@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin_layout}"
+      lang="vi">
+<head>
+    <title>Cập nhật Tác Giả</title>
+    <th:block layout:fragment="css">
+        <style>
+            /* Sử dụng đúng bộ CSS "Signature" đang chạy tốt của Nhi */
+            .form-card {
+                background: #fff; border-radius: 12px; padding: 30px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: none;
+                max-width: 100%; margin: 20px auto;
+            }
+            .form-label { 
+                font-weight: 600; color: #2563eb; 
+                margin-bottom: 8px; font-size: 14px; 
+            }
+            .form-control, .form-select { 
+                border-radius: 8px; padding: 10px 15px; border: 1px solid #e2e8f0; 
+                font-size: 14px; background-color: #fff;
+            }
+            .form-control:focus { border-color: #2563eb; box-shadow: none; }
+            
+            .btn-update { 
+                background: #3b82f6; color: #fff; border: none; padding: 10px 35px; 
+                border-radius: 8px; font-weight: 600; 
+            }
+            .btn-update:hover { background: #2563eb; color: #fff; }
+            .btn-cancel { 
+                background: #64748b; color: #fff; border: none; padding: 10px 25px; 
+                border-radius: 8px; font-weight: 500; text-decoration: none;
+            }
+            
+            .section-header-blue {
+                color: #2563eb; font-weight: 700; font-size: 16px;
+                margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;
+            }
+
+            /* CSS Bổ sung cho khung xem trước ảnh đại diện */
+            .preview-container {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                margin-top: 8px;
+            }
+            .avatar-preview {
+                width: 70px;
+                height: 70px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 2px solid #e2e8f0;
+                background: #f8fafc;
+            }
+            .avatar-empty {
+                width: 70px;
+                height: 70px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #eff6ff;
+                color: #2563eb;
+                font-weight: bold;
+                font-size: 24px;
+                border: 2px dashed #3b82f6;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="container-fluid">
+        <h2 style="color: #002d72; font-weight: 700; font-size: 22px; margin-bottom: 20px;">Chỉnh sửa Thông tin Tác Giả</h2>
+        
+        <div class="form-card">
+            <form th:action="@{/admin/author/save}" th:object="${author}" method="post" enctype="multipart/form-data">
+                
+                <input type="hidden" th:field="*{id}">
+                
+                <input type="hidden" th:field="*{imageUrl}">
+
+                <div class="section-header-blue">
+                    <i class="bi bi-person-vcard"></i> Thông tin cơ bản
+                </div>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-5">
+                        <label class="form-label">Họ và tên thật <span class="text-danger">*</span></label>
+                        <input type="text" th:field="*{fullName}" class="form-control" placeholder="Nguyễn Nhật Ánh" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Bút danh</label>
+                        <input type="text" th:field="*{pseudonym}" class="form-control" placeholder="VD: Chu Lai">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Quốc tịch</label>
+                        <input type="text" th:field="*{nationality}" class="form-control" placeholder="Việt Nam">
+                    </div>
+                </div>
+
+                <div class="section-header-blue">
+                    <i class="bi bi-image"></i> Ảnh đại diện tác giả
+                </div>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-12">
+                        <label class="form-label">Thay đổi ảnh đại diện</label>
+                        <div class="preview-container">
+                            <img th:if="${author.imageUrl != null and !author.imageUrl.isEmpty()}" 
+                                 th:src="@{'/uploads/authors/' + ${author.imageUrl}}" 
+                                 id="imgPreview" class="avatar-preview" alt="Avatar">
+                            
+                            <div th:unless="${author.imageUrl != null and !author.imageUrl.isEmpty()}" 
+                                 id="avatarLetter" class="avatar-empty" 
+                                 th:text="${author.fullName != null ? #strings.substring(author.fullName, 0, 1) : 'A'}">A</div>
+
+                            <div class="flex-grow-1">
+                                <input type="file" name="imageFile" id="imageFileInput" class="form-control" accept="image/*" onchange="previewImage(this)">
+                                <small class="text-muted mt-1 d-block">Chấp nhận định dạng: .jpg, .jpeg, .png. Để trống nếu muốn giữ nguyên ảnh cũ.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-header-blue">
+                    <i class="bi bi-body-text"></i> Chi tiết tác giả
+                </div>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-12">
+                        <label class="form-label">Tiểu sử tóm tắt</label>
+                        <textarea th:field="*{bio}" class="form-control" rows="6" placeholder="Nhập tiểu sử tác giả tại đây..."></textarea>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-5 pt-3 border-top">
+                    <a th:href="@{/admin/author/list}" class="btn-cancel">Hủy bỏ</a>
+                    <button type="submit" class="btn-update">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="script">
+<script>
+    function previewImage(input) {
+        const file = input.files[0];
+        const preview = document.getElementById('imgPreview');
+        const letterBox = document.getElementById('avatarLetter');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (preview) {
+                    // Nếu đã có sẵn thẻ img cũ, thay đổi thuộc tính src
+                    preview.src = e.target.value || e.target.result;
+                } else if (letterBox) {
+                    // Nếu đang hiển thị ô chữ cái, tạo thẻ img mới thế chỗ ô chữ cái
+                    const newImg = document.createElement('img');
+                    newImg.id = 'imgPreview';
+                    newImg.className = 'avatar-preview';
+                    newImg.src = e.target.result;
+                    letterBox.parentNode.replaceChild(newImg, letterBox);
+                }
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+</script>
+</th:block>
+
+</body>
+</html>

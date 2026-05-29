@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--
+  CÁCH DÙNG: th:replace="~{fragments/sidebar :: aside}"
+  Controller phải truyền: model.addAttribute("activePage", "dashboard")
+  Giá trị: dashboard | book | category | author | publisher | member | loan | fine | report | user
+-->
+<nav th:fragment="aside">
+
+    <ul class="sb-nav">
+        <li class="sb-item">
+            <a th:href="@{/admin/dashboard}"
+               th:classappend="${activePage == 'dashboard'} ? ' active'"
+               class="sb-link">
+                <span class="sb-ic"><i class="bi bi-grid-1x2"></i></span>
+                Dashboard
+            </a>
+        </li>
+    </ul>
+
+    <span class="sb-label">Quản lý Sách</span>
+    <ul class="sb-nav">
+        <li class="sb-item">
+            <a th:href="@{/admin/book/list}"
+               th:classappend="${activePage == 'book'} ? ' active'"
+               class="sb-link">
+                <span class="sb-ic"><i class="bi bi-journal-bookmark"></i></span>
+                Đầu sách
+            </a>
+        </li>
+        <li class="sb-item">
+            <a th:href="@{/admin/category/list}"
+               th:classappend="${activePage == 'category'} ? ' active'"
+               class="sb-link">
+                <span class="sb-ic"><i class="bi bi-tags"></i></span>
+                Danh mục
+            </a>
+        </li>
+        <li class="sb-item">
+            <a th:href="@{/admin/author/list}"
+               th:classappend="${activePage == 'author'} ? ' active'"
+               class="sb-link">
+                <span class="sb-ic"><i class="bi bi-person-badge"></i></span>
+                Tác giả
+            </a>
+        </li>
+        <li class="sb-item">
+            <a th:href="@{/admin/publisher/list}"
+               th:classappend="${activePage == 'publisher'} ? ' active'"
+               class="sb-link">
+                <span class="sb-ic"><i class="bi bi-building"></i></span>
+                Nhà xuất bản
+            </a>
+        </li>
+		<li class="sb-item">
+		    <a th:href="@{/admin/digital/list}"
+		       th:classappend="${activePage == 'digital'} ? ' active'"
+		       class="sb-link">
+		        <span class="sb-ic"><i class="bi bi-file-earmark-text"></i></span>
+		        Tài liệu số
+		    </a>
+		</li>
+    </ul>
+
+    <span class="sb-label">Lưu hành</span>
+    <ul class="sb-nav">
+        <li class="sb-item">
+            <a th:href="@{/admin/member/list}"
+               th:classappend="${activePage == 'member'} ? ' active'"
+               class="sb-link">
+                <span class="sb-ic"><i class="bi bi-people"></i></span>
+                Bạn đọc
+            </a>
+        </li>
+		<li class="sb-item">
+		    <a th:href="@{/admin/reservation/list}"
+		       th:classappend="${activePage == 'reservation'} ? ' active'"
+		       class="sb-link">
+		        <span class="sb-ic"><i class="bi bi-calendar-check"></i></span>
+		        Đặt chỗ
+		    </a>
+		</li>
+        <li class="sb-item">
+            <a th:href="@{/admin/loan/list}"
+               th:classappend="${activePage == 'loan'} ? ' active'"
+               class="sb-link">
+                <span class="sb-ic"><i class="bi bi-arrow-left-right"></i></span>
+                Mượn / Trả sách
+            </a>
+        </li>
+        <li class="sb-item">
+            <a th:href="@{/admin/fine/list}"
+               th:classappend="${activePage == 'fine'} ? ' active'"
+               class="sb-link">
+                <span class="sb-ic"><i class="bi bi-cash-coin"></i></span>
+                Phí phạt
+            </a>
+        </li>
+    </ul>
+
+    <span class="sb-label">Hệ thống</span>
+    <ul class="sb-nav">
+		<li class="sb-item">
+		            <a th:href="@{/admin/contact}"
+		               th:classappend="${activePage == 'report'} ? ' active'"
+		               class="sb-link">
+		                <span class="sb-ic"><i class="bi bi-bar-chart-line"></i></span>
+		                Phản hồi
+		            </a>
+		        </li>
+        <li class="sb-item">
+            <a th:href="@{/admin/statistics}"
+               th:classappend="${activePage == 'report'} ? ' active'"
+               class="sb-link">
+                <span class="sb-ic"><i class="bi bi-bar-chart-line"></i></span>
+                Thống kê &amp; Báo cáo
+            </a>
+        </li>
+        <li class="sb-item">
+            <a th:href="@{/admin/user/list}"
+               th:classappend="${activePage == 'user'} ? ' active'"
+               class="sb-link">
+                <span class="sb-ic"><i class="bi bi-shield-lock"></i></span>
+                Tài khoản &amp; Quyền
+            </a>
+        </li>
+    </ul>
+
+    <!-- Status card -->
+    <div class="sb-foot">
+        <div class="sb-status-card">
+            <div class="sb-dot"></div>
+            <div class="sb-status-txt">
+                <strong>Hoạt động bình thường</strong>
+                <span>Trạng thái hệ thống</span>
+            </div>
+        </div>
+    </div>
+
+</nav>
+</body>
+</html>

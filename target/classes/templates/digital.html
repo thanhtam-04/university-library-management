@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tài liệu số – LibManage</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: { 50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',300:'#93c5fd',400:'#60a5fa',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a',950:'#0f2057' },
+                        gold: { 400:'#fbbf24',500:'#f59e0b' },
+                    },
+                    fontFamily: { display:['"Playfair Display"','serif'], body:['"DM Sans"','sans-serif'] },
+                }
+            }
+        }
+    </script>
+    <style>
+        *, *::before, *::after { box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+        body { font-family:'DM Sans',sans-serif; background:#f8faff; color:#0c1b3a; -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+        .font-display { font-family:'Playfair Display',serif; }
+        .btn-primary { background:linear-gradient(135deg,#1d4ed8,#2563eb); color:#fff; padding:.75rem 1.75rem; border-radius:10px; font-weight:600; display:inline-flex; align-items:center; gap:.5rem; border:none; cursor:pointer; transition:all .22s; box-shadow:0 4px 16px rgba(37,99,235,.30); text-decoration:none; }
+        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(37,99,235,.38); color:#fff; }
+        .btn-outline { background:transparent; color:#1d4ed8; border:1.5px solid #93c5fd; padding:.7rem 1.5rem; border-radius:10px; font-weight:600; display:inline-flex; align-items:center; gap:.5rem; cursor:pointer; transition:all .2s; text-decoration:none; }
+        .btn-outline:hover { background:#eff6ff; border-color:#2563eb; color:#1d4ed8; }
+        .doc-card { background:#fff; border:1.5px solid #e2e8f5; border-radius:16px; overflow:hidden; transition:all .25s; box-shadow:0 2px 8px rgba(14,30,80,.05); }
+        .doc-card:hover { transform:translateY(-4px); box-shadow:0 16px 36px rgba(14,30,80,.1); border-color:#93c5fd; }
+        .tag { display:inline-block; background:#eff6ff; color:#1d4ed8; font-size:.7rem; font-weight:600; padding:3px 10px; border-radius:20px; }
+        ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-thumb { background:#bfdbfe; border-radius:6px; }
+        input:focus, select:focus { outline:none; box-shadow:0 0 0 3px rgba(37,99,235,.15); }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+   
+<div th:replace="~{navbar :: navbar}"></div>
+<!-- HERO -->
+<section class="relative overflow-hidden py-16" style="background:linear-gradient(135deg,#0f2057 0%,#1e3a8a 50%,#1d4ed8 100%)">
+    <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle,rgba(255,255,255,.5) 1px,transparent 1px);background-size:32px 32px"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+		<div class="flex-1 text-center"> <div class="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-5 mx-auto">
+		        <svg class="w-3.5 h-3.5 text-gold-400" fill="currentColor" viewBox="0 0 20 20"><path d="M2 6a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/></svg>
+		        <span class="text-white/80 text-xs font-semibold tracking-wide uppercase">Kho học liệu điện tử</span>
+		    </div>
+
+		    <h1 class="font-display text-white text-4xl sm:text-5xl font-bold mb-4">
+		        Tài liệu số <span style="color:#fbbf24">miễn phí</span>
+		    </h1>
+
+		    <p class="text-white/70 text-base max-w-lg mb-8 mx-auto">
+		        Truy cập kho tài liệu số với hàng nghìn giáo trình, đề tài nghiên cứu khoa học, luận văn và tài liệu học thuật chất lượng cao.
+		    </p>
+
+		    <div class="flex gap-6 justify-center">
+		        <div class="text-center"><div class="font-display text-2xl font-bold text-white">2,500+</div><div class="text-white/55 text-xs mt-0.5">Tài liệu PDF</div></div>
+		        <div class="w-px h-10 bg-white/20"></div>
+		        <div class="text-center"><div class="font-display text-2xl font-bold text-white">800+</div><div class="text-white/55 text-xs mt-0.5">Luận văn</div></div>
+		        <div class="w-px h-10 bg-white/20"></div>
+		        <div class="text-center"><div class="font-display text-2xl font-bold text-white">300+</div><div class="text-white/55 text-xs mt-0.5">Đề tài NCKH</div></div>
+		    </div>
+		</div>
+    </div>
+    <div class="absolute bottom-0 left-0 right-0"><svg viewBox="0 0 1440 40" fill="none"><path d="M0 40V20C360 0 720 40 1080 20C1260 10 1380 30 1440 20V40H0Z" fill="#f8faff"/></svg></div>
+</section>
+
+<!-- TYPE FILTER TABS -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
+    <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+        <button onclick="filterType('all')" id="tab-all" class="type-tab flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-semibold bg-navy-900 text-white">
+            📚 Tất cả
+        </button>
+        <button onclick="filterType('giaotrinh')" id="tab-giaotrinh" class="type-tab flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-medium text-slate-600 bg-white border border-blue-100 hover:border-blue-300 hover:text-blue-700 transition-all">
+            📖 Giáo trình
+        </button>
+        <button onclick="filterType('luanvan')" id="tab-luanvan" class="type-tab flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-medium text-slate-600 bg-white border border-blue-100 hover:border-blue-300 hover:text-blue-700 transition-all">
+            🎓 Luận văn
+        </button>
+        <button onclick="filterType('nckh')" id="tab-nckh" class="type-tab flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-medium text-slate-600 bg-white border border-blue-100 hover:border-blue-300 hover:text-blue-700 transition-all">
+            🔬 Đề tài NCKH
+        </button>
+        <button onclick="filterType('dethi')" id="tab-dethi" class="type-tab flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-medium text-slate-600 bg-white border border-blue-100 hover:border-blue-300 hover:text-blue-700 transition-all">
+            📝 Đề thi
+        </button>
+        <button onclick="filterType('baobao')" id="tab-baobao" class="type-tab flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-medium text-slate-600 bg-white border border-blue-100 hover:border-blue-300 hover:text-blue-700 transition-all">
+            📊 Báo cáo
+        </button>
+    </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col lg:flex-row gap-8">
+
+        <!-- Document grid -->
+        <div class="flex-1">
+            <div class="flex items-center justify-between mb-5">
+                <h2 class="font-display text-xl font-bold text-navy-900">Tài liệu nổi bật</h2>
+                <span class="text-sm text-slate-500" id="docCount">Hiển thị tất cả tài liệu</span>
+            </div>
+
+            <div id="docGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+
+                <!-- Dynamic từ backend -->
+                <div th:each="doc : ${documents}" th:if="${documents != null}" class="doc-card" th:data-type="${doc.type}">
+                    <div class="p-5">
+                        <div class="flex items-start gap-4">
+                            <!-- File icon -->
+                            <div class="w-12 h-14 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl"
+                                 th:style="${doc.type == 'giaotrinh' ? 'background:linear-gradient(135deg,#eff6ff,#dbeafe)' : doc.type == 'luanvan' ? 'background:linear-gradient(135deg,#f0fdf4,#dcfce7)' : 'background:linear-gradient(135deg,#fefce8,#fef3c7)'}">
+                                <span th:text="${doc.type == 'giaotrinh' ? '📖' : doc.type == 'luanvan' ? '🎓' : doc.type == 'nckh' ? '🔬' : '📄'}">📄</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-semibold text-navy-900 text-[14px] leading-snug mb-1 line-clamp-2" th:text="${doc.title}"></h3>
+                                <p class="text-slate-500 text-xs mb-2" th:text="${doc.author}"></p>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="tag text-[11px]" th:text="${doc.category}"></span>
+                                    <span class="text-xs text-slate-400" th:text="${doc.year}"></span>
+                                </div>
+                            </div>
+							
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+                            
+                            <div class="flex gap-2">
+                                <a th:href="${doc.fileUrl}" target="_blank"
+                                   sec:authorize="isAuthenticated()"
+                                   class="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                                    Xem
+                                </a>
+                                <a th:href="@{/login}" sec:authorize="!isAuthenticated()"
+                                   class="text-xs bg-slate-100 text-slate-500 px-3 py-1.5 rounded-lg font-semibold hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                                    Đăng nhập để xem
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fallback / demo -->
+                <th:block th:if="${documents == null or #lists.isEmpty(documents)}">
+                    <div th:each="item : ${#numbers.sequence(1,9)}" class="doc-card" th:attr="data-type=${item <= 3 ? 'giaotrinh' : item <= 6 ? 'luanvan' : 'nckh'}">
+                        <div class="p-5">
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-14 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl"
+                                     th:style="${item <= 3 ? 'background:linear-gradient(135deg,#eff6ff,#dbeafe)' : item <= 6 ? 'background:linear-gradient(135deg,#f0fdf4,#dcfce7)' : 'background:linear-gradient(135deg,#fefce8,#fef3c7)'}">
+                                    <span th:text="${item <= 3 ? '📖' : item <= 6 ? '🎓' : '🔬'}">📖</span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="font-semibold text-navy-900 text-[14px] leading-snug mb-1"
+                                        th:text="${item == 1 ? 'Giáo trình Kinh tế Vi mô' : item == 2 ? 'Giáo trình Luật Kinh tế' : item == 3 ? 'Giáo trình Kế toán Tài chính' : item == 4 ? 'Luận văn: Phân tích BCTC Công ty X' : item == 5 ? 'Luận văn: Chiến lược Marketing XYZ' : item == 6 ? 'Luận văn: Quản trị rủi ro ngân hàng' : item == 7 ? 'NCKH: Tác động COVID đến du lịch NA' : item == 8 ? 'NCKH: Chuyển đổi số SME Việt Nam' : 'NCKH: Phân tích chuỗi cung ứng'}"></h3>
+                                    <p class="text-slate-500 text-xs mb-2"
+                                       th:text="${item <= 3 ? 'TS. Nguyễn Văn An' : item <= 6 ? 'SV. Trần Thị Bình – K60' : 'ThS. Lê Quang Minh'}"></p>
+                                    <div class="flex items-center gap-2">
+                                        <span class="tag text-[11px]" th:text="${item <= 3 ? 'Giáo trình' : item <= 6 ? 'Luận văn' : 'NCKH'}"></span>
+                                        <span class="text-xs text-slate-400">2024</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+                                <div class="flex items-center gap-3 text-xs text-slate-400">
+                                    <span>📥 <span th:text="${item * 47 + 100}">100</span> lượt</span>
+                                    <span>👁 <span th:text="${item * 123 + 200}">200</span> xem</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <a href="#" sec:authorize="isAuthenticated()" class="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg font-semibold hover:bg-blue-700 transition-colors">Tải xuống</a>
+                                    <a th:href="@{/login}" sec:authorize="!isAuthenticated()" class="text-xs bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg font-semibold hover:bg-blue-50 hover:text-blue-600 transition-colors">Đăng nhập để tải</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </th:block>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="hidden xl:block w-72 flex-shrink-0 space-y-5">
+            <!-- Gợi ý tìm kiếm -->
+            <div class="bg-white border border-blue-50 rounded-2xl p-5" style="box-shadow:0 2px 8px rgba(14,30,80,.05)">
+                <h4 class="font-semibold text-navy-900 text-sm mb-3">🔥 Từ khóa hot</h4>
+                <div class="flex flex-wrap gap-2">
+                    <a th:each="kw : ${'Kinh tế vi mô,Marketing,Lập trình,Kế toán,Luật dân sự,Tài chính,Python,SQL,Quản trị,Thống kê'.split(',')}"
+                       th:href="@{/digital(q=${kw})}" th:text="${kw}"
+                       class="tag text-[12px] hover:bg-blue-600 hover:text-white transition-colors cursor-pointer">
+                    </a>
+                </div>
+            </div>
+            <!-- Hướng dẫn -->
+            <div class="rounded-2xl p-5 text-white" style="background:linear-gradient(135deg,#1e3a8a,#1d4ed8)">
+                <h4 class="font-semibold text-[14px] mb-3">📋 Hướng dẫn sử dụng</h4>
+                <ul class="space-y-2.5 text-[13px] text-white/80">
+                    <li class="flex items-start gap-2"><span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">1</span>Đăng nhập bằng tài khoản sinh viên</li>
+                    <li class="flex items-start gap-2"><span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">2</span>Tìm kiếm tài liệu theo tên hoặc chuyên ngành</li>
+                    <li class="flex items-start gap-2"><span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">3</span>Nhấn "Tải xuống" để lưu về máy</li>
+                    <li class="flex items-start gap-2"><span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">4</span>Chỉ sử dụng cho mục đích học tập</li>
+                </ul>
+                <a th:href="@{/login}" sec:authorize="!isAuthenticated()" class="mt-4 w-full py-2 rounded-xl text-navy-900 font-bold text-sm flex items-center justify-center gap-2" style="background:#fbbf24">
+                    Đăng nhập ngay →
+                </a>
+            </div>
+          
+        </aside>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<div th:replace="~{navbar :: footer}"></div>
+<script>
+    document.getElementById('mobileMenuBtn')?.addEventListener('click', () => document.getElementById('mobileMenu')?.classList.toggle('hidden'));
+
+    function filterType(type) {
+        document.querySelectorAll('.type-tab').forEach(btn => {
+            btn.className = 'type-tab flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-medium text-slate-600 bg-white border border-blue-100 hover:border-blue-300 hover:text-blue-700 transition-all';
+        });
+        const activeBtn = document.getElementById('tab-' + type);
+        if (activeBtn) activeBtn.className = 'type-tab flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-semibold bg-navy-900 text-white';
+
+        const cards = document.querySelectorAll('#docGrid [data-type]');
+        let count = 0;
+        cards.forEach(card => {
+            const show = type === 'all' || card.dataset.type === type;
+            card.style.display = show ? '' : 'none';
+            if (show) count++;
+        });
+        document.getElementById('docCount').textContent = count + ' tài liệu';
+    }
+
+    const io = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.style.opacity='1'; e.target.style.transform='translateY(0)'; io.unobserve(e.target); }});
+    }, { threshold: 0.05 });
+    document.querySelectorAll('.doc-card').forEach((el,i) => {
+        el.style.opacity='0'; el.style.transform='translateY(14px)';
+        el.style.transition=`opacity .4s ease ${i*50}ms, transform .4s ease ${i*50}ms`;
+        io.observe(el);
+    });
+</script>
+</body>
+</html>

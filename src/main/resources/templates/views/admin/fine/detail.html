@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin_layout}"
+      lang="vi">
+<head>
+    <title>Chi tiết Phí Phạt</title>
+    <th:block layout:fragment="css">
+    <style>
+        .detail-card {
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 14px;
+            box-shadow: var(--shd);
+            overflow: hidden;
+        }
+        .detail-header {
+            padding: 22px 26px;
+            border-bottom: 1px solid var(--bdr);
+            display: flex; align-items: center; gap: 16px;
+        }
+        .fine-id-badge {
+            font-family: var(--fh); font-size: 13px; font-weight: 700;
+            color: var(--t3); background: var(--page);
+            border: 1px solid var(--bdr); border-radius: 7px;
+            padding: 3px 11px; display: inline-block;
+        }
+        .fine-amount-big {
+            font-family: var(--fh); font-size: 32px; font-weight: 800;
+        }
+        .fine-amount-big.danger { color: var(--cr); }
+        .fine-amount-big.ok     { color: var(--cg); }
+        .fine-amount-big.muted  { color: var(--t3); }
+
+        .info-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+        }
+        .info-row {
+            padding: 15px 26px;
+            border-bottom: 1px solid var(--bdr);
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .info-row:nth-child(odd)  { border-right: 1px solid var(--bdr); }
+        .info-row:nth-last-child(-n+2) { border-bottom: none; }
+        .info-label { font-size: 11.5px; font-weight: 600; color: var(--t3); text-transform: uppercase; letter-spacing: .5px; }
+        .info-val   { font-size: 14px; font-weight: 500; color: var(--t1); }
+
+        .member-banner {
+            background: linear-gradient(135deg, var(--sb) 0%, var(--sb2) 100%);
+            padding: 20px 26px;
+            display: flex; align-items: center; gap: 14px;
+        }
+        .mb-av {
+            width: 48px; height: 48px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--ac), #fb923c);
+            color: var(--sb); font-size: 18px; font-weight: 800;
+            font-family: var(--fh);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; box-shadow: var(--ac-glow);
+        }
+        .mb-name { font-family: var(--fh); font-size: 16px; font-weight: 700; color: #fff; }
+        .mb-card { font-size: 12.5px; color: var(--sb-txt); margin-top: 2px; }
+
+        .action-bar {
+            padding: 18px 26px;
+            background: var(--page);
+            border-top: 1px solid var(--bdr);
+            display: flex; gap: 10px; flex-wrap: wrap;
+        }
+    </style>
+    </th:block>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="pagetitle">
+        <h1>Chi tiết Phí Phạt</h1>
+        <nav><ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a th:href="@{/admin/dashboard}"><i class="bi bi-house-door"></i> Trang chủ</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a th:href="@{/admin/fine/list}">Phí phạt</a>
+            </li>
+            <li class="breadcrumb-item active"
+                th:text="${'Phiếu #' + fine.id}">Chi tiết</li>
+        </ol></nav>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Cột trái: Thông tin phiếu phạt -->
+        <div class="col-lg-8">
+            <div class="detail-card">
+
+                <!-- Header -->
+                <div class="detail-header">
+                    <div>
+                        <div class="d-flex align-items-center gap-10 mb-2">
+                            <span class="fine-id-badge"
+                                  th:text="${'Phiếu phạt #' + fine.id}"></span>
+                            <span th:if="${fine.status.name() == 'UNPAID'}"
+                                  class="s-bdg bdg-r ms-2">Chưa nộp</span>
+                            <span th:if="${fine.status.name() == 'PAID'}"
+                                  class="s-bdg bdg-g ms-2">Đã nộp</span>
+                            <span th:if="${fine.status.name() == 'WAIVED'}"
+                                  class="s-bdg ms-2"
+                                  style="background:var(--page);color:var(--t3)">Miễn giảm</span>
+                        </div>
+                        <div th:classappend="${fine.status.name() == 'UNPAID'} ? 'danger' : (${fine.status.name() == 'PAID'} ? 'ok' : 'muted')"
+                             class="fine-amount-big"
+                             th:text="${#numbers.formatDecimal(fine.fineAmount,0,'COMMA',0,'POINT') + ' đ'}">
+                        </div>
+                        <div style="font-size:13px;color:var(--t2);margin-top:5px"
+                             th:text="${fine.reason ?: 'Không có lý do'}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chi tiết dạng grid -->
+                <div class="info-grid">
+                    <div class="info-row">
+                        <span class="info-label">Số ngày trễ hạn</span>
+                        <span class="info-val">
+                            <span style="color:var(--cr);font-weight:700;font-family:var(--fh)"
+                                  th:text="${fine.daysOverdue}"></span>
+                            ngày
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Phí phạt mỗi ngày</span>
+                        <span class="info-val"
+                              th:text="${#numbers.formatDecimal(fine.finePerDay,0,'COMMA',0,'POINT') + ' đ/ngày'}">
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Mã phiếu mượn</span>
+                        <span class="info-val">
+                            <a th:href="@{/admin/loan/detail/{id}(id=${fine.loan?.id})}"
+                               style="color:var(--cb);text-decoration:none;font-weight:600">
+                                <i class="bi bi-link-45deg"></i>
+                                <span th:text="${fine.loan?.loanCode ?: 'N/A'}"></span>
+                            </a>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Ngày tạo phiếu phạt</span>
+                        <span class="info-val"
+                              th:text="${fine.createdAt != null
+                                ? #temporals.format(fine.createdAt,'dd/MM/yyyy HH:mm')
+                                : '—'}">
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Ngày thanh toán / duyệt</span>
+                        <span class="info-val"
+                              th:text="${fine.paidAt != null
+                                ? #temporals.format(fine.paidAt,'dd/MM/yyyy HH:mm')
+                                : '—'}">
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Xử lý bởi</span>
+                        <span class="info-val"
+                              th:text="${fine.paidBy?.fullName ?: '—'}">
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Action bar -->
+                <div class="action-bar">
+                    <a th:href="@{/admin/fine/list}" class="btn-g">
+                        <i class="bi bi-arrow-left"></i> Quay lại
+                    </a>
+
+                    <!-- Thanh toán -->
+                    <form th:if="${fine.status.name() == 'UNPAID'}"
+                          th:action="@{/admin/fine/pay/{id}(id=${fine.id})}"
+                          method="post" style="margin:0">
+                        <button type="submit" class="btn-p"
+                                onclick="return confirm('Xác nhận thu phí phạt?')"
+                                style="background:var(--cg);box-shadow:0 3px 10px rgba(16,185,129,.25)">
+                            <i class="bi bi-cash-stack"></i> Xác nhận thu tiền
+                        </button>
+                    </form>
+
+                    <!-- Miễn giảm -->
+                    <form th:if="${fine.status.name() == 'UNPAID'}"
+                          th:action="@{/admin/fine/waive/{id}(id=${fine.id})}"
+                          method="post" style="margin:0">
+                        <button type="submit" class="btn-g"
+                                onclick="return confirm('Xác nhận miễn giảm phí phạt?')">
+                            <i class="bi bi-slash-circle"></i> Miễn giảm
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột phải: Thông tin bạn đọc -->
+        <div class="col-lg-4">
+            <div class="detail-card">
+                <div class="member-banner">
+                    <div class="mb-av"
+                         th:text="${fine.member?.user?.fullName != null
+                                    ? fine.member.user.fullName.substring(0,1).toUpperCase()
+                                    : '?'}">
+                    </div>
+                    <div>
+                        <div class="mb-name"
+                             th:text="${fine.member?.user?.fullName ?: 'N/A'}">
+                        </div>
+                        <div class="mb-card"
+                             th:text="${'Thẻ: ' + (fine.member?.cardNumber ?: '—')}">
+                        </div>
+                    </div>
+                </div>
+                <div class="info-grid" style="grid-template-columns:1fr">
+                    <div class="info-row" style="border-right:none">
+                        <span class="info-label">Mã sinh viên</span>
+                        <span class="info-val"
+                              th:text="${fine.member?.studentCode ?: '—'}">
+                        </span>
+                    </div>
+                    <div class="info-row" style="border-right:none">
+                        <span class="info-label">Khoa / Ban</span>
+                        <span class="info-val"
+                              th:text="${fine.member?.department ?: '—'}">
+                        </span>
+                    </div>
+                    <div class="info-row" style="border-right:none">
+                        <span class="info-label">Email</span>
+                        <span class="info-val"
+                              th:text="${fine.member?.user?.email ?: '—'}">
+                        </span>
+                    </div>
+                    <div class="info-row" style="border-right:none;border-bottom:none">
+                        <span class="info-label">Xem hồ sơ đầy đủ</span>
+                        <span class="info-val">
+                            <a th:href="@{/admin/member/detail/{id}(id=${fine.member?.id})}"
+                               style="color:var(--cb);text-decoration:none;font-weight:600;font-size:13px">
+                                <i class="bi bi-person-circle me-1"></i>Mở hồ sơ bạn đọc
+                            </a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

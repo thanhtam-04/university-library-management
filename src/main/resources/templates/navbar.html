@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<header th:fragment="navbar" class="sticky top-0 z-50 bg-white border-b border-blue-50"
+        style="box-shadow:0 1px 0 0 rgba(30,58,138,.08)">
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16 gap-4">
+
+            <!-- Logo -->
+            <a th:href="@{/}" class="flex items-center gap-3 flex-shrink-0">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center"
+                     style="background:linear-gradient(135deg,#1e3a8a,#2563eb)">
+                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+                <div class="hidden sm:block">
+                    <div class="font-display text-navy-900 font-bold text-[17px] leading-tight">
+                        Thư Viện <span class="text-blue-600">Đại Học</span>
+                    </div>
+                    <div class="text-[10px] text-slate-400 font-medium tracking-wide uppercase leading-tight">
+                        ĐH Kinh tế Nghệ An
+                    </div>
+                </div>
+            </a>
+
+            <!-- Search bar (desktop) -->
+            <form th:action="@{/search}" method="get" class="flex-1 max-w-xl mx-4 hidden md:flex">
+                <div class="relative w-full">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                    <input type="text" name="q" placeholder="Tìm tên sách, tác giả, ISBN..."
+                           class="w-full pl-10 pr-28 py-2.5 rounded-xl border border-blue-100 bg-blue-50/60 text-[14px] text-navy-900 placeholder-slate-400 focus:bg-white focus:border-blue-400 transition-all">
+                    <button type="submit" class="btn-primary absolute right-2 top-1/2 -translate-y-1/2 !py-1.5 !px-4 !text-[13px] !rounded-lg">
+                        Tìm kiếm
+                    </button>
+                </div>
+            </form>
+
+            <!-- Nav links -->
+			<nav class="hidden lg:flex items-center gap-1">
+			                <a th:href="@{/home}" class="px-3 py-2 rounded-lg text-[13.5px] font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition-all">Trang chủ</a>
+			                <a th:href="@{/category}" class="px-3 py-2 rounded-lg text-[13.5px] font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition-all">Danh mục</a>
+							<a th:href="@{/author}" class="px-3 py-2 rounded-lg text-[13.5px] font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition-all">Tác giả</a>
+			                <a th:href="@{/digital}" class="px-3 py-2 rounded-lg text-[13.5px] font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition-all">Tài liệu số</a>
+			                <a th:href="@{/rules}" class="px-3 py-2 rounded-lg text-[13.5px] font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition-all">Quy định</a>
+							<a th:href="@{/contact}" class="px-3 py-2 rounded-lg text-[13.5px] font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition-all">Liên hệ</a>
+			            </nav>
+
+            <!-- Auth area -->
+            <div class="flex items-center gap-2 flex-shrink-0">
+                <!-- Chưa đăng nhập -->
+                <div sec:authorize="!isAuthenticated()" class="flex items-center gap-2">
+                    <a th:href="@{/login}" class="btn-outline !py-2 !px-4 !text-[13px]">Đăng nhập</a>
+                    <a th:href="@{/register}" class="btn-primary !py-2 !px-4 !text-[13px] hidden sm:inline-flex">Đăng ký</a>
+                </div>
+
+                <!-- Đã đăng nhập -->
+                <div sec:authorize="isAuthenticated()" class="relative group">
+                    <button class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-blue-50 transition-all">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white text-sm font-bold">
+                            <span th:text="${#strings.substring(#authentication.name,0,1).toUpperCase()}">U</span>
+                        </div>
+                        <span class="text-[13px] font-medium text-navy-800 hidden sm:block" th:text="${#authentication.name}">User</span>
+                        <svg class="w-3 h-3 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"/>
+                        </svg>
+                    </button>
+                    <div class="absolute right-0 top-full mt-2 w-52 bg-white rounded-xl border border-slate-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                        <div class="py-1.5 px-2">
+                            <div class="px-3 py-2 border-b border-slate-100 mb-1">
+                                <p class="text-xs font-bold text-navy-800" th:text="${#authentication.name}">User</p>
+                                <p class="text-[11px] text-slate-400">Bạn đọc</p>
+                            </div>
+                            <a th:href="@{/profile}" class="flex items-center gap-2.5 px-3 py-2.5 text-[13px] text-slate-600 hover:bg-blue-50 hover:text-blue-700 rounded-lg">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                Tài khoản cá nhân
+                            </a>
+							<a th:href="@{/phanHoi}" class="flex items-center gap-2.5 px-3 py-2.5 text-[13px] text-slate-600 hover:bg-blue-50 hover:text-blue-700 rounded-lg">
+							                               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+							                               Phản hồi
+							                           </a>
+                            <a th:href="@{/my-loans}" class="flex items-center gap-2.5 px-3 py-2.5 text-[13px] text-slate-600 hover:bg-blue-50 hover:text-blue-700 rounded-lg">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                                Sách đang mượn
+                            </a>
+                            <hr class="my-1.5 border-slate-100">
+                            <a th:href="@{/logout}" class="flex items-center gap-2.5 px-3 py-2.5 text-[13px] text-red-500 hover:bg-red-50 rounded-lg">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                Đăng xuất
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hamburger mobile -->
+                <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg hover:bg-blue-50 transition-colors">
+                    <svg class="w-5 h-5 text-navy-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile search -->
+        <div class="md:hidden pb-3">
+            <form th:action="@{/search}" method="get" class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div>
+                <input type="text" name="q" placeholder="Tìm sách..." class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-blue-100 bg-blue-50/60 text-sm text-navy-900 placeholder-slate-400 focus:bg-white focus:border-blue-400 transition-all">
+            </form>
+        </div>
+
+        <!-- Mobile menu -->
+        <div id="mobileMenu" class="lg:hidden hidden pb-3 border-t border-slate-100 pt-3">
+            <nav class="flex flex-col gap-1">
+                <a th:href="@{/}" class="px-3 py-2 rounded-lg text-sm font-medium text-blue-700 bg-blue-50">Trang chủ</a>
+                <a th:href="@{/category}" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-700">Danh mục</a>
+                <a th:href="@{/digital}" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-700">Tài liệu số</a>
+                <a th:href="@{/rules}" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-700">Quy định</a>
+				<a th:href="@{/contact}" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-700">Liên hệ</a>
+                <a th:href="@{/login}" class="px-3 py-2 rounded-lg text-sm font-medium text-blue-600 hover:bg-blue-50">Đăng nhập</a>
+            </nav>
+        </div>
+    </div>
+</header>
+
+
+<footer th:fragment="footer" class="bg-navy-950 text-white pt-14 pb-8 mt-8" style="background:#0f2057">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+            <div>
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#f59e0b,#fb923c)">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg>
+                    </div>
+                    <div><div class="font-display font-bold text-[16px]">Lib<span style="color:#f59e0b">Manage</span></div><div class="text-[10px] text-white/40 uppercase tracking-wider">Thư Viện Đại Học</div></div>
+                </div>
+                <p class="text-[13px] text-white/40 leading-relaxed">Hệ thống quản lý thư viện hiện đại của Trường Đại học Kinh tế Nghệ An.</p>
+            </div>
+            <div>
+                <div class="text-[11px] font-bold text-white/40 uppercase tracking-wider mb-4">Điều hướng</div>
+                <div class="space-y-2.5">
+                    <a th:href="@{/}" class="block text-[13px] text-white/50 hover:text-white transition-colors">Trang chủ</a>
+                    <a th:href="@{/category}" class="block text-[13px] text-white/70 hover:text-white transition-colors font-medium">Danh mục</a>
+                    <a th:href="@{/digital}" class="block text-[13px] text-white/50 hover:text-white transition-colors">Tài liệu số</a>
+                    <a th:href="@{/rules}" class="block text-[13px] text-white/50 hover:text-white transition-colors">Quy định</a>
+					<a th:href="@{/rules}" class="block text-[13px] text-white/50 hover:text-white transition-colors">Quy định</a>
+                </div>
+            </div>
+            <div>
+                <div class="text-[11px] font-bold text-white/40 uppercase tracking-wider mb-4">Hỗ trợ</div>
+                <div class="space-y-2.5">
+                    <a href="#" class="block text-[13px] text-white/50 hover:text-white transition-colors">Hướng dẫn mượn sách</a>
+                    <a href="#" class="block text-[13px] text-white/50 hover:text-white transition-colors">Liên hệ thủ thư</a>
+                    <a th:href="@{/admin/dashboard}" class="block text-[13px] text-white/50 hover:text-white transition-colors">Quản trị</a>
+                </div>
+            </div>
+            <div>
+                <div class="text-[11px] font-bold text-white/40 uppercase tracking-wider mb-4">Liên hệ</div>
+                <div class="space-y-2 text-[13px] text-white/50">
+                    <p>📍 Vinh Phú, Nghệ An</p>
+                    <p>📞 (0238) 888 xxx</p>
+                    <p>✉ library@nau.edu.vn</p>
+                    <p>🕐 T2–T6: 7:30 – 17:00</p>
+                </div>
+            </div>
+        </div>
+        <div class="border-t border-white/[0.07] pt-7 text-center">
+            <p class="text-[12px] text-white/25">&copy; 2026 <strong class="text-white/40">LibManage</strong> – Trường ĐH Nghệ An. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

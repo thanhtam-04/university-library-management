@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${book.title + ' – Chi tiết sách'}">Chi tiết sách – LibManage</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: { 50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',300:'#93c5fd',400:'#60a5fa',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a',950:'#0f2057' },
+                        gold: { 400:'#fbbf24',500:'#f59e0b',600:'#d97706' },
+                    },
+                    fontFamily: { display:['"Playfair Display"','serif'], body:['"DM Sans"','sans-serif'] },
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family:'DM Sans',sans-serif; background:#f8faff; color:#0c1b3a; }
+        .font-display { font-family:'Playfair Display',serif; }
+        .badge-available { background:#dcfce7; color:#15803d; font-size:.75rem; font-weight:700; padding:4px 12px; border-radius:20px; }
+        .badge-unavailable { background:#fee2e2; color:#b91c1c; font-size:.75rem; font-weight:700; padding:4px 12px; border-radius:20px; }
+        .tag { display:inline-block; background:#eff6ff; color:#1d4ed8; font-size:.75rem; font-weight:600; padding:4px 12px; border-radius:20px; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{navbar :: navbar}"></div>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+	<div class="mb-6">
+	    <a href="javascript:void(0);" 
+	       onclick="if(document.referrer) { history.back(); } else { window.location.href='/'; }" 
+	       class="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors">
+	        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+	        Quay lại trang trước
+	    </a>
+	</div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 sticky top-6 text-center">
+                <div class="aspect-[3/4] max-w-[260px] mx-auto rounded-2xl overflow-hidden shadow-lg mb-6 border border-slate-100">
+                    <img th:src="${book.coverImage != null ? book.coverImage : '/images/book-default.jpg'}" 
+                         th:alt="${book.title}"
+                         class="w-full h-full object-cover">
+                </div>
+
+                <div class="mb-6">
+                    <span th:if="${book.availableCopies > 0}" class="badge-available">● Còn sách trong thư viện</span>
+                    <span th:if="${book.availableCopies == 0}" class="badge-unavailable">● Đã được mượn hết</span>
+                </div>
+
+                <div class="space-y-3">
+                    
+
+					<div class="space-y-3">
+					                    <a th:href="@{'/books/' + ${book.id} + '/borrow'}" 
+					                       th:class="${book.availableCopies > 0 ? 'w-full block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md' : 'w-full block text-center bg-slate-300 text-slate-500 font-bold py-3 px-6 rounded-xl cursor-not-allowed pointer-events-none'}">
+					                        Đăng ký mượn sách
+					                    </a>
+
+										<div th:if="${book.availableCopies == 0}">
+										    <a th:href="@{'/reservation/add/' + ${book.id}}" 
+										       class="w-full block text-center bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
+										       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+										       </svg>
+										       Đặt lịch mượn trước
+										    </a>
+										    <p class="text-xs text-center text-slate-400 mt-2">Sách đã hết, đặt chỗ để nhận thông báo khi có người trả sách.</p>
+										</div>
+					                </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 sm:p-8 space-y-6">
+                
+                <div>
+                    <span class="tag mb-2" th:text="${book.categoryName ?: 'Chung'}">Chuyên ngành</span>
+                    <h1 class="font-display font-bold text-navy-900 text-3xl sm:text-4xl mt-1 leading-tight" th:text="${book.title}">Tên sách</h1>
+                </div>
+
+                <div class="h-px bg-slate-100"></div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Sẵn sàng cho mượn</div>
+                        <div class="text-xl font-bold text-navy-950 mt-1" th:text="${book.availableCopies + ' quyển'}">0 quyển</div>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Tổng số lượng kho</div>
+                        <div class="text-xl font-bold text-slate-700 mt-1" th:text="${book.totalCopies + ' quyển'}">0 quyển</div>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 col-span-2 sm:col-span-1">
+                        <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Vị trí kệ sách</div>
+                        <div class="text-xl font-bold text-amber-600 mt-1" th:text="${book.shelfLocation ?: 'Khu A - Kệ 1'}">Khu A</div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-display text-lg font-bold text-navy-900 mb-3">Thông tin xuất bản</h3>
+                    <div class="border border-slate-100 rounded-2xl overflow-hidden text-sm">
+                        <div class="flex border-b border-slate-50 p-3.5 bg-slate-50/50">
+                            <span class="w-32 font-semibold text-slate-500 flex-shrink-0">Tác giả:</span>
+                            <span class="text-navy-950 font-medium" th:text="${book.authors != null and !book.authors.isEmpty() ? book.authors.iterator().next() : 'Chưa cập nhật'}">Tên tác giả</span>
+                        </div>
+                        <div class="flex border-b border-slate-50 p-3.5">
+                            <span class="w-32 font-semibold text-slate-500 flex-shrink-0">Mã định danh ISBN:</span>
+                            <span class="text-slate-700 font-mono font-medium" th:text="${book.isbn ?: 'Chưa cập nhật'}">978-604-0-12345-6</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-display text-lg font-bold text-navy-900 mb-2">Tóm tắt nội dung tác phẩm</h3>
+					<div class="text-gray-600 leading-relaxed space-y-4">
+					    <p th:text="${book.summary != null ? book.summary : 'Hiện tại thư viện chưa cập nhật tóm tắt nội dung cho đầu sách này.'}"></p>
+					</div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</main>
+
+
+
+<div th:replace="~{navbar :: footer}"></div>
+
+<script>
+    const modal = document.getElementById('previewModal');
+    function openPreviewModal() {
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+    function closePreviewModal() {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) closePreviewModal();
+    });
+</script>
+
+</body>
+</html>

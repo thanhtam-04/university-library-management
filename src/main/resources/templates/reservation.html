@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Xác nhận đặt lịch – LibManage</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'DM Sans', sans-serif; background: #f8faff; }
+        .font-display { font-family: 'Playfair Display', serif; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-md w-full bg-white rounded-3xl shadow-xl border border-slate-100 p-8 text-center">
+        <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+        </div>
+
+        <h2 class="font-display text-2xl font-bold text-navy-900 mb-2">Xác nhận đặt chỗ</h2>
+        <p class="text-slate-500 mb-6 text-sm">Bạn đang đặt lịch mượn cho đầu sách:</p>
+
+        <div class="bg-slate-50 rounded-2xl p-4 mb-8 text-left border border-slate-100">
+            <div class="font-bold text-navy-900 text-lg mb-1" th:text="${book.title}">Tên sách</div>
+            <div class="text-sm text-slate-500 font-mono" th:text="${'ISBN: ' + book.isbn}">ISBN: 000-000</div>
+        </div>
+
+        <form th:action="@{'/reservation/confirm/' + ${book.id}}" method="POST">
+            <div class="space-y-3">
+                <button type="submit" 
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all shadow-md">
+                    Xác nhận đặt lịch
+                </button>
+                <a th:href="@{'/books/' + ${book.id}}" 
+                   class="w-full block text-slate-500 hover:text-slate-800 font-semibold py-3 transition-colors">
+                    Hủy bỏ
+                </a>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>

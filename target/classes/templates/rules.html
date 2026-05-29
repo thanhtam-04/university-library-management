@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quy định thư viện – LibManage</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: { 50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',300:'#93c5fd',400:'#60a5fa',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a',950:'#0f2057' },
+                        gold: { 400:'#fbbf24',500:'#f59e0b' },
+                    },
+                    fontFamily: { display:['"Playfair Display"','serif'], body:['"DM Sans"','sans-serif'] },
+                }
+            }
+        }
+    </script>
+    <style>
+        *, *::before, *::after { box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+        body { font-family:'DM Sans',sans-serif; background:#f8faff; color:#0c1b3a; -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+        .font-display { font-family:'Playfair Display',serif; }
+        .btn-primary { background:linear-gradient(135deg,#1d4ed8,#2563eb); color:#fff; padding:.75rem 1.75rem; border-radius:10px; font-weight:600; display:inline-flex; align-items:center; gap:.5rem; border:none; cursor:pointer; transition:all .22s; box-shadow:0 4px 16px rgba(37,99,235,.30); text-decoration:none; }
+        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(37,99,235,.38); color:#fff; }
+        .btn-outline { background:transparent; color:#1d4ed8; border:1.5px solid #93c5fd; padding:.7rem 1.5rem; border-radius:10px; font-weight:600; display:inline-flex; align-items:center; gap:.5rem; cursor:pointer; transition:all .2s; text-decoration:none; }
+        .btn-outline:hover { background:#eff6ff; border-color:#2563eb; color:#1d4ed8; }
+        .rule-section { background:#fff; border:1px solid #e2e8f5; border-radius:16px; overflow:hidden; box-shadow:0 2px 8px rgba(14,30,80,.05); }
+        .rule-section-header { padding:20px 24px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; transition:background .15s; }
+        .rule-section-header:hover { background:#f8faff; }
+        .rule-section-body { padding:0 24px 24px; }
+        .fine-row { display:flex; align-items:center; padding:12px 0; border-bottom:1px solid #f1f5f9; }
+        .fine-row:last-child { border-bottom:none; }
+        ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-thumb { background:#bfdbfe; border-radius:6px; }
+        .toc-link { display:block; padding:6px 12px; border-radius:8px; font-size:13.5px; color:#475569; transition:all .15s; }
+        .toc-link:hover { background:#eff6ff; color:#2563eb; }
+        .toc-link.active { background:#eff6ff; color:#2563eb; font-weight:600; border-left:3px solid #2563eb; }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+     
+<div th:replace="~{navbar :: navbar}"></div>
+<!-- HERO -->
+<section class="relative overflow-hidden py-14" style="background:linear-gradient(135deg,#0f2057 0%,#1e3a8a 50%,#1d4ed8 100%)">
+    <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle,rgba(255,255,255,.5) 1px,transparent 1px);background-size:32px 32px"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-5">
+            <svg class="w-3.5 h-3.5 text-gold-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clip-rule="evenodd"/></svg>
+            <span class="text-white/80 text-xs font-semibold tracking-wide uppercase">Nội quy & Quy định</span>
+        </div>
+        <h1 class="font-display text-white text-4xl sm:text-5xl font-bold mb-4">Quy định <span style="color:#fbbf24">thư viện</span></h1>
+        <p class="text-white/70 text-base max-w-xl mx-auto">Vui lòng đọc kỹ và tuân thủ các quy định để đảm bảo quyền lợi của bạn và cộng đồng học thuật.</p>
+        <!-- Quick stats -->
+        <div class="flex gap-6 justify-center mt-8 flex-wrap">
+            <div class="bg-white/10 border border-white/20 rounded-xl px-5 py-3 text-center">
+                <div class="font-display text-xl font-bold text-white">14 ngày</div>
+                <div class="text-white/55 text-xs mt-0.5">Thời hạn mượn</div>
+            </div>
+            <div class="bg-white/10 border border-white/20 rounded-xl px-5 py-3 text-center">
+                <div class="font-display text-xl font-bold text-white">5 cuốn</div>
+                <div class="text-white/55 text-xs mt-0.5">Tối đa mỗi lần</div>
+            </div>
+            <div class="bg-white/10 border border-white/20 rounded-xl px-5 py-3 text-center">
+                <div class="font-display text-xl font-bold text-white">2.000đ</div>
+                <div class="text-white/55 text-xs mt-0.5">Phạt / ngày trễ</div>
+            </div>
+            <div class="bg-white/10 border border-white/20 rounded-xl px-5 py-3 text-center">
+                <div class="font-display text-xl font-bold text-white">1 lần</div>
+                <div class="text-white/55 text-xs mt-0.5">Được gia hạn</div>
+            </div>
+        </div>
+    </div>
+    <div class="absolute bottom-0 left-0 right-0"><svg viewBox="0 0 1440 40" fill="none"><path d="M0 40V20C360 0 720 40 1080 20C1260 10 1380 30 1440 20V40H0Z" fill="#f8faff"/></svg></div>
+</section>
+
+<!-- MAIN -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="flex gap-8">
+
+        <!-- TABLE OF CONTENTS (sticky sidebar) -->
+        <aside class="hidden xl:block w-64 flex-shrink-0">
+            <div class="sticky top-24 bg-white border border-blue-50 rounded-2xl p-4" style="box-shadow:0 2px 8px rgba(14,30,80,.05)">
+                <h4 class="font-semibold text-navy-900 text-sm mb-3 px-2">📋 Mục lục</h4>
+                <nav class="space-y-1">
+                    <a href="#sec-membership" class="toc-link active">1. Điều kiện thành viên</a>
+                    <a href="#sec-borrow" class="toc-link">2. Quy định mượn sách</a>
+                    <a href="#sec-return" class="toc-link">3. Trả sách & gia hạn</a>
+                    <a href="#sec-fine" class="toc-link">4. Biểu phí vi phạm</a>
+                    <a href="#sec-conduct" class="toc-link">5. Nội quy phòng đọc</a>
+                    <a href="#sec-digital" class="toc-link">6. Tài liệu số</a>
+                    <a href="#sec-contact" class="toc-link">7. Liên hệ & Khiếu nại</a>
+                </nav>
+                <div class="mt-4 pt-4 border-t border-slate-100">
+                    <p class="text-xs text-slate-400 mb-2">Cập nhật lần cuối</p>
+                    <p class="text-xs font-semibold text-navy-800">01/01/2026</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CONTENT -->
+        <div class="flex-1 space-y-5">
+
+            <!-- 1. Điều kiện thành viên -->
+            <div id="sec-membership" class="rule-section">
+                <div class="rule-section-header" onclick="toggleSection(this)">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,#eff6ff,#dbeafe)">
+                            <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-navy-900 text-[15px]">1. Điều kiện & Thủ tục làm thẻ thành viên</h3>
+                            <p class="text-slate-400 text-xs mt-0.5">Đối tượng, hồ sơ và thời hạn thẻ</p>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-slate-400 transition-transform section-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+                <div class="rule-section-body">
+                    <div class="grid sm:grid-cols-2 gap-4 mb-4">
+                        <div class="bg-blue-50 rounded-xl p-4">
+                            <h4 class="font-semibold text-navy-800 text-sm mb-2">✅ Đối tượng được làm thẻ</h4>
+                            <ul class="space-y-1.5 text-sm text-slate-600">
+                                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0"></span>Sinh viên đang theo học tại trường</li>
+                                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0"></span>Giảng viên và cán bộ nhà trường</li>
+                                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0"></span>Học viên cao học, nghiên cứu sinh</li>
+                            </ul>
+                        </div>
+                        <div class="bg-amber-50 rounded-xl p-4">
+                            <h4 class="font-semibold text-navy-800 text-sm mb-2">📋 Hồ sơ cần thiết</h4>
+                            <ul class="space-y-1.5 text-sm text-slate-600">
+                                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0"></span>Thẻ sinh viên / CCCD còn hiệu lực</li>
+                                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0"></span>1 ảnh 3×4 cm</li>
+                                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0"></span>Phiếu đăng ký (nhận tại quầy)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 rounded-xl p-4">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"/></svg></div>
+                            <div>
+                                <p class="text-sm font-semibold text-navy-800">Thời hạn thẻ</p>
+                                <p class="text-sm text-slate-500 mt-0.5">Thẻ có hiệu lực <strong>1 năm học</strong> kể từ ngày cấp. Gia hạn miễn phí tại quầy thư viện trước khi hết hạn 1 tuần.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Quy định mượn sách -->
+            <div id="sec-borrow" class="rule-section">
+                <div class="rule-section-header" onclick="toggleSection(this)">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7)">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-navy-900 text-[15px]">2. Quy định mượn sách</h3>
+                            <p class="text-slate-400 text-xs mt-0.5">Số lượng, thời hạn và điều kiện mượn</p>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-slate-400 transition-transform section-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+                <div class="rule-section-body">
+                    <div class="grid sm:grid-cols-3 gap-3 mb-4">
+                        <div class="text-center bg-green-50 rounded-xl p-4">
+                            <div class="font-display text-3xl font-bold text-green-700 mb-1">5</div>
+                            <div class="text-sm font-semibold text-navy-800">Cuốn / lần</div>
+                            <div class="text-xs text-slate-400 mt-1">Số sách tối đa cùng lúc</div>
+                        </div>
+                        <div class="text-center bg-blue-50 rounded-xl p-4">
+                            <div class="font-display text-3xl font-bold text-blue-700 mb-1">14</div>
+                            <div class="text-sm font-semibold text-navy-800">Ngày / lần mượn</div>
+                            <div class="text-xs text-slate-400 mt-1">Thời hạn mượn tiêu chuẩn</div>
+                        </div>
+                        <div class="text-center bg-purple-50 rounded-xl p-4">
+                            <div class="font-display text-3xl font-bold text-purple-700 mb-1">1</div>
+                            <div class="text-sm font-semibold text-navy-800">Lần gia hạn</div>
+                            <div class="text-xs text-slate-400 mt-1">Thêm tối đa 7 ngày</div>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-50">
+                            <span class="text-green-500 mt-0.5">✓</span>
+                            <p class="text-sm text-slate-600">Phải xuất trình <strong>thẻ thư viện hợp lệ</strong> khi mượn sách.</p>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-50">
+                            <span class="text-green-500 mt-0.5">✓</span>
+                            <p class="text-sm text-slate-600">Sách <strong>tham khảo, tài liệu hiếm, luận văn gốc</strong> chỉ được đọc tại chỗ, không cho mượn về.</p>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-50">
+                            <span class="text-green-500 mt-0.5">✓</span>
+                            <p class="text-sm text-slate-600">Không được <strong>chuyển nhượng hoặc cho mượn lại</strong> sách của thư viện cho người khác.</p>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 rounded-xl bg-red-50 border border-red-100">
+                            <span class="text-red-500 mt-0.5">✗</span>
+                            <p class="text-sm text-slate-600">Nếu có <strong>sách quá hạn hoặc nợ phí</strong>, tài khoản sẽ bị tạm khóa đến khi giải quyết xong.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Trả sách & Gia hạn -->
+            <div id="sec-return" class="rule-section">
+                <div class="rule-section-header" onclick="toggleSection(this)">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#fefce8,#fef3c7)">
+                            <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-navy-900 text-[15px]">3. Trả sách & Gia hạn</h3>
+                            <p class="text-slate-400 text-xs mt-0.5">Thủ tục trả, gia hạn và điều kiện</p>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-slate-400 transition-transform section-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+                <div class="rule-section-body">
+                    <div class="space-y-3">
+                        <div class="flex gap-4 p-4 bg-blue-50 rounded-xl">
+                            <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">1</div>
+                            <div>
+                                <h4 class="font-semibold text-navy-800 text-sm mb-1">Trả trực tiếp tại quầy</h4>
+                                <p class="text-sm text-slate-500">Mang sách đến quầy thư viện trong giờ mở cửa. Thủ thư sẽ kiểm tra tình trạng sách và cập nhật hệ thống.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 p-4 bg-green-50 rounded-xl">
+                            <div class="w-10 h-10 rounded-xl bg-green-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">2</div>
+                            <div>
+                                <h4 class="font-semibold text-navy-800 text-sm mb-1">Gia hạn trực tuyến</h4>
+                                <p class="text-sm text-slate-500">Đăng nhập vào hệ thống → Mục "Sách đang mượn" → Nhấn "Gia hạn". Chỉ được gia hạn <strong>1 lần, tối đa 7 ngày</strong> và phải thực hiện <strong>trước ngày hết hạn</strong>.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 p-4 bg-amber-50 rounded-xl border border-amber-100">
+                            <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0">⚠</div>
+                            <div>
+                                <h4 class="font-semibold text-navy-800 text-sm mb-1">Lưu ý quan trọng</h4>
+                                <p class="text-sm text-slate-500">Không được gia hạn nếu có người khác đang đặt trước cuốn sách đó, hoặc tài khoản đang bị khóa do nợ phí.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Biểu phí vi phạm -->
+            <div id="sec-fine" class="rule-section">
+                <div class="rule-section-header" onclick="toggleSection(this)">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#fef2f2,#fee2e2)">
+                            <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-navy-900 text-[15px]">4. Biểu phí vi phạm</h3>
+                            <p class="text-slate-400 text-xs mt-0.5">Mức phí phạt cụ thể</p>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-slate-400 transition-transform section-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+                <div class="rule-section-body">
+                    <div class="overflow-hidden rounded-xl border border-slate-200">
+                        <table class="w-full text-sm border-collapse">
+                            <thead>
+                                <tr style="background:linear-gradient(135deg,#1e3a8a,#1d4ed8)">
+                                    <th class="text-left p-3 text-white font-semibold text-xs uppercase tracking-wide">Vi phạm</th>
+                                    <th class="text-center p-3 text-white font-semibold text-xs uppercase tracking-wide">Mức phạt</th>
+                                    <th class="text-left p-3 text-white font-semibold text-xs uppercase tracking-wide">Ghi chú</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-slate-100 hover:bg-slate-50">
+                                    <td class="p-3 font-medium text-navy-800">Trả sách trễ hạn</td>
+                                    <td class="p-3 text-center"><span class="font-bold text-red-600">5.000đ / ngày</span></td>
+                                    <td class="p-3 text-slate-500 text-xs">Tính từng ngày, kể cả ngày nghỉ lễ</td>
+                                </tr>
+                                <tr class="border-b border-slate-100 hover:bg-slate-50">
+                                    <td class="p-3 font-medium text-navy-800">Làm rách / bẩn sách</td>
+                                    <td class="p-3 text-center"><span class="font-bold text-red-600">20% – 50% giá sách</span></td>
+                                    <td class="p-3 text-slate-500 text-xs">Tùy mức độ hư hỏng</td>
+                                </tr>
+                                <tr class="border-b border-slate-100 hover:bg-slate-50">
+                                    <td class="p-3 font-medium text-navy-800">Làm mất sách</td>
+                                    <td class="p-3 text-center"><span class="font-bold text-red-600">100% giá sách + 10.000đ</span></td>
+                                    <td class="p-3 text-slate-500 text-xs">Có thể mua sách tương đương để thay thế</td>
+                                </tr>
+                                <tr class="border-b border-slate-100 hover:bg-slate-50">
+                                    <td class="p-3 font-medium text-navy-800">Ghi chú / viết vào sách</td>
+                                    <td class="p-3 text-center"><span class="font-bold text-orange-600">10.000đ – 30.000đ</span></td>
+                                    <td class="p-3 text-slate-500 text-xs">Tùy số trang bị viết</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-3 font-medium text-navy-800">Không trả thẻ khi hết hạn</td>
+                                    <td class="p-3 text-center"><span class="font-bold text-purple-600">50.000đ</span></td>
+                                    <td class="p-3 text-slate-500 text-xs">Phí hành chính làm lại thẻ</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-3 italic">* Biểu phí có thể thay đổi theo quyết định của Ban Giám hiệu. Phiên bản hiện hành cập nhật ngày 01/01/2026.</p>
+                </div>
+            </div>
+
+            <!-- 5. Nội quy phòng đọc -->
+            <div id="sec-conduct" class="rule-section">
+                <div class="rule-section-header" onclick="toggleSection(this)">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#faf5ff,#ede9fe)">
+                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-navy-900 text-[15px]">5. Nội quy phòng đọc sách</h3>
+                            <p class="text-slate-400 text-xs mt-0.5">Quy tắc ứng xử trong thư viện</p>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-slate-400 transition-transform section-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+                <div class="rule-section-body">
+                    <div class="grid sm:grid-cols-2 gap-3">
+                        <div>
+                            <h4 class="text-sm font-semibold text-green-700 mb-2 flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center text-xs">✓</span>Được phép</h4>
+                            <ul class="space-y-2">
+                                <li class="flex items-start gap-2 text-sm text-slate-600"><span class="text-green-500 mt-0.5 flex-shrink-0">●</span>Mang tài liệu cá nhân vào để nghiên cứu</li>
+                                <li class="flex items-start gap-2 text-sm text-slate-600"><span class="text-green-500 mt-0.5 flex-shrink-0">●</span>Sử dụng máy tính cá nhân (không âm thanh)</li>
+                                <li class="flex items-start gap-2 text-sm text-slate-600"><span class="text-green-500 mt-0.5 flex-shrink-0">●</span>Chụp ảnh tài liệu cho mục đích học tập</li>
+                                <li class="flex items-start gap-2 text-sm text-slate-600"><span class="text-green-500 mt-0.5 flex-shrink-0">●</span>Uống nước (trong bình nắp kín)</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-red-700 mb-2 flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center text-xs">✗</span>Không được phép</h4>
+                            <ul class="space-y-2">
+                                <li class="flex items-start gap-2 text-sm text-slate-600"><span class="text-red-500 mt-0.5 flex-shrink-0">●</span>Nói chuyện to, gây mất trật tự</li>
+                                <li class="flex items-start gap-2 text-sm text-slate-600"><span class="text-red-500 mt-0.5 flex-shrink-0">●</span>Mang thức ăn vào phòng đọc</li>
+                                <li class="flex items-start gap-2 text-sm text-slate-600"><span class="text-red-500 mt-0.5 flex-shrink-0">●</span>Gọi điện thoại trong khu vực đọc yên tĩnh</li>
+                                <li class="flex items-start gap-2 text-sm text-slate-600"><span class="text-red-500 mt-0.5 flex-shrink-0">●</span>Để túi xách trên bàn đọc sách</li>
+                                <li class="flex items-start gap-2 text-sm text-slate-600"><span class="text-red-500 mt-0.5 flex-shrink-0">●</span>Mang sách ra khỏi thư viện khi chưa mượn</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Tài liệu số -->
+            <div id="sec-digital" class="rule-section">
+                <div class="rule-section-header" onclick="toggleSection(this)">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7)">
+                            <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path d="M2 6a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-navy-900 text-[15px]">6. Quy định sử dụng tài liệu số</h3>
+                            <p class="text-slate-400 text-xs mt-0.5">Bản quyền và phạm vi sử dụng</p>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-slate-400 transition-transform section-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+                <div class="rule-section-body">
+                    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-4">
+                        <p class="text-sm text-navy-800 font-medium mb-2">⚖️ Quy định bản quyền</p>
+                        <p class="text-sm text-slate-500">Tất cả tài liệu số trong hệ thống chỉ được sử dụng <strong>cho mục đích học tập và nghiên cứu</strong> của cá nhân. Nghiêm cấm phân phối, bán hoặc sử dụng thương mại dưới bất kỳ hình thức nào.</p>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex items-start gap-2 p-3 rounded-xl bg-slate-50 text-sm text-slate-600"><span class="text-blue-500 flex-shrink-0">📌</span>Chỉ được tải về và lưu trữ để đọc offline trên thiết bị cá nhân.</div>
+                        <div class="flex items-start gap-2 p-3 rounded-xl bg-slate-50 text-sm text-slate-600"><span class="text-blue-500 flex-shrink-0">📌</span>Khi trích dẫn cần ghi rõ nguồn: Tên tác giả, Thư viện ĐHKTNA.</div>
+                        <div class="flex items-start gap-2 p-3 rounded-xl bg-red-50 border border-red-100 text-sm text-slate-600"><span class="text-red-500 flex-shrink-0">🚫</span>Vi phạm bản quyền có thể bị thu hồi quyền truy cập và chịu trách nhiệm theo pháp luật.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. Liên hệ -->
+            <div id="sec-contact" class="rule-section">
+                <div class="rule-section-header" onclick="toggleSection(this)">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#eff6ff,#dbeafe)">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-navy-900 text-[15px]">7. Liên hệ & Khiếu nại</h3>
+                            <p class="text-slate-400 text-xs mt-0.5">Thông tin liên lạc với thư viện</p>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-slate-400 transition-transform section-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+                <div class="rule-section-body">
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                                <div class="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center">📍</div>
+                                <div><p class="text-xs text-slate-400">Địa chỉ</p><p class="text-sm font-medium text-navy-800">Vinh Phú, Nghệ An</p></div>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                                <div class="w-9 h-9 rounded-lg bg-green-100 flex items-center justify-center">📞</div>
+                                <div><p class="text-xs text-slate-400">Điện thoại</p><p class="text-sm font-medium text-navy-800">(0238) 888 xxx</p></div>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                                <div class="w-9 h-9 rounded-lg bg-purple-100 flex items-center justify-center">✉️</div>
+                                <div><p class="text-xs text-slate-400">Email</p><p class="text-sm font-medium text-navy-800">library@nau.edu.vn</p></div>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                                <div class="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center">🕐</div>
+                                <div><p class="text-xs text-slate-400">Giờ làm việc</p><p class="text-sm font-medium text-navy-800">T2–T6: 7:30 – 17:00 | T7: 7:30 – 12:00</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<div th:replace="~{navbar :: footer}"></div>
+
+<script>
+    document.getElementById('mobileMenuBtn')?.addEventListener('click', () => document.getElementById('mobileMenu')?.classList.toggle('hidden'));
+
+    function toggleSection(header) {
+        const body = header.nextElementSibling;
+        const chevron = header.querySelector('.section-chevron');
+        const isOpen = !body.classList.contains('hidden');
+        if (isOpen) {
+            body.classList.add('hidden');
+            chevron.style.transform = 'rotate(-90deg)';
+        } else {
+            body.classList.remove('hidden');
+            chevron.style.transform = '';
+        }
+    }
+
+    // TOC active highlight on scroll
+    const sections = document.querySelectorAll('[id^="sec-"]');
+    const tocLinks = document.querySelectorAll('.toc-link');
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(sec => { if (window.scrollY >= sec.offsetTop - 120) current = sec.id; });
+        tocLinks.forEach(link => {
+            link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+        });
+    });
+</script>
+</body>
+</html>

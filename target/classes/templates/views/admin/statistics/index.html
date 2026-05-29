@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin_layout}"
+      lang="vi">
+<head>
+    <title>Thống kê &amp; Báo cáo</title>
+    <th:block layout:fragment="css">
+        <style>
+            /* ── KPI cards ── */
+            .kpi-card { background:#fff; border:1px solid #e9ecef; border-radius:14px; padding:22px 24px; display:flex; align-items:center; gap:18px; box-shadow:0 1px 4px rgba(0,0,0,.05); transition:box-shadow .2s,transform .2s; }
+            .kpi-card:hover { box-shadow:0 6px 20px rgba(0,0,0,.1); transform:translateY(-2px); }
+            .kpi-icon { width:54px; height:54px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; }
+            .kpi-icon.indigo { background:#eef2ff; color:#4154f1; }
+            .kpi-icon.blue   { background:#eff6ff; color:#2563eb; }
+            .kpi-icon.green  { background:#f0fdf4; color:#16a34a; }
+            .kpi-icon.amber  { background:#fffbeb; color:#d97706; }
+            .kpi-icon.red    { background:#fef2f2; color:#dc2626; }
+            .kpi-icon.purple { background:#faf5ff; color:#7c3aed; }
+            .kpi-value { font-size:30px; font-weight:800; color:#0f172a; line-height:1; }
+            .kpi-label { font-size:13px; color:#6c757d; margin-top:4px; }
+            .kpi-sub   { font-size:12px; color:#94a3b8; margin-top:2px; }
+
+            /* ── Chart cards ── */
+            .chart-card { background:#fff; border:1px solid #e9ecef; border-radius:14px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.05); height:100%; }
+            .chart-card-title { font-size:15px; font-weight:700; color:#0f172a; margin-bottom:4px; }
+            .chart-card-sub   { font-size:12.5px; color:#94a3b8; margin-bottom:20px; }
+
+            /* ── Table cards ── */
+            .tbl-card { background:#fff; border:1px solid #e9ecef; border-radius:14px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.05); }
+            .tbl-card-head { padding:18px 20px 12px; border-bottom:1px solid #f1f5f9; }
+            .tbl-card-head h6 { font-size:15px; font-weight:700; color:#0f172a; margin:0 0 2px; }
+            .tbl-card-head p  { font-size:12.5px; color:#94a3b8; margin:0; }
+            .tbl-card table { width:100%; border-collapse:collapse; }
+            .tbl-card thead th { background:#f8f9fa; padding:10px 16px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:#6c757d; border-bottom:1px solid #e9ecef; }
+            .tbl-card tbody td { padding:11px 16px; border-bottom:1px solid #f8f9fa; font-size:13.5px; vertical-align:middle; }
+            .tbl-card tbody tr:last-child td { border-bottom:none; }
+            .tbl-card tbody tr:hover td { background:#fafbff; }
+
+            .rank-badge { display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; font-size:12px; font-weight:700; }
+            .rank-1 { background:#fef3c7; color:#d97706; }
+            .rank-2 { background:#f1f5f9; color:#475569; }
+            .rank-3 { background:#fce7f3; color:#be185d; }
+            .rank-n { background:#f8f9fa; color:#94a3b8; }
+
+            .debt-bar-wrap { display:flex; align-items:center; gap:10px; }
+            .debt-bar { height:8px; border-radius:4px; background:#4154f1; min-width:4px; transition:width .4s; }
+            .debt-val { font-size:13px; font-weight:700; color:#dc2626; white-space:nowrap; }
+
+            .section-heading { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:#94a3b8; margin:32px 0 16px; padding-bottom:8px; border-bottom:2px solid #f1f5f9; }
+        </style>
+    </th:block>
+</head>
+
+<body>
+<div layout:fragment="content">
+
+    <div class="pagetitle">
+        <h1>Thống kê &amp; Báo cáo</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a th:href="@{/admin/dashboard}"><i class="bi bi-house-door"></i> Trang chủ</a>
+                </li>
+                <li class="breadcrumb-item active">Thống kê &amp; Báo cáo</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section">
+
+        <!-- ══ KPI ROW 1: Kho sách & Thành viên ══ -->
+        <div class="section-heading"><i class="bi bi-grid-3x3-gap me-2"></i>Tổng quan hệ thống</div>
+        <div class="row g-3 mb-2">
+            <div class="col-md-3 col-sm-6">
+                <div class="kpi-card">
+                    <div class="kpi-icon indigo"><i class="bi bi-book-fill"></i></div>
+                    <div>
+                        <div class="kpi-value" th:text="${totalBooks}">0</div>
+                        <div class="kpi-label">Đầu sách</div>
+                        <div class="kpi-sub" th:text="${totalCopies} + ' bản sao'"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="kpi-card">
+                    <div class="kpi-icon green"><i class="bi bi-people-fill"></i></div>
+                    <div>
+                        <div class="kpi-value" th:text="${totalMembers}">0</div>
+                        <div class="kpi-label">Thành viên</div>
+                        <div class="kpi-sub">Đang hoạt động</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="kpi-card">
+                    <div class="kpi-icon blue"><i class="bi bi-journal-arrow-up"></i></div>
+                    <div>
+                        <div class="kpi-value" th:text="${totalLoans}">0</div>
+                        <div class="kpi-label">Tổng phiếu mượn</div>
+                        <div class="kpi-sub" th:text="${activeLoans} + ' đang mượn'"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="kpi-card">
+                    <div class="kpi-icon red"><i class="bi bi-exclamation-circle-fill"></i></div>
+                    <div>
+                        <div class="kpi-value" th:text="${overdueLoans}">0</div>
+                        <div class="kpi-label">Phiếu quá hạn</div>
+                        <div class="kpi-sub" th:text="${unpaidFines} + ' phiếu phạt chưa TT'"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ KPI ROW 2: Tài chính ══ -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4 col-sm-6">
+                <div class="kpi-card">
+                    <div class="kpi-icon amber"><i class="bi bi-receipt-cutoff"></i></div>
+                    <div>
+                        <div class="kpi-value"
+                             th:text="${#numbers.formatDecimal(totalFineAmount,0,'COMMA',0,'POINT')} + ' đ'">0</div>
+                        <div class="kpi-label">Tổng tiền phạt</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <div class="kpi-card">
+                    <div class="kpi-icon green"><i class="bi bi-cash-coin"></i></div>
+                    <div>
+                        <div class="kpi-value"
+                             th:text="${#numbers.formatDecimal(totalPaidAmount,0,'COMMA',0,'POINT')} + ' đ'">0</div>
+                        <div class="kpi-label">Đã thu</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <div class="kpi-card">
+                    <div class="kpi-icon red"><i class="bi bi-wallet2"></i></div>
+                    <div>
+                        <div class="kpi-value"
+                             th:text="${#numbers.formatDecimal(totalDebt,0,'COMMA',0,'POINT')} + ' đ'">0</div>
+                        <div class="kpi-label">Tổng công nợ</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ BIỂU ĐỒ ══ -->
+        <div class="section-heading"><i class="bi bi-bar-chart-line me-2"></i>Biểu đồ thống kê</div>
+        <div class="row g-3 mb-4">
+
+            <!-- Biểu đồ mượn/trả theo tháng (Chart.js - Bar) -->
+            <div class="col-lg-8">
+                <div class="chart-card">
+                    <div class="chart-card-title">Lượt mượn / trả theo tháng</div>
+                    <div class="chart-card-sub" th:text="'Năm ' + ${#temporals.createNow().year}"></div>
+                    <canvas id="loanChart" height="100"></canvas>
+                </div>
+            </div>
+
+            <!-- Biểu đồ phiếu phạt (Chart.js - Doughnut) -->
+            <div class="col-lg-4">
+                <div class="chart-card">
+                    <div class="chart-card-title">Phân bố phiếu phạt</div>
+                    <div class="chart-card-sub">Theo trạng thái thanh toán</div>
+                    <canvas id="fineChart" height="170"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ TOP SÁCH + TOP NỢ ══ -->
+        <div class="row g-3 mb-4">
+
+            <!-- Top sách mượn nhiều (Recharts-style bar ngang bằng CSS + Chart.js) -->
+            <div class="col-lg-7">
+                <div class="chart-card">
+                    <div class="chart-card-title">Top sách được mượn nhiều nhất</div>
+                    <div class="chart-card-sub">10 đầu sách hàng đầu</div>
+                    <canvas id="topBookChart" height="160"></canvas>
+                </div>
+            </div>
+
+            <!-- Top thành viên nợ -->
+            <div class="col-lg-5">
+                <div class="tbl-card">
+                    <div class="tbl-card-head">
+                        <h6><i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>Top công nợ</h6>
+                        <p>Thành viên có nợ cao nhất</p>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Thành viên</th>
+                                <th class="text-end">Công nợ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="m, i : ${topDebtMembers}">
+                                <td>
+                                    <span th:class="${i.index == 0 ? 'rank-badge rank-1' :
+                                                      i.index == 1 ? 'rank-badge rank-2' :
+                                                      i.index == 2 ? 'rank-badge rank-3' : 'rank-badge rank-n'}"
+                                          th:text="${i.index + 1}"></span>
+                                </td>
+                                <td>
+                                    <div style="font-weight:600; font-size:13.5px; color:#0f172a;"
+                                         th:text="${m.name}"></div>
+                                    <div style="font-size:12px; color:#94a3b8;"
+                                         th:text="${m.card}"></div>
+                                </td>
+                                <td class="text-end">
+                                    <span class="debt-val"
+                                          th:text="${#numbers.formatDecimal(m.debt,0,'COMMA',0,'POINT')} + ' đ'"></span>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(topDebtMembers)}">
+                                <td colspan="3" style="text-align:center; padding:24px; color:#94a3b8; font-size:13px;">
+                                    <i class="bi bi-check-circle text-success me-1"></i> Không có công nợ
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ BẢNG TOP SÁCH CHI TIẾT ══ -->
+        <div class="section-heading"><i class="bi bi-table me-2"></i>Chi tiết top sách</div>
+        <div class="tbl-card mb-4">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="padding-left:20px">#</th>
+                        <th>Tên sách</th>
+                        <th class="text-center">Lượt mượn</th>
+                        <th>Tỉ lệ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="b, i : ${topBooks}">
+                        <td style="padding-left:20px">
+                            <span th:class="${i.index == 0 ? 'rank-badge rank-1' :
+                                              i.index == 1 ? 'rank-badge rank-2' :
+                                              i.index == 2 ? 'rank-badge rank-3' : 'rank-badge rank-n'}"
+                                  th:text="${i.index + 1}"></span>
+                        </td>
+                        <td>
+                            <span style="font-weight:600; color:#0f172a; font-size:14px;"
+                                  th:text="${b.title}"></span>
+                        </td>
+                        <td class="text-center">
+                            <span style="background:#eff6ff; color:#2563eb; border-radius:6px; padding:3px 12px; font-size:13px; font-weight:700;"
+                                  th:text="${b.count} + ' lượt'"></span>
+                        </td>
+                        <td style="min-width:160px;">
+                            <div class="debt-bar-wrap">
+                                <div class="debt-bar"
+                                     th:style="'width:' + (${topBooks[0].count} > 0
+                                               ? ${b.count} * 100 / ${topBooks[0].count}
+                                               : 0) + '%'"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(topBooks)}">
+                        <td colspan="4" style="text-align:center; padding:32px; color:#94a3b8; font-size:13.5px;">
+                            Chưa có dữ liệu mượn sách
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </section>
+</div>
+
+<th:block layout:fragment="script">
+    <!-- Chart.js từ CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script th:inline="javascript">
+        const chartLabels  = /*[[${chartLabels}]]*/ '[]';
+        const chartLoans   = /*[[${chartLoans}]]*/ '[]';
+        const chartReturns = /*[[${chartReturns}]]*/ '[]';
+        const fineDist     = /*[[${fineDist}]]*/ '[]';
+        const fineLabels   = /*[[${fineDistLabels}]]*/ '[]';
+        const topTitles    = /*[[${topBookTitles}]]*/ '[]';
+        const topCounts    = /*[[${topBookCounts}]]*/ '[]';
+
+        // ── Biểu đồ mượn/trả theo tháng (Bar) ──
+        new Chart(document.getElementById('loanChart'), {
+            type: 'bar',
+            data: {
+                labels: JSON.parse(chartLabels),
+                datasets: [
+                    {
+                        label: 'Mượn',
+                        data: JSON.parse(chartLoans),
+                        backgroundColor: 'rgba(65,84,241,0.8)',
+                        borderRadius: 6,
+                        borderSkipped: false,
+                    },
+                    {
+                        label: 'Trả',
+                        data: JSON.parse(chartReturns),
+                        backgroundColor: 'rgba(22,163,74,0.7)',
+                        borderRadius: 6,
+                        borderSkipped: false,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'top' } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#f1f5f9' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // ── Biểu đồ phiếu phạt (Doughnut) ──
+        new Chart(document.getElementById('fineChart'), {
+            type: 'doughnut',
+            data: {
+                labels: JSON.parse(fineLabels),
+                datasets: [{
+                    data: JSON.parse(fineDist),
+                    backgroundColor: ['#fbbf24','#4ade80','#94a3b8'],
+                    borderWidth: 2,
+                    borderColor: '#fff',
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '65%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 16, font: { size: 12 } } }
+                }
+            }
+        });
+
+        // ── Top sách mượn nhiều (Horizontal Bar) ──
+        new Chart(document.getElementById('topBookChart'), {
+            type: 'bar',
+            data: {
+                labels: JSON.parse(topTitles).map(t => t.length > 30 ? t.slice(0,30)+'…' : t),
+                datasets: [{
+                    label: 'Lượt mượn',
+                    data: JSON.parse(topCounts),
+                    backgroundColor: [
+                        '#818cf8','#60a5fa','#34d399','#fbbf24','#f87171',
+                        '#a78bfa','#38bdf8','#4ade80','#fb923c','#e879f9'
+                    ],
+                    borderRadius: 5,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#f1f5f9' } },
+                    y: { grid: { display: false }, ticks: { font: { size: 12 } } }
+                }
+            }
+        });
+    </script>
+</th:block>
+</body>
+</html>

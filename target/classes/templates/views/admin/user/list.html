@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin_layout}"
+      lang="vi">
+<head>
+    <title>Quản lý Tài khoản & Quyền</title>
+    <th:block layout:fragment="css">
+    <style>
+/* ═══ USER LIST (Chuẩn hóa giao diện & Dropdown Phê duyệt) ═══ */
+@keyframes fadeUp {
+    from { opacity:0; transform:translateY(18px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+.anim   { animation: fadeUp .42s cubic-bezier(.4,0,.2,1) both; }
+.anim-1 { animation-delay:.05s } .anim-2 { animation-delay:.10s }
+
+/* ─ Header ─ */
+.usr-head {
+    display:flex; align-items:flex-end; justify-content:space-between;
+    margin-bottom:26px; gap:16px; flex-wrap:wrap;
+}
+.usr-title { font-family:var(--fh); font-size:23px; font-weight:800;
+    color:var(--t1); letter-spacing:-.5px; }
+.usr-breadcrumb { display:flex; align-items:center; gap:5px;
+    font-size:12.5px; color:var(--t3); margin-top:4px; list-style:none; padding:0; }
+.usr-breadcrumb a { color:var(--t2); text-decoration:none; transition:color .14s; }
+.usr-breadcrumb a:hover { color:var(--ac); }
+.usr-breadcrumb li:not(:last-child)::after { content:'/'; margin-left:5px; color:var(--bdr); }
+
+/* ─ Table wrapper ─ */
+.usr-wrap {
+    background:var(--card); border:1px solid var(--bdr);
+    border-radius:16px; overflow:hidden; box-shadow:var(--shd);
+}
+
+/* ─ Toolbar ─ */
+.usr-toolbar {
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    padding:14px 20px; border-bottom:1px solid var(--bdr);
+}
+.usr-search {
+    display:flex; align-items:center; gap:9px;
+    height:40px; padding:0 14px; border-radius:10px;
+    border:1.5px solid var(--bdr); background:var(--page);
+    transition:all .18s var(--ease); width:280px;
+}
+.usr-search:focus-within {
+    border-color:var(--ac); background:#fff; box-shadow:0 0 0 3px var(--ac-bg);
+}
+.usr-search i { color:var(--t3); font-size:14px; flex-shrink:0; }
+.usr-search input {
+    border:none; background:transparent; outline:none;
+    font-family:var(--fb); font-size:13.5px; color:var(--t1); width:100%;
+}
+.usr-search input::placeholder { color:var(--t3); }
+.tb-btn {
+    display:flex; align-items:center; gap:7px; height:40px; padding:0 16px;
+    border-radius:10px; border:1.5px solid var(--bdr); background:var(--page);
+    font-family:var(--fb); font-size:13px; font-weight:500; color:var(--t2);
+    cursor:pointer; transition:all .15s var(--ease);
+}
+.tb-btn:hover { background:var(--card); border-color:#c4cdd8; color:var(--t1); }
+.ml-a { margin-left:auto; }
+.res-txt { font-size:12.5px; color:var(--t3); }
+
+/* ─ Table ─ */
+.usr-tbl { width:100%; border-collapse:collapse; }
+.usr-tbl thead th {
+    background:var(--page); padding:12px 18px;
+    font-size:11px; font-weight:700; letter-spacing:.8px;
+    text-transform:uppercase; color:var(--t3); border-bottom:1px solid var(--bdr);
+    white-space:nowrap;
+}
+.usr-tbl tbody tr { border-bottom:1px solid #f0f4fb; transition:background .12s; }
+.usr-tbl tbody tr:hover { background:#f7f9ff; }
+.usr-tbl td { padding:14px 18px; vertical-align:middle; }
+
+/* ─ User Avatar Info ─ */
+.usr-av-w {
+    width:38px; height:38px; border-radius:50%; overflow:hidden; flex-shrink:0;
+    box-shadow:0 2px 6px rgba(17,24,39,.06); background:#e9ecef;
+}
+.usr-av-w img { width:100%; height:100%; object-fit:cover; display:block; }
+.usr-info-wrap { display:flex; align-items:center; gap:12px; }
+.usr-nm {
+    font-family:var(--fh); font-size:14px; font-weight:700; color:var(--t1); line-height:1.2;
+}
+.usr-email { font-size:12px; color:var(--t3); margin-top:2px; display:block; }
+
+/* ─ Role Tags ─ */
+.role-badge {
+    display:inline-flex; align-items:center; gap:5px;
+    border-radius:6px; padding:3px 8px; font-size:11px; font-weight:700; white-space:nowrap;
+    text-transform:uppercase;
+}
+.role-adm { background:var(--cr-bg); color:var(--cr); }
+.role-lib { background:var(--cb-bg); color:var(--cb); }
+.role-std { background:var(--cg-bg); color:var(--cg); }
+
+/* ─ Dropdown Phê Duyệt Hiện Đại ─ */
+.approve-dropdown {
+    position: relative;
+    display: inline-block;
+}
+.btn-approve-trigger {
+    border: 1px solid transparent;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+    outline: none;
+    background: transparent;
+}
+.bdg-approve-yes { background-color: #d1e7dd; color: #0f5132; border-color: #badbcc; }
+.bdg-approve-yes:hover { background-color: #c1ffd8; }
+.bdg-approve-no { background-color: #fff3cd; color: #664d03; border-color: #ffecb5; }
+.bdg-approve-no:hover { background-color: #ffe69c; }
+
+.approve-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(6px);
+    background: #ffffff;
+    min-width: 150px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    border-radius: 12px;
+    border: 1px solid var(--bdr);
+    z-index: 99;
+    padding: 6px;
+    display: none;
+    animation: fadeUp 0.18s cubic-bezier(.4,0,.2,1) both;
+}
+.approve-menu.show {
+    display: block;
+}
+.approve-item {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--t2);
+    transition: background 0.15s;
+}
+.approve-item:hover {
+    background: var(--page);
+    color: var(--t1);
+}
+.approve-item.opt-approve { color: #198754; }
+.approve-item.opt-approve:hover { background-color: #e8f5e9; }
+.approve-item.opt-reject { color: #dc3545; }
+.approve-item.opt-reject:hover { background-color: #ffebee; }
+
+/* ─ Thao tác cực gọn ─ */
+.act-g { display:flex; align-items:center; justify-content:flex-end; gap:8px; }
+.btn-action-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--bdr);
+    background: var(--card);
+    color: var(--t2);
+    text-decoration: none;
+    transition: all 0.15s;
+}
+.btn-action-icon:hover {
+    background: var(--page);
+    color: var(--ac);
+    border-color: var(--ac);
+}
+.btn-action-icon.ai-del:hover {
+    color: #dc3545;
+    border-color: #f5c2c7;
+    background-color: #fff5f5;
+}
+
+/* ─ Footer ─ */
+.usr-foot {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 20px; background:var(--page); border-top:1px solid var(--bdr);
+}
+.usr-foot-t { font-size:12.5px; color:var(--t3); }
+
+/* ─ Pagination ─ */
+.pag { display:flex !important; gap:4px; align-items:center; }
+.pag-b {
+    width:30px; height:30px; border-radius:7px;
+    display:flex !important; align-items:center; justify-content:center;
+    font-size:12.5px; font-weight:600; cursor:pointer;
+    border:1.5px solid var(--bdr); background:var(--card); color:var(--t2);
+    text-decoration:none; transition:all .14s var(--ease);
+}
+.pag-b:hover { background:var(--ac-bg); color:var(--ac); border-color:var(--ac); }
+.pag-b.on { background:var(--ac); color:#fff; border-color:var(--ac); box-shadow:var(--ac-glow); }
+    </style>
+    </th:block>
+</head>
+
+<body>
+<div layout:fragment="content">
+
+    <div class="usr-head anim anim-1">
+        <div>
+            <div class="usr-title">Tài khoản & Quyền hạn</div>
+            <ol class="usr-breadcrumb">
+                <li><a th:href="@{/admin/dashboard}"><i class="bi bi-house-door"></i> Trang chủ</a></li>
+                <li class="active">Quản lý Tài khoản</li>
+            </ol>
+        </div>
+        <a th:href="@{/admin/user/add}" class="btn-p">
+            <i class="bi bi-person-plus-fill"></i> Thêm tài khoản mới
+        </a>
+    </div>
+
+    <div th:if="${successMsg}" class="bk-alert anim anim-1">
+        <i class="bi bi-check-circle-fill"></i>
+        <span th:text="${successMsg}"></span>
+        <button class="bk-ac" onclick="this.closest('.bk-alert').remove()">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+
+    <div th:if="${errorMsg}" class="bk-alert anim anim-1" style="background-color: #f8d7da; color: #842029; border-color: #f5c2c7;">
+        <i class="bi bi-exclamation-triangle-fill" style="color: #842029;"></i>
+        <span th:text="${errorMsg}"></span>
+        <button class="bk-ac" style="color: #842029;" onclick="this.closest('.bk-alert').remove()">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+
+    <div class="usr-wrap anim anim-2">
+
+        <div class="usr-toolbar">
+            <div class="usr-search">
+                <i class="bi bi-search"></i>
+                <input type="text" id="userSearch" placeholder="Tìm tên, email, username...">
+            </div>
+            <button class="tb-btn"><i class="bi bi-funnel"></i> Vai trò</button>
+            <button class="tb-btn"><i class="bi bi-arrow-down-up"></i> Sắp xếp</button>
+            <div class="ml-a">
+                <span class="res-txt">Tổng <b id="visibleCount" th:text="${users != null ? users.size() : 0}">0</b> tài khoản</span>
+            </div>
+        </div>
+
+        <table class="usr-tbl">
+            <thead>
+                <tr>
+                    <th style="padding-left:22px">Thành viên</th>
+                    <th>Tên đăng nhập</th>
+                    <th>Vai trò</th>
+                    <th class="text-center">Duyệt Đăng Ký</th>
+                    <th class="text-center">Trạng thái</th>
+                    <th class="text-center">Ngày tạo</th>
+                    <th class="text-end" style="padding-right:22px">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody id="userTable">
+                <tr th:each="u : ${users}">
+                    
+                    <td style="padding-left:22px">
+                        <div class="usr-info-wrap">
+                            <div class="usr-av-w">
+                                <img th:src="${u.avatar != null and !u.avatar.isEmpty() ? u.avatar : '/assets/img/default-avatar.png'}" alt="Avatar">
+                            </div>
+                            <div>
+                                <div class="usr-nm" th:text="${u.fullName}"></div>
+                                <span class="usr-email" th:text="${u.email}"></span>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>
+                        <span class="id-tag" th:text="${u.username}"></span>
+                    </td>
+
+                    <td>
+                        <div class="d-flex gap-1 flex-wrap">
+                            <span th:each="role : ${u.roles}" 
+                                  th:classappend="${role.name.name() == 'ROLE_ADMIN' ? 'role-adm' : (role.name.name() == 'ROLE_LIBRARIAN' ? 'role-lib' : 'role-std')}"
+                                  class="role-badge" 
+                                  th:text="${role.name.name() == 'ROLE_ADMIN' ? 'Quản trị' : (role.name.name() == 'ROLE_LIBRARIAN' ? 'Thủ thư' : 'Sinh viên')}">
+                            </span>
+                        </div>
+                    </td>
+
+                    <td class="text-center">
+                        <div class="approve-dropdown">
+                            <button type="button" class="btn-approve-trigger"
+                                    th:classappend="${u.isApproved} ? 'bdg-approve-yes' : 'bdg-approve-no'"
+                                    onclick="toggleApproveMenu(this, event)">
+                                <i th:class="${u.isApproved} ? 'bi bi-patch-check-fill' : 'bi bi-clock-fill'"></i>
+                                <span th:text="${u.isApproved ? 'Đã duyệt' : 'Chờ duyệt'}"></span>
+                                <i class="bi bi-chevron-down" style="font-size: 9px; opacity: 0.8;"></i>
+                            </button>
+
+                            <div class="approve-menu">
+                                <form th:action="@{/admin/user/approve-quick/{id}(id=${u.id})}" method="post">
+                                    <input type="hidden" name="approve" value="true"/>
+                                    <button type="submit" class="approve-item opt-approve">
+                                        <i class="bi bi-check-circle"></i> Duyệt tài khoản
+                                    </button>
+                                </form>
+                                <form th:action="@{/admin/user/approve-quick/{id}(id=${u.id})}" method="post"
+                                      th:onsubmit="'return confirm(\'Hủy phê duyệt tài khoản này sẽ khóa quyền truy cập. Bạn chắc chắn chứ?\')'">
+                                    <input type="hidden" name="approve" value="false"/>
+                                    <button type="submit" class="approve-item opt-reject">
+                                        <i class="bi bi-slash-circle"></i> Hủy duyệt/Khóa
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td class="text-center">
+                        <span class="s-bdg" 
+                              th:classappend="${u.isActive} ? 'bdg-g' : 'bdg-r'"
+                              th:text="${u.isActive ? 'Đang hoạt động' : 'Đang khóa'}">
+                        </span>
+                    </td>
+
+                    <td class="text-center">
+                        <span style="font-size: 13px; color: var(--t2); font-family: var(--fb);"
+                              th:text="${u.createdAt != null ? #temporals.format(u.createdAt, 'dd/MM/yyyy') : '—'}">
+                        </span>
+                    </td>
+
+                    <td style="padding-right:22px">
+                        <div class="act-g">
+                            <a th:href="@{/admin/user/edit/{id}(id=${u.id})}"
+                               class="btn-action-icon" title="Chỉnh sửa thông tin">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+
+                            <a th:href="@{/admin/user/delete/{id}(id=${u.id})}"
+                               class="btn-action-icon ai-del" title="Xóa tài khoản"
+                               onclick="return confirm('Bạn có chắc muốn xóa vĩnh viễn tài khoản này khỏi hệ thống?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr th:if="${users == null or #lists.isEmpty(users)}">
+                    <td colspan="7"> 
+                        <div class="usr-empty">
+                            <div class="usr-empty-ic"><i class="bi bi-people"></i></div>
+                            <h5>Hệ thống chưa có tài khoản nào</h5>
+                            <p>Nhấn "Thêm tài khoản mới" để tạo tài khoản vận hành thư viện.</p>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="usr-foot">
+            <span class="usr-foot-t">
+                Hiển thị <b id="footCount" th:text="${users != null ? users.size() : 0}">0</b> 
+                / <b th:text="${users != null ? users.size() : 0}">0</b> tài khoản
+            </span>
+            <div class="pag">
+                <div class="pag-b"><i class="bi bi-chevron-left"></i></div>
+                <div class="pag-b on">1</div>
+                <div class="pag-b"><i class="bi bi-chevron-right"></i></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<th:block layout:fragment="script">
+<script>
+    // 1. Hàm đóng mở Dropdown Phê Duyệt tại chỗ
+    function toggleApproveMenu(btn, event) {
+        event.stopPropagation(); // Ngăn sự kiện nổi bọt làm đóng menu ngay lập tức
+        
+        // Đóng các menu phê duyệt khác đang mở
+        document.querySelectorAll('.approve-menu').forEach(menu => {
+            if (menu !== btn.nextElementSibling) {
+                menu.classList.remove('show');
+            }
+        });
+        
+        // Toggle menu của nút được click
+        const targetMenu = btn.nextElementSibling;
+        targetMenu.classList.toggle('show');
+    }
+
+    // Đóng menu khi nhấp bất cứ đâu ngoài màn hình
+    document.addEventListener('click', function() {
+        document.querySelectorAll('.approve-menu').forEach(menu => {
+            menu.classList.remove('show');
+        });
+    });
+
+    // 2. JS bộ lọc tìm kiếm tức thì
+    const inp   = document.getElementById('userSearch');
+    const vc    = document.getElementById('visibleCount');
+    const fc    = document.getElementById('footCount');
+    const rows  = () => document.querySelectorAll('#userTable tr');
+
+    inp.addEventListener('input', function () {
+        const q = this.value.toLowerCase().trim();
+        let cnt = 0;
+        rows().forEach(row => {
+            const name  = row.querySelector('.usr-nm')?.textContent.toLowerCase()    || '';
+            const email = row.querySelector('.usr-email')?.textContent.toLowerCase() || '';
+            const uname = row.querySelector('.id-tag')?.textContent.toLowerCase()    || '';
+            const show  = name.includes(q) || email.includes(q) || uname.includes(q);
+            
+            row.style.display = show ? '' : 'none';
+            if (show && row.querySelector('.usr-nm')) cnt++;
+        });
+        const total = [...rows()].filter(r => r.querySelector('.usr-nm')).length;
+        if (vc) vc.textContent = q ? cnt : total;
+        if (fc) fc.textContent = q ? cnt : total;
+    });
+</script>
+</th:block>
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    // Lấy thông báo từ RedirectAttributes - Cần có dấu {} để Thymeleaf hiểu biến
+    var successMsg = [[$successMsg]];
+    var errorMsg = [[$errorMsg]];
+
+    if (successMsg) {
+        Swal.fire({
+            icon: 'success',
+            title: 'Thành công!',
+            text: successMsg,
+            timer: 3000,
+            showConfirmButton: false,
+            toast: true,
+            position: 'top-end',
+            timerProgressBar: true,
+            background: '#fff',
+            iconColor: '#28a745',
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+    }
+
+    if (errorMsg) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Thông báo lỗi',
+            text: errorMsg,
+            confirmButtonColor: '#dc3545',
+            confirmButtonText: 'Đóng'
+        });
+    }
+    /*]]>*/
+</script>
+</body>
+</html>

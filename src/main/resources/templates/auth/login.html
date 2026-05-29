@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Đăng nhập – LibManage</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+    <link th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.css}" rel="stylesheet">
+    <style>
+        :root {
+            /* ══ ĐỒNG BỘ MÀU SẮC TỪ TRANG TÀI LIỆU SỐ (NAVY & GOLD) ══ */
+            --ac:       #fbbf24;       /* Vàng Gold chính chủ từ trang trước */
+            --ac-dk:    #f59e0b;       /* Vàng đậm hơn khi hover */
+            --ac-bg:    rgba(251,191,36,.10);
+            --ac-glow:  0 8px 28px rgba(251,191,36,.25);
+
+            --page:     #f8faff;       /* Nền xanh nhạt chuẩn từ trang trước */
+            --card:     #ffffff;
+            --panel:    #0f2057;       /* Xanh Navy đậm điểm bắt đầu của dải Gradient */
+            --panel2:   #1e3a8a;       /* Xanh Navy trung gian */
+
+            --bdr:      #e2e8f5;       /* Viền border đồng bộ với .doc-card (.bdr cũ) */
+            --bdr2:     #93c5fd;
+
+            --t1:       #0c1b3a;       /* Màu chữ Navy sẫm chính */
+            --t2:       #475569;       /* Màu chữ phụ text-slate-600 */
+            --t3:       #94a3b8;       /* Chữ mờ placeholder-slate-400 */
+
+            --cg:  #10b981; --cg-bg: rgba(16,185,129,.10);
+            --cr:  #ef4444; --cr-bg: rgba(239,68,68,.10);
+
+            --fh: 'Bricolage Grotesque', sans-serif;
+            --fb: 'DM Sans', sans-serif;
+            --ease: cubic-bezier(.4,0,.2,1);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--fb);
+            background: var(--page);
+            min-height: 100vh;
+            display: flex;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── LEFT PANEL (dark, keeps contrast) ── */
+        .left-panel {
+            width: 48%;
+            background: linear-gradient(135deg, #0f2057 0%, #1e3a8a 50%, #1d4ed8 100%); /* Đồng bộ Gradient nền Hero */
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 48px 56px;
+            overflow: hidden;
+        }
+
+        /* Subtle geometric pattern */
+        .left-panel::before {
+            content: '';
+            position: absolute; inset: 0;
+            background:
+                radial-gradient(ellipse 70% 55% at 20% 15%, rgba(251,191,36,.13) 0%, transparent 55%),
+                radial-gradient(ellipse 50% 45% at 80% 85%, rgba(99,102,241,.09) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        /* Grid dot texture */
+        .left-panel::after {
+            content: '';
+            position: absolute; inset: 0;
+            background-image: radial-gradient(circle, rgba(255,255,255,.06) 1px, transparent 1px);
+            background-size: 28px 28px;
+            pointer-events: none;
+        }
+
+        .panel-content { position: relative; z-index: 1; }
+
+        /* Brand */
+        .brand {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 72px;
+            animation: fadeUp .5s var(--ease) both;
+        }
+        .brand-icon {
+            width: 40px; height: 40px; border-radius: 11px;
+            background: linear-gradient(135deg, var(--ac), #f59e0b);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--ac-glow); flex-shrink: 0;
+        }
+        .brand-icon i { color: #0f2057; font-size: 19px; } /* Đổi màu icon thương hiệu thành navy để nổi bật trên nền vàng */
+        .brand-name {
+            font-family: var(--fh); font-size: 20px; font-weight: 800;
+            color: #fff; letter-spacing: -.3px;
+        }
+
+        .hero-eyebrow {
+            font-size: 11px; font-weight: 700; letter-spacing: 1.8px;
+            text-transform: uppercase; color: var(--ac);
+            margin-bottom: 14px; display: block;
+            animation: fadeUp .5s .08s var(--ease) both;
+        }
+        .hero-title {
+            font-family: var(--fh);
+            font-size: clamp(30px, 3vw, 46px);
+            font-weight: 800; color: #fff;
+            line-height: 1.1; letter-spacing: -.6px;
+            margin-bottom: 18px;
+            animation: fadeUp .5s .12s var(--ease) both;
+        }
+        .hero-title em { color: var(--ac); font-style: normal; }
+
+        .hero-desc {
+            font-size: 14.5px; color: rgba(255,255,255,.70);
+            line-height: 1.75; max-width: 340px;
+            animation: fadeUp .5s .16s var(--ease) both;
+        }
+
+        /* Feature cards */
+        .feature-grid {
+            display: flex; flex-direction: column; gap: 10px; margin-top: 48px;
+            animation: fadeUp .5s .22s var(--ease) both;
+        }
+        .feat-card {
+            display: flex; align-items: center; gap: 13px;
+            background: rgba(255,255,255,.05);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 12px; padding: 13px 16px;
+            transition: background .2s var(--ease);
+        }
+        .feat-card:hover { background: rgba(255,255,255,.08); }
+        .feat-ic {
+            width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+        .fi-am  { background: var(--ac-bg);             color: var(--ac); }
+        .fi-bl  { background: rgba(96,165,250,.12);     color: #60a5fa;  }
+        .fi-gr  { background: rgba(52,211,153,.12);     color: #34d399;  }
+        .feat-txt strong {
+            display: block; font-size: 13px; font-weight: 600;
+            color: rgba(255,255,255,.90); margin-bottom: 1px;
+        }
+        .feat-txt span { font-size: 12px; color: rgba(255,255,255,.50); }
+
+        /* Panel footer */
+        .panel-footer {
+            position: relative; z-index: 1;
+            font-size: 12px; color: rgba(255,255,255,.35);
+            animation: fadeUp .5s .3s var(--ease) both;
+        }
+
+        /* ── RIGHT PANEL ── */
+        .right-panel {
+            width: 52%;
+            display: flex; align-items: center; justify-content: center;
+            padding: 48px 56px;
+            background: var(--page);
+            position: relative;
+        }
+
+        /* Subtle warm pattern on right */
+        .right-panel::before {
+            content: '';
+            position: absolute; inset: 0;
+            background:
+                radial-gradient(ellipse 60% 40% at 90% 10%, rgba(251,191,36,.04) 0%, transparent 55%),
+                radial-gradient(ellipse 50% 35% at 10% 90%, rgba(251,191,36,.02) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .form-wrap {
+            width: 100%; max-width: 400px;
+            position: relative; z-index: 1;
+            animation: slideIn .5s var(--ease) both;
+        }
+        @keyframes slideIn {
+            from { opacity:0; transform: translateX(20px); }
+            to   { opacity:1; transform: translateX(0); }
+        }
+
+        /* Form header */
+        .form-eyebrow {
+            font-size: 11px; font-weight: 700; letter-spacing: 1.6px;
+            text-transform: uppercase; color: #1d4ed8; margin-bottom: 8px; display: block; /* Đổi thành xanh của chữ "Tải xuống" */
+        }
+        .form-title {
+            font-family: var(--fh); font-size: 28px; font-weight: 800;
+            color: var(--t1); letter-spacing: -.5px; margin-bottom: 5px;
+        }
+        .form-sub { font-size: 14px; color: var(--t2); margin-bottom: 32px; line-height: 1.5; }
+
+        /* Alert */
+        .lib-alert {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 12px 14px; border-radius: 10px;
+            font-size: 13px; margin-bottom: 22px;
+            border: 1px solid transparent;
+        }
+        .lib-alert i { flex-shrink: 0; margin-top: 1px; font-size: 15px; }
+        .lib-alert-err { background: var(--cr-bg); color: #b91c1c; border-color: rgba(239,68,68,.2); }
+        .lib-alert-ok  { background: var(--cg-bg); color: #065f46; border-color: rgba(16,185,129,.2); }
+
+        /* Form field */
+        .fg { margin-bottom: 16px; }
+        .fg label {
+            display: block; font-size: 12px; font-weight: 600;
+            color: var(--t2); margin-bottom: 7px; letter-spacing: .3px;
+        }
+        .input-wrap { position: relative; }
+        .input-wrap .ico {
+            position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+            color: var(--t3); font-size: 15px; pointer-events: none;
+            transition: color .2s var(--ease);
+        }
+        .input-wrap input {
+            width: 100%;
+            background: #fff;
+            border: 1.5px solid var(--bdr);
+            border-radius: 11px;
+            padding: 12px 14px 12px 42px;
+            font-family: var(--fb); font-size: 14px;
+            color: var(--t1); outline: none;
+            transition: all .2s var(--ease);
+            box-shadow: 0 1px 3px rgba(14,30,80,.03);
+        }
+        .input-wrap input::placeholder { color: var(--t3); }
+        .input-wrap input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,.15), 0 1px 3px rgba(0,0,0,.04);
+        }
+        .input-wrap input:focus ~ .ico,
+        .input-wrap:focus-within .ico { color: #2563eb; }
+
+        /* Password toggle */
+        .pw-tog {
+            position: absolute; right: 13px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; cursor: pointer; padding: 0;
+            color: var(--t3); font-size: 15px; transition: color .15s;
+        }
+        .pw-tog:hover { color: var(--t2); }
+
+        /* Options row */
+        .opt-row {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 22px;
+        }
+        .chk-wrap {
+            display: flex; align-items: center; gap: 8px; cursor: pointer;
+        }
+        .chk-wrap input[type=checkbox] {
+            width: 16px; height: 16px; accent-color: #2563eb; cursor: pointer;
+        }
+        .chk-wrap span { font-size: 13px; color: var(--t2); }
+        .forgot { font-size: 13px; color: #1d4ed8; text-decoration: none; transition: color .15s; font-weight: 500; }
+        .forgot:hover { color: #2563eb; text-decoration: underline; }
+
+        /* Submit */
+        .btn-login {
+            width: 100%;
+            background: linear-gradient(135deg, #1d4ed8, #2563eb); color: #fff; /* Chuyển sang nút Gradient xanh dương đậm chất của .btn-primary bên digital */
+            border: none; border-radius: 11px; padding: 13.5px;
+            font-family: var(--fh); font-size: 15px; font-weight: 700;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 0 4px 16px rgba(37,99,235,.30);
+            transition: all .2s var(--ease);
+            letter-spacing: -.1px;
+        }
+        .btn-login:hover {
+            background: linear-gradient(135deg, #1e40af, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(37,99,235,.38);
+        }
+        .btn-login:active { transform: translateY(0); }
+        .btn-login .arr { transition: transform .2s var(--ease); }
+        .btn-login:hover .arr { transform: translateX(5px); }
+
+        /* Divider */
+        .divider {
+            display: flex; align-items: center; gap: 12px; margin: 22px 0;
+        }
+        .divider::before, .divider::after {
+            content: ''; flex: 1; height: 1px; background: var(--bdr);
+        }
+        .divider span { font-size: 12px; color: var(--t3); }
+
+        /* Register row */
+        .reg-row { text-align: center; font-size: 13.5px; color: var(--t2); }
+        .reg-row a {
+            color: #1d4ed8; font-weight: 600; text-decoration: none; transition: color .15s;
+        }
+        .reg-row a:hover { color: #2563eb; }
+
+        /* Demo hint */
+        .demo-hint {
+            margin-top: 20px;
+            background: #f8faff;
+            border: 1px solid #fde68a;
+            border-radius: 10px;
+            padding: 11px 14px;
+            display: flex; align-items: flex-start; gap: 9px;
+        }
+        .demo-hint i { color: var(--ac); font-size: 15px; margin-top: 1px; flex-shrink: 0; }
+        .demo-hint p { margin: 0; font-size: 12.5px; color: #92400e; line-height: 1.6; }
+        .demo-hint p strong { display: block; color: #78350f; margin-bottom: 1px; font-size: 13px; }
+        .demo-hint code { background: rgba(245,158,11,.15); padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+
+        /* Animations */
+        @keyframes fadeUp {
+            from { opacity:0; transform: translateY(14px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+
+        @media (max-width: 860px) {
+            .left-panel { display: none; }
+            .right-panel { width: 100%; padding: 32px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="left-panel">
+    <div class="panel-content">
+        <div class="brand">
+            <div class="brand-icon"><i class="bi bi-book-half"></i></div>
+            <span class="brand-name">LibManage</span>
+        </div>
+
+        <span class="hero-eyebrow">Hệ thống thư viện</span>
+        <h1 class="hero-title">
+            Quản lý thư viện<br><em>thông minh hơn.</em>
+        </h1>
+        <p class="hero-desc">
+            Nền tảng toàn diện dành cho thư viện đại học —
+            sách, bạn đọc, mượn trả và báo cáo trong một hệ thống duy nhất.
+        </p>
+
+        <div class="feature-grid">
+            <div class="feat-card">
+                <div class="feat-ic fi-am"><i class="bi bi-journal-bookmark-fill"></i></div>
+                <div class="feat-txt">
+                    <strong>Kho sách thông minh</strong>
+                    <span>Quản lý tồn kho, ISBN, bản sao theo thời gian thực</span>
+                </div>
+            </div>
+            <div class="feat-card">
+                <div class="feat-ic fi-bl"><i class="bi bi-arrow-left-right"></i></div>
+                <div class="feat-txt">
+                    <strong>Mượn / Trả tự động</strong>
+                    <span>Tính phạt quá hạn, phí cọc, hoàn tiền tự động</span>
+                </div>
+            </div>
+            <div class="feat-card">
+                <div class="feat-ic fi-gr"><i class="bi bi-bar-chart-line-fill"></i></div>
+                <div class="feat-txt">
+                    <strong>Thống kê & Báo cáo</strong>
+                    <span>Doanh thu, tồn kho, hoạt động theo biểu đồ</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-footer">
+        &copy; 2026 LibManage · ĐH Kinh tế Nghệ An
+    </div>
+</div>
+
+<div class="right-panel">
+    <div class="form-wrap">
+
+        <span class="form-eyebrow">Chào mừng trở lại</span>
+        <h2 class="form-title">Đăng nhập</h2>
+        <p class="form-sub">Nhập tài khoản của bạn để truy cập hệ thống</p>
+
+        <div th:if="${error}" class="lib-alert lib-alert-err">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            <span th:text="${error}">Tên đăng nhập hoặc mật khẩu không đúng!</span>
+        </div>
+        <div th:if="${success}" class="lib-alert lib-alert-ok">
+            <i class="bi bi-check-circle-fill"></i>
+            <span th:text="${success}"></span>
+        </div>
+
+        <form th:action="@{/login}" method="post" autocomplete="on">
+
+            <div class="fg">
+                <label>Tên đăng nhập</label>
+                <div class="input-wrap">
+                    <input type="text" name="username"
+                           placeholder="Nhập username..."
+                           required autofocus autocomplete="username">
+                    <i class="bi bi-person ico"></i>
+                </div>
+            </div>
+
+            <div class="fg">
+                <label>Mật khẩu</label>
+                <div class="input-wrap">
+                    <input type="password" id="pw" name="password"
+                           placeholder="••••••••"
+                           required autocomplete="current-password">
+                    <i class="bi bi-lock ico"></i>
+                    <button type="button" class="pw-tog" id="pwTog">
+                        <i class="bi bi-eye-slash" id="pwIco"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="opt-row">
+                <label class="chk-wrap">
+                    <input type="checkbox" name="remember-me">
+                    <span>Ghi nhớ đăng nhập</span>
+                </label>
+                <a href="#" class="forgot">Quên mật khẩu?</a>
+            </div>
+
+            <button type="submit" class="btn-login">
+                Đăng nhập
+                <i class="bi bi-arrow-right arr"></i>
+            </button>
+        </form>
+
+        <div class="divider"><span>hoặc</span></div>
+
+        <div class="reg-row">
+            Chưa có tài khoản? <a th:href="@{/register}">Đăng ký ngay</a>
+        </div>
+
+    </div>
+</div>
+
+<script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script>
+    document.getElementById('pwTog').addEventListener('click', function() {
+        const pw  = document.getElementById('pw');
+        const ico = document.getElementById('pwIco');
+        const s   = pw.type === 'password';
+        pw.type      = s ? 'text' : 'password';
+        ico.className = s ? 'bi bi-eye' : 'bi bi-eye-slash';
+    });
+</script>
+</body>
+</html>

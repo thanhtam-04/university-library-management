@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin_layout}"
+      lang="vi">
+<head>
+    <title>Chỉnh sửa Phiếu Mượn</title>
+    <th:block layout:fragment="css">
+        <style>
+            /* Style dàn ngang đồng bộ trang Sách */
+            .form-card { background:#fff; border-radius:15px; padding:30px; box-shadow:0 5px 20px rgba(0,0,0,0.03); border:none; }
+            
+            .section-title { 
+                font-size: 16px; font-weight: 700; color: #4154f1; 
+                margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #f6f9ff;
+                display: flex; align-items: center; gap: 10px;
+            }
+
+            .form-label { font-weight: 600; color: #012970; margin-bottom: 8px; font-size: 14px; }
+            
+            .form-control, .form-select { 
+                border-radius: 10px; padding: 12px 15px; border: 1px solid #ced4da; 
+                font-size: 14px; transition: all 0.2s; 
+            }
+            .form-control:focus, .form-select:focus { 
+                border-color: #4154f1; box-shadow: 0 0 0 4px rgba(65, 84, 241, 0.1); 
+            }
+
+            /* Info box (vùng thông tin cố định) */
+            .info-box { background:#f8fafc; border:1px solid #eef2f7; border-radius:12px; padding:20px; }
+            .info-row { display:flex; align-items:center; gap:10px; font-size:14.5px; color:#475569; margin-bottom:10px; }
+            .info-row:last-child { margin-bottom:0; }
+            .info-row i { color:#4154f1; font-size: 16px; width:20px; }
+            .info-label { font-weight:700; color:#012970; min-width:130px; }
+
+            /* Bảng chi tiết sách */
+            .item-table-container { border: 1px solid #f1f5f9; border-radius: 12px; overflow: hidden; background: #fff; }
+            .item-table { width:100%; border-collapse:collapse; }
+            .item-table th { background:#fcfdfe; padding:15px; font-size:12px; font-weight:700; text-transform:uppercase; color:#64748b; border-bottom:1px solid #f1f5f9; }
+            .item-table td { padding:15px; border-bottom:1px solid #f1f5f9; vertical-align:middle; font-size:14px; }
+            .item-table tr:last-child td { border-bottom:none; }
+            
+            .returned-yes { color:#16a34a; font-weight:700; display: flex; align-items: center; gap: 5px; }
+            .returned-no  { color:#dc2626; font-weight:700; display: flex; align-items: center; gap: 5px; }
+
+            /* Nút bấm chuẩn Blue */
+            .btn-save { 
+                background: #4154f1; color: #fff; border: none; padding: 12px 30px; 
+                border-radius: 10px; font-weight: 600; transition: all 0.3s;
+            }
+            .btn-save:hover { background: #2f43e0; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(65, 84, 241, 0.3); color: #fff; }
+            .btn-back { background: #f8f9fa; color: #6c757d; border-radius: 10px; padding: 12px 20px; font-weight: 600; text-decoration: none; }
+        </style>
+    </th:block>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="pagetitle">
+        <h1 style="color: #012970; font-weight: 700;">Chỉnh Sửa Phiếu Mượn</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/loan/list}">Mượn / Trả sách</a></li>
+                <li class="breadcrumb-item active">Cập nhật</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section">
+        <!-- Thông báo dàn ngang -->
+        <div th:if="${successMsg}" class="alert alert-success alert-dismissible fade show mb-4">
+            <i class="bi bi-check-circle me-1"></i> <span th:text="${successMsg}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <form th:action="@{/admin/loan/update}" th:object="${loan}" method="post">
+            <input type="hidden" th:field="*{id}">
+
+            <div class="form-card">
+                <!-- 1. Thông tin phiếu (Cố định) -->
+                <div class="section-title">
+                    <i class="bi bi-info-square-fill"></i> Thông tin phiếu gốc
+                </div>
+                <div class="info-box mb-4">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="info-row">
+                                <i class="bi bi-hash"></i>
+                                <span class="info-label">Mã phiếu:</span>
+                                <span th:text="${loan.loanCode}" style="font-family:monospace; font-weight:700; color:#4154f1;"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="info-row">
+                                <i class="bi bi-person-fill"></i>
+                                <span class="info-label">Thành viên:</span>
+                                <span th:text="${loan.member.user != null ? loan.member.user.fullName : '—'}"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="info-row">
+                                <i class="bi bi-calendar-event-fill"></i>
+                                <span class="info-label">Ngày mượn:</span>
+                                <span th:text="${#temporals.format(loan.loanDate,'dd/MM/yyyy HH:mm')}"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Thông tin chỉnh sửa (Dàn ngang) -->
+                <div class="section-title">
+                    <i class="bi bi-pencil-square"></i> Cấu hình chỉnh sửa
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <label class="form-label">Hạn trả mới <span class="text-danger">*</span></label>
+                        <input type="date" th:field="*{dueDate}" class="form-control" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Trạng thái phiếu</label>
+                        <select th:field="*{status}" class="form-select">
+                            <option value="ACTIVE">Đang mượn (Active)</option>
+                            <option value="OVERDUE">Quá hạn (Overdue)</option>
+                            <option value="RETURNED">Đã hoàn tất (Returned)</option>
+                            <option value="LOST">Mất sách (Lost)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Tiền cọc (VNĐ)</label>
+                        <input type="number" th:field="*{depositPaid}" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Tiền hoàn trả (VNĐ)</label>
+                        <input type="number" th:field="*{depositRefunded}" class="form-control">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Ghi chú nội bộ</label>
+                        <textarea th:field="*{note}" class="form-control" rows="2" placeholder="Lý do chỉnh sửa hoặc tình trạng phiếu..."></textarea>
+                    </div>
+                </div>
+
+                <!-- 3. Chi tiết sách (Dàn ngang bảng) -->
+                <div class="section-title">
+                    <i class="bi bi-journal-bookmark-fill"></i> Danh sách sách đang mượn
+                </div>
+                <div class="item-table-container mb-5">
+                    <table class="item-table">
+                        <thead>
+                            <tr>
+                                <th>Mã Barcode</th>
+                                <th>Tên đầu sách</th>
+                                <th class="text-center">Tình trạng</th>
+                                <th>Ngày xử lý trả</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="item : ${loan.items}">
+                                <td style="font-family:monospace; font-weight:700; color:#4154f1;" th:text="${item.bookCopy.barcode}"></td>
+                                <td th:text="${item.bookCopy.book != null ? item.bookCopy.book.title : '—'}"></td>
+                                <td class="text-center">
+                                    <span th:if="${item.returned}" class="returned-yes"><i class="bi bi-patch-check-fill"></i> Đã trả</span>
+                                    <span th:unless="${item.returned}" class="returned-no"><i class="bi bi-clock-history"></i> Đang giữ</span>
+                                </td>
+                                <td th:text="${item.returnDate != null ? #temporals.format(item.returnDate,'dd/MM/yyyy') : '—'}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Footer nút bấm chuẩn Sách -->
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                    <a th:href="@{/admin/loan/list}" class="btn-back">
+                        <i class="bi bi-arrow-left"></i> Quay lại
+                    </a>
+                    <button type="submit" class="btn-save">
+                        <i class="bi bi-cloud-check-fill"></i> Xác nhận cập nhật
+                    </button>
+                </div>
+            </div>
+        </form>
+    </section>
+</div>
+</body>
+</html>

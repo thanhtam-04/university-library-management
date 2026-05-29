@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Đăng ký – LibManage</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+    <link th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.css}" rel="stylesheet">
+    <style>
+        :root {
+            /* ══ ĐỒNG BỘ BẢNG MÀU GIAO DIỆN (NAVY & GOLD) ══ */
+            --ac:      #fbbf24;        /* Vàng Gold chuẩn thương hiệu */
+            --ac-dk:   #f59e0b;        /* Vàng đậm khi hover */
+            --ac-bg:   rgba(251,191,36,.10);
+            --ac-glow: 0 6px 24px rgba(251,191,36,.25);
+            
+            --page:    #f8faff;        /* Nền xanh nhạt dịu mát */
+            --card:    #ffffff;
+            --panel:   #0f2057;        /* Xanh Navy sẫm */
+            --bdr:     #e2e8f5;        /* Viền border đồng điệu */
+            
+            --t1:      #0c1b3a;        /* Chữ Navy chính */
+            --t2:      #475569;        /* Chữ Slate phụ */
+            --t3:      #94a3b8;        /* Chữ mờ Placeholder */
+            
+            --cg:  #10b981; --cg-bg: rgba(16,185,129,.10);
+            --cr:  #ef4444; --cr-bg: rgba(239,68,68,.10);
+            --cb:  #2563eb; --cb-bg: rgba(37,99,235,.08); /* Chuyển sang xanh dương của nút bấm chính */
+            
+            --fh: 'Bricolage Grotesque', sans-serif;
+            --fb: 'DM Sans', sans-serif;
+            --ease: cubic-bezier(.4,0,.2,1);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--fb);
+            background: var(--page);
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 36px 20px 52px;
+            -webkit-font-smoothing: antialiased;
+            position: relative;
+        }
+
+        /* Warm background blobs */
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: 0;
+            background:
+                radial-gradient(ellipse 65% 45% at 5% 10%, rgba(251,191,36,.05) 0%, transparent 55%),
+                radial-gradient(ellipse 55% 40% at 95% 90%, rgba(37,99,235,.04) 0%, transparent 50%),
+                radial-gradient(ellipse 40% 30% at 50% 50%, rgba(251,191,36,.02) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        /* ── PAGE WRAPPER ── */
+        .page-wrap {
+            position: relative; z-index: 1;
+            width: 100%; max-width: 640px;
+            animation: slideUp .45s var(--ease) both;
+        }
+        @keyframes slideUp {
+            from { opacity:0; transform: translateY(20px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+
+        /* ── TOP NAV ── */
+        .top-nav {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 28px;
+        }
+        .brand {
+            display: flex; align-items: center; gap: 11px; text-decoration: none;
+        }
+        .brand-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: linear-gradient(135deg, var(--ac), #f59e0b);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--ac-glow); flex-shrink: 0;
+        }
+        .brand-icon i { color: #0f2057; font-size: 18px; } /* Đổi màu icon thành Navy sẫm trên nền vàng */
+        .brand-name {
+            font-family: var(--fh); font-size: 18px; font-weight: 800;
+            color: var(--t1); letter-spacing: -.3px;
+        }
+        .back-link {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 13.5px; color: #1d4ed8; text-decoration: none; /* Màu link đồng bộ .btn-outline */
+            padding: 7px 14px; border-radius: 8px;
+            border: 1px solid #93c5fd; background: var(--card);
+            transition: all .15s var(--ease);
+            box-shadow: 0 1px 3px rgba(14,30,80,.03);
+            font-weight: 600;
+        }
+        .back-link:hover { border-color: #2563eb; background: #eff6ff; color: #1d4ed8; }
+
+        /* ── CARD ── */
+        .reg-card {
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 20px;
+            padding: 40px 40px 36px;
+            box-shadow:
+                0 4px 6px rgba(14,30,80,.02),
+                0 20px 48px rgba(14,30,80,.06);
+        }
+
+        /* ── PROGRESS STEPS ── */
+        .steps {
+            display: flex; align-items: center; margin-bottom: 32px;
+        }
+        .step { display: flex; align-items: center; gap: 8px; }
+        .step-num {
+            width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 700; font-family: var(--fh);
+            transition: all .2s var(--ease);
+        }
+        .step.done   .step-num { background: var(--cg); color: #fff; }
+        .step.active .step-num { background: #2563eb; color: #fff; box-shadow: 0 0 0 4px rgba(37,99,235,.15); } /* Đổi active step thành màu xanh chủ đạo */
+        .step.idle   .step-num { background: #e2e8f5; color: var(--t3); }
+        .step-lbl { font-size: 12.5px; font-weight: 500; }
+        .step.done   .step-lbl { color: var(--cg); }
+        .step.active .step-lbl { color: #2563eb; font-weight: 600; }
+        .step.idle   .step-lbl { color: var(--t3); }
+        .step-line {
+            flex: 1; height: 1.5px; margin: 0 10px;
+            background: #e2e8f5;
+        }
+        .step-line.done { background: var(--cg); opacity: .5; }
+
+        /* ── CARD HEADER ── */
+        .card-eyebrow {
+            font-size: 11px; font-weight: 700; letter-spacing: 1.6px;
+            text-transform: uppercase; color: #1d4ed8; /* Đổi màu chữ nhỏ dẫn nhập thành xanh dương */
+            margin-bottom: 7px; display: block;
+        }
+        .card-title {
+            font-family: var(--fh); font-size: 26px; font-weight: 800;
+            color: var(--t1); letter-spacing: -.5px; margin-bottom: 4px;
+        }
+        .card-sub { font-size: 13.5px; color: var(--t2); margin-bottom: 28px; line-height: 1.5; }
+
+        /* ── ALERT ── */
+        .lib-alert {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 12px 14px; border-radius: 10px;
+            font-size: 13px; margin-bottom: 20px;
+            border: 1px solid transparent;
+        }
+        .lib-alert i { flex-shrink: 0; margin-top: 1px; }
+        .lib-alert-err { background: var(--cr-bg); color: #b91c1c; border-color: rgba(239,68,68,.2); }
+        .lib-alert-ok  { background: var(--cg-bg); color: #065f46; border-color: rgba(16,185,129,.2); }
+
+        /* ── SECTION DIVIDER ── */
+        .sec-hd {
+            display: flex; align-items: center; gap: 10px;
+            margin: 22px 0 16px;
+            font-size: 11px; font-weight: 700;
+            letter-spacing: 1px; text-transform: uppercase;
+            color: var(--t3);
+        }
+        .sec-hd::before {
+            content: ''; width: 3px; height: 14px;
+            border-radius: 2px; background: #2563eb; flex-shrink: 0; /* Đầu vạch phân mục đổi thành xanh dương */
+        }
+        .sec-hd::after {
+            content: ''; flex: 1; height: 1px; background: var(--bdr);
+        }
+
+        /* ── FORM GRID ── */
+        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .row-1 { display: grid; grid-template-columns: 1fr; gap: 14px; }
+        .mb-14 { margin-bottom: 14px; }
+
+        .fg label {
+            display: block; font-size: 12px; font-weight: 600;
+            color: var(--t2); margin-bottom: 6px; letter-spacing: .2px;
+        }
+        .fg label .req { color: #ef4444; } /* Dấu sao bắt buộc giữ màu đỏ cảnh báo chuẩn form */
+
+        .input-wrap { position: relative; }
+        .input-wrap .ico {
+            position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+            color: var(--t3); font-size: 15px; pointer-events: none;
+            transition: color .18s var(--ease);
+        }
+        .input-wrap input,
+        .input-wrap select {
+            width: 100%;
+            background: #fff;
+            border: 1.5px solid var(--bdr);
+            border-radius: 10px;
+            padding: 11px 13px 11px 40px;
+            font-family: var(--fb); font-size: 13.5px;
+            color: var(--t1); outline: none;
+            transition: all .18s var(--ease);
+            appearance: none;
+            box-shadow: 0 1px 2px rgba(14,30,80,.02);
+        }
+        .input-wrap input::placeholder { color: var(--t3); }
+        .input-wrap select option { background: #fff; }
+        .input-wrap input:focus,
+        .input-wrap select:focus {
+            border-color: #2563eb;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+        }
+        .input-wrap:focus-within .ico { color: #2563eb; }
+
+        /* Password toggle */
+        .pw-tog {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; cursor: pointer; padding: 0;
+            color: var(--t3); font-size: 15px; transition: color .14s;
+        }
+        .pw-tog:hover { color: var(--t2); }
+
+        /* Hint text */
+        .hint { font-size: 11.5px; color: var(--t3); margin-top: 5px; display: block; }
+        .hint.ok  { color: var(--cg); }
+        .hint.err { color: var(--cr); }
+
+        /* Password strength */
+        .pw-str {
+            margin-top: 7px;
+            display: flex; align-items: center; gap: 7px;
+        }
+        .pw-bars { display: flex; gap: 3px; flex: 1; }
+        .pw-bar {
+            flex: 1; height: 3px; border-radius: 3px;
+            background: #e2e8f5; transition: background .2s var(--ease);
+        }
+        .pw-bar.lv1 { background: var(--cr); }
+        .pw-bar.lv2 { background: #fb923c; }
+        .pw-bar.lv3 { background: #f59e0b; }
+        .pw-bar.lv4 { background: var(--cg); }
+        .pw-str-lbl { font-size: 11px; color: var(--t3); min-width: 46px; text-align: right; }
+
+        /* Terms */
+        .terms {
+            display: flex; align-items: flex-start; gap: 10px;
+            margin: 20px 0 18px;
+            padding: 14px 16px;
+            background: #eff6ff; border: 1px solid #93c5fd; /* Đổi màu hộp điều khoản sang tông xanh nhạt dịu mắt khớp digital page */
+            border-radius: 10px;
+        }
+        .terms input[type=checkbox] {
+            width: 16px; height: 16px; margin-top: 2px;
+            accent-color: #2563eb; cursor: pointer; flex-shrink: 0;
+        }
+        .terms p { font-size: 13px; color: #1e40af; line-height: 1.55; margin: 0; }
+        .terms a { color: #1d4ed8; font-weight: 600; text-decoration: none; }
+        .terms a:hover { text-decoration: underline; color: #2563eb; }
+
+        /* Submit */
+        .btn-reg {
+            width: 100%;
+            background: linear-gradient(135deg, #1d4ed8, #2563eb); color: #fff; /* Chuyển thành nút xanh dương đồng bộ nút Đăng nhập */
+            border: none; border-radius: 11px; padding: 13.5px;
+            font-family: var(--fh); font-size: 15px; font-weight: 700;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 0 4px 16px rgba(37,99,235,.30);
+            transition: all .2s var(--ease); letter-spacing: -.1px;
+        }
+        .btn-reg:hover {
+            background: linear-gradient(135deg, #1e40af, #1d4ed8); transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(37,99,235,.38);
+        }
+        .btn-reg:active { transform: translateY(0); }
+        .btn-reg .arr { transition: transform .2s var(--ease); }
+        .btn-reg:hover .arr { transform: translateX(5px); }
+        .btn-reg:disabled { opacity: .45; cursor: not-allowed; transform: none !important; box-shadow: none; }
+
+        /* Login row */
+        .login-row {
+            text-align: center; margin-top: 18px;
+            font-size: 13.5px; color: var(--t2);
+        }
+        .login-row a {
+            color: #1d4ed8; font-weight: 600; text-decoration: none; transition: color .14s;
+        }
+        .login-row a:hover { color: #2563eb; }
+
+        /* Info banner */
+        .info-banner {
+            display: flex; align-items: center; gap: 10px;
+            margin-top: 20px;
+            background: var(--cb-bg); border: 1px solid rgba(37,99,235,.2);
+            border-radius: 10px; padding: 11px 14px;
+            font-size: 12.5px; color: #1e40af;
+        }
+        .info-banner i { font-size: 16px; flex-shrink: 0; color: #2563eb; }
+
+        @media (max-width: 580px) {
+            .reg-card { padding: 28px 20px 24px; }
+            .row-2 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-wrap">
+
+    <div class="top-nav">
+        <a th:href="@{/admin/dashboard}" class="brand">
+            <div class="brand-icon"><i class="bi bi-book-half"></i></div>
+            <span class="brand-name">LibManage</span>
+        </a>
+        <a th:href="@{/login}" class="back-link">
+            <i class="bi bi-arrow-left"></i> Về đăng nhập
+        </a>
+    </div>
+
+    <div class="reg-card">
+
+        <div class="steps">
+            <div class="step active">
+                <div class="step-num">1</div>
+                <span class="step-lbl">Tài khoản</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step idle">
+                <div class="step-num">2</div>
+                <span class="step-lbl">Thông tin SV</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step idle">
+                <div class="step-num">3</div>
+                <span class="step-lbl">Hoàn tất</span>
+            </div>
+        </div>
+
+        <span class="card-eyebrow">Tạo tài khoản mới</span>
+        <h2 class="card-title">Đăng ký</h2>
+        <p class="card-sub">Điền thông tin để tạo tài khoản thư viện của bạn</p>
+
+        <div th:if="${error}" class="lib-alert lib-alert-err">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            <span th:text="${error}"></span>
+        </div>
+        <div th:if="${success}" class="lib-alert lib-alert-ok">
+            <i class="bi bi-check-circle-fill"></i>
+            <span th:text="${success}"></span>
+        </div>
+
+        <form th:action="@{/register}" method="post" th:object="${userRequest}" id="regForm" novalidate>
+
+            <div class="sec-hd">Thông tin đăng nhập</div>
+
+            <div class="row-2 mb-14">
+                <div class="fg">
+                    <label>Tên đăng nhập <span class="req">*</span></label>
+                    <div class="input-wrap">
+                        <input type="text" id="uname" th:field="*{username}"
+                               placeholder="vd: nguyenvana"
+                               required pattern="[a-zA-Z0-9_]{4,20}"
+                               autocomplete="username">
+                        <i class="bi bi-at ico"></i>
+                    </div>
+                    <span class="hint" id="unameHint">4–20 ký tự, không dấu</span>
+                </div>
+                <div class="fg">
+                    <label>Họ và tên <span class="req">*</span></label>
+                    <div class="input-wrap">
+                        <input type="text" th:field="*{fullName}"
+                               placeholder="Nguyễn Văn A" required>
+                        <i class="bi bi-person ico"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row-1 mb-14">
+                <div class="fg">
+                    <label>Địa chỉ Email <span class="req">*</span></label>
+                    <div class="input-wrap">
+                        <input type="email" th:field="*{email}"
+                               placeholder="ten@email.com" required autocomplete="email">
+                        <i class="bi bi-envelope ico"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sec-hd">Bảo mật</div>
+
+            <div class="row-2 mb-14">
+                <div class="fg">
+                    <label>Mật khẩu <span class="req">*</span></label>
+                    <div class="input-wrap">
+                        <input type="password" id="pwInput" th:field="*{password}"
+                               placeholder="Tối thiểu 8 ký tự"
+                               required minlength="8" autocomplete="new-password">
+                        <i class="bi bi-lock ico"></i>
+                        <button type="button" class="pw-tog" id="pwTog">
+                            <i class="bi bi-eye-slash" id="pwIco"></i>
+                        </button>
+                    </div>
+                    <div class="pw-str">
+                        <div class="pw-bars">
+                            <div class="pw-bar" id="b1"></div>
+                            <div class="pw-bar" id="b2"></div>
+                            <div class="pw-bar" id="b3"></div>
+                            <div class="pw-bar" id="b4"></div>
+                        </div>
+                        <span class="pw-str-lbl" id="pwLbl"></span>
+                    </div>
+                </div>
+                <div class="fg">
+                    <label>Số điện thoại</label>
+                    <div class="input-wrap">
+                        <input type="text" th:field="*{phone}"
+                               placeholder="0912 345 678">
+                        <i class="bi bi-telephone ico"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="terms">
+                <input type="checkbox" id="terms" required>
+                <p>
+                    Tôi đã đọc và đồng ý với <a href="#">Điều khoản sử dụng</a>
+                    và <a href="#">Chính sách bảo mật</a> của thư viện.
+                    Tài khoản sẽ được xét duyệt bởi thủ thư.
+                </p>
+            </div>
+
+            <button type="submit" class="btn-reg" id="submitBtn">
+                Tạo tài khoản
+                <i class="bi bi-arrow-right arr"></i>
+            </button>
+
+        </form>
+
+        <div class="login-row">
+            Đã có tài khoản? <a th:href="@{/login}">Đăng nhập ngay</a>
+        </div>
+
+        <div class="info-banner">
+            <i class="bi bi-shield-check"></i>
+            <span>Tài khoản sinh viên cần được <strong>thủ thư phê duyệt</strong> trước khi mượn sách.</span>
+        </div>
+
+    </div>
+</div>
+
+<script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script>
+    // Password show/hide
+    document.getElementById('pwTog').addEventListener('click', function() {
+        const pw  = document.getElementById('pwInput');
+        const ico = document.getElementById('pwIco');
+        const s   = pw.type === 'password';
+        pw.type       = s ? 'text' : 'password';
+        ico.className = s ? 'bi bi-eye' : 'bi bi-eye-slash';
+    });
+
+    // Password strength
+    const bars = [1,2,3,4].map(n => document.getElementById('b'+n));
+    const lbl  = document.getElementById('pwLbl');
+    const lvls = [
+        { label:'Yếu',       cls:'lv1', n:1, color:'#ef4444' },
+        { label:'Trung bình',cls:'lv2', n:2, color:'#fb923c' },
+        { label:'Khá mạnh',  cls:'lv3', n:3, color:'#f59e0b' },
+        { label:'Mạnh',      cls:'lv4', n:4, color:'#10b981' },
+    ];
+    function strength(v) {
+        let s=0;
+        if(v.length>=8)         s++;
+        if(/[A-Z]/.test(v))     s++;
+        if(/[0-9]/.test(v))     s++;
+        if(/[^A-Za-z0-9]/.test(v)) s++;
+        return s;
+    }
+    document.getElementById('pwInput').addEventListener('input', function() {
+        const v = this.value;
+        if (!v) { bars.forEach(b=>b.className='pw-bar'); lbl.textContent=''; return; }
+        const l = lvls[Math.max(0, Math.min(strength(v)-1, 3))];
+        bars.forEach((b,i) => b.className = i < l.n ? `pw-bar ${l.cls}` : 'pw-bar');
+        lbl.textContent = l.label; lbl.style.color = l.color;
+    });
+
+    // Username validation
+    document.getElementById('uname').addEventListener('input', function() {
+        const h  = document.getElementById('unameHint');
+        const ok = /^[a-zA-Z0-9_]{4,20}$/.test(this.value);
+        if (!this.value) {
+            h.textContent='4–20 ký tự, không dấu'; h.className='hint';
+        } else if(ok) {
+            h.textContent='✓ Tên đăng nhập hợp lệ'; h.className='hint ok';
+        } else {
+            h.textContent='✗ Chỉ chữ cái, số, dấu _ (4–20 ký tự)'; h.className='hint err';
+        }
+    });
+</script>
+</body>
+</html>

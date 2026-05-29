@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="styles">
+    <!-- Google Fonts: Playfair Display + DM Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        // Bảng màu chính: Xanh dương đậm + Trắng
+                        navy:    { 50:'#eff6ff', 100:'#dbeafe', 200:'#bfdbfe', 300:'#93c5fd', 400:'#60a5fa', 500:'#3b82f6', 600:'#2563eb', 700:'#1d4ed8', 800:'#1e3a8a', 900:'#1e3a8a', 950:'#0f2057' },
+                        gold:    { 400:'#fbbf24', 500:'#f59e0b', 600:'#d97706' },
+                        ink:     '#0c1b3a',
+                        'ink-2': '#1a2f5a',
+                    },
+                    fontFamily: {
+                        display: ['"Playfair Display"', 'serif'],
+                        body:    ['"DM Sans"', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card':  '0 4px 6px -1px rgba(14,30,80,0.06), 0 2px 4px -1px rgba(14,30,80,0.04)',
+                        'card-hover': '0 20px 40px -8px rgba(14,30,80,0.14), 0 8px 16px -4px rgba(14,30,80,0.08)',
+                        'nav':   '0 1px 0 0 rgba(30,58,138,0.08)',
+                    },
+                    animation: {
+                        'fade-up':   'fadeUp .6s ease both',
+                        'fade-in':   'fadeIn .5s ease both',
+                        'slide-right':'slideRight .5s ease both',
+                    },
+                    keyframes: {
+                        fadeUp:     { from:{opacity:'0',transform:'translateY(20px)'}, to:{opacity:'1',transform:'none'} },
+                        fadeIn:     { from:{opacity:'0'}, to:{opacity:'1'} },
+                        slideRight: { from:{opacity:'0',transform:'translateX(-20px)'}, to:{opacity:'1',transform:'none'} },
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- CSS tùy chỉnh bổ sung -->
+    <style>
+        /* ── Base ── */
+        *, *::before, *::after { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #f8faff;
+            color: #0c1b3a;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── CSS Variables ── */
+        :root {
+            --navy-950: #0f2057;
+            --navy-900: #1e3a8a;
+            --navy-800: #1e40af;
+            --navy-600: #2563eb;
+            --gold:     #f59e0b;
+            --gold-lt:  #fef3c7;
+            --white:    #ffffff;
+            --bg:       #f8faff;
+            --bdr:      #e2e8f5;
+            --t1:       #0c1b3a;
+            --t2:       #3d4f72;
+            --t3:       #7c8db5;
+            --ease:     cubic-bezier(.4,0,.2,1);
+        }
+
+        /* ── Typography ── */
+        .font-display { font-family: 'Playfair Display', serif; }
+
+        /* ── Gradient text ── */
+        .text-gradient {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #0ea5e9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ── Buttons ── */
+        .btn-primary {
+            background: linear-gradient(135deg, #1d4ed8, #2563eb);
+            color: #fff;
+            padding: .75rem 1.75rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: .9375rem;
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            border: none;
+            cursor: pointer;
+            transition: all .22s var(--ease);
+            box-shadow: 0 4px 16px rgba(37,99,235,.30);
+            text-decoration: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1e40af, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(37,99,235,.38);
+            color: #fff;
+        }
+        .btn-outline {
+            background: transparent;
+            color: #1d4ed8;
+            border: 1.5px solid #93c5fd;
+            padding: .7rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: .9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            cursor: pointer;
+            transition: all .2s var(--ease);
+            text-decoration: none;
+        }
+        .btn-outline:hover {
+            background: #eff6ff;
+            border-color: #2563eb;
+            color: #1d4ed8;
+        }
+
+        /* ── Cards ── */
+        .book-card {
+            background: #fff;
+            border: 1px solid var(--bdr);
+            border-radius: 14px;
+            overflow: hidden;
+            transition: all .25s var(--ease);
+            box-shadow: 0 2px 8px rgba(14,30,80,.05);
+        }
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(14,30,80,.12);
+            border-color: #93c5fd;
+        }
+        .book-card:hover .book-cover-img {
+            transform: scale(1.04);
+        }
+        .book-cover-img {
+            transition: transform .35s var(--ease);
+        }
+
+        /* ── Section headings ── */
+        .section-eyebrow {
+            font-size: .75rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #2563eb;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+        .section-eyebrow::before {
+            content: '';
+            width: 20px; height: 2px;
+            background: #2563eb;
+            border-radius: 2px;
+        }
+
+        /* ── Input focus ring ── */
+        input:focus, select:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+        }
+
+        /* ── Badge trạng thái ── */
+        .badge-available {
+            background: #dcfce7;
+            color: #15803d;
+            font-size: .7rem;
+            font-weight: 700;
+            padding: 2px 9px;
+            border-radius: 20px;
+            letter-spacing: .3px;
+        }
+        .badge-unavailable {
+            background: #fee2e2;
+            color: #b91c1c;
+            font-size: .7rem;
+            font-weight: 700;
+            padding: 2px 9px;
+            border-radius: 20px;
+            letter-spacing: .3px;
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #bfdbfe; border-radius: 6px; }
+        ::-webkit-scrollbar-thumb:hover { background: #93c5fd; }
+
+        /* ── Animation delays ── */
+        .delay-100 { animation-delay: .1s; }
+        .delay-200 { animation-delay: .2s; }
+        .delay-300 { animation-delay: .3s; }
+        .delay-400 { animation-delay: .4s; }
+        .delay-500 { animation-delay: .5s; }
+
+        /* ── Hero wave ── */
+        .hero-wave {
+            position: absolute;
+            bottom: -2px; left: 0; right: 0;
+        }
+
+        /* ── Glassmorphism ── */
+        .glass {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        /* ── Notification item ── */
+        .notif-item {
+            padding: 12px 16px;
+            border-left: 3px solid transparent;
+            border-radius: 0 8px 8px 0;
+            transition: all .15s var(--ease);
+        }
+        .notif-item:hover {
+            background: #eff6ff;
+            border-left-color: #2563eb;
+        }
+
+        /* ── Tag ── */
+        .tag {
+            display: inline-block;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: .7rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin_layout}"
+      lang="vi">
+<head>
+    <title>Chỉnh sửa Nhà Xuất Bản</title>
+    <th:block layout:fragment="css">
+        <style>
+            .form-card { 
+                background: #fff; border-radius: 15px; padding: 30px; 
+                box-shadow: 0 5px 20px rgba(0,0,0,0.03); border: none; 
+            }
+            .form-label { 
+                font-weight: 600; color: #012970; 
+                margin-bottom: 8px; font-size: 14px; 
+            }
+            .form-control { 
+                border-radius: 10px; padding: 12px 15px; border: 1px solid #ced4da; 
+                font-size: 14px; transition: all 0.2s; 
+            }
+            .form-control:focus { 
+                border-color: #4154f1; box-shadow: 0 0 0 4px rgba(65, 84, 241, 0.1); 
+            }
+            .section-title { 
+                font-size: 16px; font-weight: 700; color: #4154f1; 
+                margin-bottom: 25px; padding-bottom: 10px; border-bottom: 2px solid #f6f9ff;
+                display: flex; align-items: center; gap: 10px;
+            }
+            .btn-save { 
+                background: #4154f1; color: #fff; border: none; padding: 12px 30px; 
+                border-radius: 10px; font-weight: 600; transition: all 0.3s;
+            }
+            .btn-save:hover { 
+                background: #2f43e0; transform: translateY(-2px); 
+                box-shadow: 0 5px 15px rgba(65, 84, 241, 0.3); color: #fff; 
+            }
+            .btn-back { 
+                background: #f8f9fa; color: #6c757d; border-radius: 10px; 
+                padding: 12px 20px; font-weight: 600; text-decoration: none; 
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="pagetitle">
+        <h1 style="color: #012970; font-weight: 700;">Chỉnh sửa Nhà Xuất Bản</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/publisher/list}">Nhà xuất bản</a></li>
+                <li class="breadcrumb-item active">Chỉnh sửa</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section">
+        <!-- th:object="${publisher}" khớp với model.addAttribute trong Controller -->
+        <form th:action="@{/admin/publisher/save}" th:object="${publisher}" method="post">
+            <!-- Luôn phải có ID ẩn để thực hiện UPDATE thay vì ADD NEW -->
+            <input type="hidden" th:field="*{id}">
+
+            <div class="form-card">
+                
+                <!-- PHẦN 1: THÔNG TIN ĐỐI TÁC -->
+                <div class="section-title">
+                    <i class="bi bi-building"></i> Thông tin đối tác
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-8">
+                        <label class="form-label">Tên nhà xuất bản <span class="text-danger">*</span></label>
+                        <input type="text" th:field="*{name}" class="form-control" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Mã NXB (ID)</label>
+                        <input type="text" th:value="${publisher.id}" class="form-control" readonly style="background-color: #f8fafc;">
+                    </div>
+                </div>
+
+                <!-- PHẦN 2: LIÊN HỆ & ĐỊA ĐIỂM -->
+                <div class="section-title">
+                    <i class="bi bi-geo-alt"></i> Liên hệ & Địa điểm
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">Địa chỉ trụ sở</label>
+                        <input type="text" th:field="*{address}" class="form-control">
+                    </div>
+                    <!-- Tách Phone và Email cho khớp với Entity Java của Nhi -->
+                    <div class="col-md-6">
+                        <label class="form-label">Số điện thoại</label>
+                        <input type="text" th:field="*{phone}" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Email liên hệ</label>
+                        <input type="email" th:field="*{email}" class="form-control">
+                    </div>
+                </div>
+
+                <!-- Nút bấm -->
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-4">
+                    <a th:href="@{/admin/publisher/list}" class="btn-back">
+                        <i class="bi bi-arrow-left"></i> Quay lại danh sách
+                    </a>
+                    <button type="submit" class="btn-save">
+                        <i class="bi bi-check-lg"></i> Cập nhật ngay
+                    </button>
+                </div>
+            </div>
+        </form>
+    </section>
+</div>
+</body>
+</html>

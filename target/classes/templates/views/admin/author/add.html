@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin_layout}"
+      lang="vi">
+<head>
+    <title>Thêm Tác Giả Mới</title>
+    <th:block layout:fragment="css">
+        <style>
+            /* Bộ CSS "Signature" giống hệt trang Sách và ảnh mẫu Nhi gửi */
+            .form-card {
+                background: #fff; border-radius: 12px; padding: 30px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: none;
+                max-width: 100%; margin: 20px auto;
+            }
+            .form-label { 
+                font-weight: 600; color: #2563eb; /* Màu xanh Blue của trang Sách */
+                margin-bottom: 8px; font-size: 14px; 
+            }
+            .form-control, .form-select { 
+                border-radius: 8px; padding: 10px 15px; border: 1px solid #e2e8f0; 
+                font-size: 14px; background-color: #fff;
+            }
+            .form-control:focus { border-color: #2563eb; box-shadow: none; }
+            
+            /* Nút bấm đồng bộ */
+            .btn-update { 
+                background: #3b82f6; color: #fff; border: none; padding: 10px 35px; 
+                border-radius: 8px; font-weight: 600; 
+            }
+            .btn-update:hover { background: #2563eb; color: #fff; }
+            .btn-cancel { 
+                background: #64748b; color: #fff; border: none; padding: 10px 25px; 
+                border-radius: 8px; font-weight: 500; text-decoration: none;
+            }
+            
+            .section-header-blue {
+                color: #2563eb; font-weight: 700; font-size: 16px;
+                margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="container-fluid">
+        <h2 style="color: #002d72; font-weight: 700; font-size: 22px; margin-bottom: 20px;">Thêm Tác Giả Mới</h2>
+        
+        <div class="form-card">
+            <form th:action="@{/admin/author/save}" th:object="${author}" method="post">
+                
+                <!-- Hàng 1: Thông tin cơ bản dàn ngang hết cỡ -->
+                <div class="section-header-blue">
+                    <i class="bi bi-person-vcard"></i> Thông tin cơ bản
+                </div>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-5">
+                        <label class="form-label">Họ và tên thật <span class="text-danger">*</span></label>
+                        <input type="text" th:field="*{fullName}" class="form-control" placeholder="Nguyễn Nhật Ánh" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Bút danh</label>
+                        <input type="text" th:field="*{pseudonym}" class="form-control" placeholder="VD: Chu Lai">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Quốc tịch</label>
+                        <input type="text" th:field="*{nationality}" class="form-control" placeholder="Việt Nam">
+                    </div>
+                </div>
+
+                <!-- Hàng 2: Tiểu sử (Dàn rộng như mô tả sách) -->
+                <div class="section-header-blue">
+                    <i class="bi bi-body-text"></i> Chi tiết tác giả
+                </div>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-12">
+                        <label class="form-label">Tiểu sử tóm tắt</label>
+                        <textarea th:field="*{bio}" class="form-control" rows="4" placeholder="Nhập tiểu sử tác giả tại đây..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Footer Buttons dàn sang 2 bên -->
+                <div class="d-flex justify-content-between align-items-center mt-5 pt-3 border-top">
+                    <a th:href="@{/admin/author/list}" class="btn-cancel">Hủy bỏ</a>
+                    <button type="submit" class="btn-update">Thêm tác giả ngay</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

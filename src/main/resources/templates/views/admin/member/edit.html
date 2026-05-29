@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin_layout}"
+      lang="vi">
+<head>
+    <title>Chỉnh sửa Thành viên</title>
+    <th:block layout:fragment="css">
+        <style>
+            /* Bỏ max-width để dàn ngang cực đại như trang Sách */
+            .form-card { background:#fff; border-radius:15px; padding:30px; box-shadow:0 5px 20px rgba(0,0,0,0.03); border:none; }
+            
+            /* Section title theo phong cách xanh Blue của Sách */
+            .section-title { 
+                font-size: 16px; font-weight: 700; color: #4154f1; 
+                margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #f6f9ff;
+                display: flex; align-items: center; gap: 10px;
+            }
+            
+            .form-label { font-weight: 600; color: #012970; margin-bottom: 8px; font-size: 14px; }
+            
+            .form-control, .form-select { 
+                border-radius: 10px; padding: 12px 15px; border: 1px solid #ced4da; 
+                font-size: 14px; transition: all 0.2s; 
+            }
+            .form-control:focus, .form-select:focus { 
+                border-color: #4154f1; box-shadow: 0 0 0 4px rgba(65, 84, 241, 0.1); 
+            }
+            .form-control[readonly] { background:#f8fafc; color:#64748b; }
+            
+            /* Nút bấm chuẩn style Sách */
+            .btn-save { 
+                background: #4154f1; color: #fff; border: none; padding: 12px 30px; 
+                border-radius: 10px; font-weight: 600; transition: all 0.3s;
+            }
+            .btn-save:hover { background: #2f43e0; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(65, 84, 241, 0.3); color: #fff; }
+            
+            .btn-back { background: #f8f9fa; color: #6c757d; border-radius: 10px; padding: 12px 20px; font-weight: 600; text-decoration: none; }
+            
+            /* Info Box cho User */
+            .user-info-box { background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:15px 20px; display:flex; align-items:center; gap:15px; }
+            .user-av { width:45px; height:45px; border-radius:50%; background:linear-gradient(135deg,#4154f1,#818cf8); display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px; font-weight:700; flex-shrink:0; }
+            .user-nm { font-weight:600; font-size:15px; color:#012970; }
+            .user-email { font-size:13px; color:#6c757d; }
+            
+            .debt-highlight { background:#fff5f5; border:1px solid #feb2b2; border-radius:10px; padding:12px 15px; color:#c53030; font-weight:600; display: flex; align-items: center; gap: 10px; }
+        </style>
+    </th:block>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="pagetitle">
+        <h1 style="color: #012970; font-weight: 700;">Chỉnh Sửa Thành Viên</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/member/list}">Thành viên</a></li>
+                <li class="breadcrumb-item active">Cập nhật</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section">
+        <!-- Thông báo lỗi/thành công dàn ngang -->
+        <div th:if="${successMsg}" class="alert alert-success alert-dismissible fade show mb-4">
+            <i class="bi bi-check-circle me-1"></i> <span th:text="${successMsg}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <form th:action="@{/admin/member/update}" th:object="${member}" method="post">
+            <input type="hidden" th:field="*{id}">
+
+            <div class="form-card">
+                <!-- 1. Tài khoản liên kết -->
+                <div class="section-title">
+                    <i class="bi bi-person-badge-fill"></i> Tài khoản liên kết
+                </div>
+                <div class="user-info-box mb-4">
+                    <div class="user-av" th:text="${member.user != null ? #strings.substring(member.user.fullName,0,1) : '?'}">U</div>
+                    <div>
+                        <div class="user-nm" th:text="${member.user != null ? member.user.fullName : 'Chưa xác định'}"></div>
+                        <div class="user-email" th:text="${member.user != null ? member.user.email : ''}"></div>
+                    </div>
+                    <span class="ms-auto badge bg-light text-secondary border">Thông tin cố định</span>
+                </div>
+
+                <!-- 2. Thông tin thẻ (Dàn ngang 4 cột) -->
+                <div class="section-title">
+                    <i class="bi bi-credit-card-2-front-fill"></i> Thông tin thẻ & Định danh
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <label class="form-label">Mã thẻ <span class="text-danger">*</span></label>
+                        <input type="text" th:field="*{cardNumber}" class="form-control" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Mã sinh viên</label>
+                        <input type="text" th:field="*{studentCode}" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Ngày cấp thẻ</label>
+                        <input type="date" th:field="*{cardIssuedDate}" class="form-control" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Ngày hết hạn</label>
+                        <input type="date" th:field="*{cardExpiryDate}" class="form-control" required>
+                    </div>
+                </div>
+
+                <!-- 3. Thông tin học tập (Dàn ngang 2 cột) -->
+                <div class="section-title">
+                    <i class="bi bi-mortarboard-fill"></i> Thông tin học tập
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-8">
+                        <label class="form-label">Khoa / Đơn vị quản lý</label>
+                        <input type="text" th:field="*{department}" class="form-control" placeholder="VD: Khoa Kinh tế & QTKD">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Khóa học</label>
+                        <input type="text" th:field="*{course}" class="form-control" placeholder="VD: K63">
+                    </div>
+                </div>
+
+                <!-- 4. Cài đặt & Số liệu (Dàn ngang 3 cột) -->
+                <div class="section-title">
+                    <i class="bi bi-gear-wide-connected"></i> Cài đặt & Số liệu hệ thống
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label">Giới hạn mượn (cuốn)</label>
+                        <input type="number" th:field="*{maxBorrowLimit}" class="form-control" min="1">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Tổng sách đã mượn</label>
+                        <input type="number" th:field="*{totalBorrowed}" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Trạng thái hiện tại</label>
+                        <select th:field="*{status}" class="form-select">
+                            <option value="ACTIVE">Hoạt động</option>
+                            <option value="SUSPENDED">Tạm khóa</option>
+                            <option value="EXPIRED">Hết hạn</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Cảnh báo nợ nếu có -->
+                <div th:if="${member.currentDebt != null and member.currentDebt.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
+                     class="debt-highlight mb-4">
+                    <i class="bi bi-exclamation-octagon-fill"></i>
+                    <span>Thành viên đang có khoản nợ: </span>
+                    <span th:text="${#numbers.formatDecimal(member.currentDebt,0,'COMMA',0,'POINT') + ' VNĐ'}"></span>
+                </div>
+
+                <!-- Footer nút bấm chuẩn Sách -->
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                    <a th:href="@{/admin/member/list}" class="btn-back">
+                        <i class="bi bi-arrow-left"></i> Quay lại danh sách
+                    </a>
+                    <button type="submit" class="btn-save">
+                        <i class="bi bi-cloud-arrow-up-fill"></i> Lưu thay đổi ngay
+                    </button>
+                </div>
+            </div>
+        </form>
+    </section>
+</div>
+</body>
+</html>

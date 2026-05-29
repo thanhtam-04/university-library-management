@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin_layout}"
+      lang="vi">
+<head>
+    <title>Thêm Danh Mục Mới</title>
+    <th:block layout:fragment="css">
+        <style>
+            /* Style đồng bộ hoàn toàn với giao diện Thêm Sách của Nhi */
+            .form-card { 
+                background: #fff; border-radius: 15px; padding: 30px; 
+                box-shadow: 0 5px 20px rgba(0,0,0,0.03); border: none; 
+            }
+            .form-label { 
+                font-weight: 600; color: #012970; /* Màu xanh đậm tiêu chuẩn */
+                margin-bottom: 8px; font-size: 14px; 
+            }
+            .form-control, .form-select { 
+                border-radius: 10px; padding: 12px 15px; border: 1px solid #ced4da; 
+                font-size: 14px; transition: all 0.2s; 
+            }
+            .form-control:focus, .form-select:focus { 
+                border-color: #4154f1; box-shadow: 0 0 0 4px rgba(65, 84, 241, 0.1); 
+            }
+            .section-title { 
+                font-size: 16px; font-weight: 700; color: #4154f1; 
+                margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #f6f9ff;
+                display: flex; align-items: center; gap: 10px;
+            }
+            .btn-save { 
+                background: #4154f1; color: #fff; border: none; padding: 12px 30px; 
+                border-radius: 10px; font-weight: 600; transition: all 0.3s;
+            }
+            .btn-save:hover { 
+                background: #2f43e0; transform: translateY(-2px); 
+                box-shadow: 0 5px 15px rgba(65, 84, 241, 0.3); color: #fff; 
+            }
+            .btn-back { 
+                background: #f8f9fa; color: #6c757d; border-radius: 10px; 
+                padding: 12px 20px; font-weight: 600; text-decoration: none; 
+                display: inline-flex; align-items: center; gap: 8px; 
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="pagetitle">
+        <h1 style="color: #012970; font-weight: 700;">Thêm Danh Mục Mới</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/category/list}">Quản lý danh mục</a></li>
+                <li class="breadcrumb-item active">Thêm mới</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section">
+        <form th:action="@{/admin/category/save}" th:object="${category}" method="post">
+            <div class="form-card">
+                
+                <!-- 1. Thông tin cơ bản (Dàn hàng ngang 2 cột) -->
+                <div class="section-title">
+                    <i class="bi bi-info-circle-fill"></i> Thông tin cơ bản
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-8">
+                        <label class="form-label">Tên danh mục <span class="text-danger">*</span></label>
+                        <input type="text" th:field="*{name}" class="form-control" 
+                               placeholder="Ví dụ: Công nghệ thông tin, Văn học..." required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Danh mục cha</label>
+                        <select name="parentId" class="form-select">
+                            <option value="">-- Là danh mục gốc --</option>
+                            <option th:each="p : ${parentList}" 
+                                    th:value="${p.id}" 
+                                    th:text="${p.name}"></option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 2. Mô tả & Hình ảnh (Nếu có trường ảnh cho danh mục) -->
+                <div class="section-title">
+                    <i class="bi bi-card-text"></i> Nội dung & Mô tả
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Mô tả danh mục</label>
+                    <textarea th:field="*{description}" class="form-control" rows="4" 
+                              placeholder="Viết mô tả ngắn gọn về danh mục này..."></textarea>
+                </div>
+
+                <!-- Footer nút bấm dàn sang 2 bên -->
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                    <a th:href="@{/admin/category/list}" class="btn-back">
+                        <i class="bi bi-arrow-left"></i> Quay lại
+                    </a>
+                    <button type="submit" class="btn-save">
+                        <i class="bi bi-check-lg"></i> Lưu danh mục vào hệ thống
+                    </button>
+                </div>
+            </div>
+        </form>
+    </section>
+</div>
+</body>
+</html>

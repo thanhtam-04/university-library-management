@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin_layout}"
+      lang="vi">
+<head>
+    <title>Phí Phạt</title>
+    <th:block layout:fragment="css">
+    <style>
+        /* ── Filter tabs ── */
+        .filter-tabs {
+            display: flex; gap: 6px;
+        }
+        .ftab {
+            padding: 7px 16px; border-radius: 8px; font-size: 13px;
+            font-weight: 600; font-family: var(--fb);
+            border: 1.5px solid var(--bdr); background: transparent;
+            color: var(--t2); cursor: pointer; text-decoration: none;
+            transition: all .15s var(--ease);
+        }
+        .ftab:hover  { border-color: var(--ac); color: var(--ac); }
+        .ftab.active { background: var(--ac); color: var(--sb); border-color: var(--ac); }
+        .ftab.unpaid.active  { background: var(--cr); border-color: var(--cr); color: #fff; }
+        .ftab.paid.active    { background: var(--cg); border-color: var(--cg); color: #fff; }
+        .ftab.waived.active  { background: var(--t3); border-color: var(--t3); color: #fff; }
+
+        /* ── Name cell ── */
+        .member-cell { display:flex; align-items:center; gap:10px; }
+        .m-av {
+            width:34px; height:34px; border-radius:50%;
+            background:linear-gradient(135deg,var(--ac),#fb923c);
+            color:var(--sb); font-size:12px; font-weight:700;
+            font-family:var(--fh);
+            display:flex; align-items:center; justify-content:center;
+            flex-shrink:0;
+        }
+        .m-name { font-weight:600; color:var(--t1); font-size:13.5px; }
+        .m-card { font-size:11.5px; color:var(--t3); }
+
+        /* ── Amount ── */
+        .amount-cell { font-family:var(--fh); font-weight:700; }
+        .amount-cell.danger { color: var(--cr); }
+        .amount-cell.ok     { color: var(--cg); }
+        .amount-cell.muted  { color: var(--t3); }
+
+        /* ── Action group ── */
+        .act-grp { display:flex; gap:6px; justify-content:flex-end; align-items:center; }
+
+        /* ── Pay form button ── */
+        .pay-btn {
+            display:inline-flex; align-items:center; gap:5px;
+            padding:6px 12px; border-radius:7px;
+            background:var(--cg-bg); color:var(--cg);
+            font-size:12.5px; font-weight:600; font-family:var(--fb);
+            border:none; cursor:pointer; text-decoration:none;
+            transition:all .14s var(--ease);
+        }
+        .pay-btn:hover { background:var(--cg); color:#fff; }
+
+        .waive-btn {
+            display:inline-flex; align-items:center; gap:5px;
+            padding:6px 10px; border-radius:7px;
+            background:var(--page); color:var(--t3);
+            font-size:12.5px; font-weight:600; font-family:var(--fb);
+            border:1px solid var(--bdr); cursor:pointer; text-decoration:none;
+            transition:all .14s var(--ease);
+        }
+        .waive-btn:hover { background:var(--t3); color:#fff; border-color:var(--t3); }
+
+        /* ── Overdue badge ── */
+        .overdue-pill {
+            display:inline-flex; align-items:center; gap:4px;
+            background:var(--cr-bg); color:var(--cr);
+            padding:2px 8px; border-radius:6px;
+            font-size:11.5px; font-weight:600;
+        }
+    </style>
+    </th:block>
+</head>
+
+<body>
+<div layout:fragment="content">
+
+    <!-- Page Title -->
+    <div class="pagetitle">
+        <h1>Phí Phạt</h1>
+        <nav><ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a th:href="@{/admin/dashboard}"><i class="bi bi-house-door"></i> Trang chủ</a>
+            </li>
+            <li class="breadcrumb-item active">Phí phạt</li>
+        </ol></nav>
+    </div>
+
+    <!-- Flash messages -->
+    <div th:if="${successMsg}" class="lib-alert lib-alert-ok">
+        <i class="bi bi-check-circle-fill"></i>
+        <span th:text="${successMsg}"></span>
+        <button class="la-close" onclick="this.closest('.lib-alert').remove()">
+            <i class="bi bi-x"></i>
+        </button>
+    </div>
+    <div th:if="${errorMsg}" class="lib-alert lib-alert-err">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span th:text="${errorMsg}"></span>
+        <button class="la-close" onclick="this.closest('.lib-alert').remove()">
+            <i class="bi bi-x"></i>
+        </button>
+    </div>
+
+    <!-- Stat tiles -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="s-tile" style="--tile-c:var(--cr)">
+                <div class="s-tile-ic" style="background:var(--cr-bg);color:var(--cr)">
+                    <i class="bi bi-exclamation-circle"></i>
+                </div>
+                <div>
+                    <div class="s-tile-val" th:text="${totalUnpaid}">0</div>
+                    <div class="s-tile-lbl">Chưa thanh toán</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="s-tile" style="--tile-c:var(--cg)">
+                <div class="s-tile-ic" style="background:var(--cg-bg);color:var(--cg)">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div>
+                    <div class="s-tile-val" th:text="${totalPaid}">0</div>
+                    <div class="s-tile-lbl">Đã thanh toán</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="s-tile" style="--tile-c:var(--t3)">
+                <div class="s-tile-ic" style="background:var(--page);color:var(--t3)">
+                    <i class="bi bi-slash-circle"></i>
+                </div>
+                <div>
+                    <div class="s-tile-val" th:text="${totalWaived}">0</div>
+                    <div class="s-tile-lbl">Đã miễn giảm</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table card -->
+    <div class="lc">
+        <!-- Toolbar -->
+        <div class="lc-hd flex-wrap gap-3">
+            <!-- Search -->
+            <div class="s-bar" style="width:260px">
+                <i class="bi bi-search"></i>
+                <input type="text" id="searchInput" placeholder="Tìm tên, mã thẻ, mã phiếu...">
+            </div>
+
+            <!-- Filter tabs -->
+            <div class="filter-tabs ms-auto">
+                <a th:href="@{/admin/fine/list}"
+                   th:classappend="${filterStatus == null} ? ' active'"
+                   class="ftab">Tất cả</a>
+                <a th:href="@{/admin/fine/list(status='UNPAID')}"
+                   th:classappend="${filterStatus == 'UNPAID'} ? ' active'"
+                   class="ftab unpaid">Chưa nộp</a>
+                <a th:href="@{/admin/fine/list(status='PAID')}"
+                   th:classappend="${filterStatus == 'PAID'} ? ' active'"
+                   class="ftab paid">Đã nộp</a>
+                <a th:href="@{/admin/fine/list(status='WAIVED')}"
+                   th:classappend="${filterStatus == 'WAIVED'} ? ' active'"
+                   class="ftab waived">Miễn giảm</a>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-responsive">
+            <table class="lt">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Bạn đọc</th>
+                        <th>Mã phiếu mượn</th>
+                        <th>Số ngày trễ</th>
+                        <th>Phí/ngày</th>
+                        <th>Tổng tiền phạt</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày tạo</th>
+                        <th class="text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr th:each="f : ${list}">
+
+                        <!-- ID -->
+                        <td><span class="id-tag" th:text="${'#' + f.id}"></span></td>
+
+                        <!-- Bạn đọc -->
+                        <td>
+                            <div class="member-cell">
+                                <div class="m-av"
+                                     th:text="${f.member?.user?.fullName != null
+                                                ? f.member.user.fullName.substring(0,1).toUpperCase()
+                                                : '?'}">
+                                </div>
+                                <div>
+                                    <div class="m-name row-name"
+                                         th:text="${f.member?.user?.fullName ?: 'N/A'}">
+                                    </div>
+                                    <div class="m-card"
+                                         th:text="${f.member?.cardNumber ?: ''}">
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Mã phiếu mượn -->
+                        <td>
+                            <a th:href="@{/admin/loan/detail/{id}(id=${f.loan?.id})}"
+                               style="color:var(--cb);font-size:13px;font-weight:600;text-decoration:none">
+                                <i class="bi bi-link-45deg"></i>
+                                <span th:text="${f.loan?.loanCode ?: 'N/A'}"></span>
+                            </a>
+                        </td>
+
+                        <!-- Số ngày trễ -->
+                        <td>
+                            <span class="overdue-pill">
+                                <i class="bi bi-clock"></i>
+                                <span th:text="${f.daysOverdue + ' ngày'}"></span>
+                            </span>
+                        </td>
+
+                        <!-- Phí mỗi ngày -->
+                        <td>
+                            <span style="font-size:13px;color:var(--t2)"
+                                  th:text="${#numbers.formatDecimal(f.finePerDay,0,'COMMA',0,'POINT') + ' đ'}">
+                            </span>
+                        </td>
+
+                        <!-- Tổng tiền phạt -->
+                        <td>
+                            <span th:classappend="${f.status.name() == 'UNPAID'} ? 'danger' : (${f.status.name() == 'PAID'} ? 'ok' : 'muted')"
+                                  class="amount-cell"
+                                  th:text="${#numbers.formatDecimal(f.fineAmount,0,'COMMA',0,'POINT') + ' đ'}">
+                            </span>
+                        </td>
+
+                        <!-- Trạng thái -->
+                        <td>
+                            <span th:if="${f.status.name() == 'UNPAID'}"
+                                  class="s-bdg bdg-r">Chưa nộp</span>
+                            <span th:if="${f.status.name() == 'PAID'}"
+                                  class="s-bdg bdg-g">Đã nộp</span>
+                            <span th:if="${f.status.name() == 'WAIVED'}"
+                                  class="s-bdg"
+                                  style="background:var(--page);color:var(--t3)">Miễn giảm</span>
+                        </td>
+
+                        <!-- Ngày tạo -->
+                        <td style="font-size:13px;color:var(--t2)">
+                            <span th:text="${f.createdAt != null
+                                ? #temporals.format(f.createdAt,'dd/MM/yyyy')
+                                : '—'}">
+                            </span>
+                        </td>
+
+                        <!-- Thao tác -->
+                        <td>
+                            <div class="act-grp">
+
+                                <!-- Xem chi tiết -->
+                                <a th:href="@{/admin/fine/detail/{id}(id=${f.id})}"
+                                   class="ai ai-view" title="Xem chi tiết">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+
+                                <!-- Thanh toán (chỉ hiện khi UNPAID) -->
+								<form th:if="${f.status.name() == 'UNPAID'}"
+								      th:action="@{/admin/fine/pay/{id}(id=${f.id})}"
+								      method="post" style="margin:0">
+								    <input type="hidden" name="paymentMethod" value="CASH"/>
+								    <button type="submit" class="pay-btn"
+								            onclick="return confirm('Xác nhận độc giả đã nộp tiền mặt và thanh toán phí phạt này?')">
+								        <i class="bi bi-cash-stack"></i> Thu tiền
+								    </button>
+								</form>
+
+                                <!-- Miễn giảm (chỉ hiện khi UNPAID) -->
+                                <form th:if="${f.status.name() == 'UNPAID'}"
+                                      th:action="@{/admin/fine/waive/{id}(id=${f.id})}"
+                                      method="post" style="margin:0">
+                                    <button type="submit" class="waive-btn"
+                                            onclick="return confirm('Xác nhận miễn giảm phí phạt này?')">
+                                        <i class="bi bi-slash-circle"></i>
+                                    </button>
+                                </form>
+
+                                <!-- Đã xử lý: hiện ngày -->
+                                <span th:if="${f.status.name() != 'UNPAID'}"
+                                      style="font-size:11.5px;color:var(--t3)">
+                                    <i class="bi bi-calendar-check"></i>
+                                    <span th:text="${f.paidAt != null
+                                        ? #temporals.format(f.paidAt,'dd/MM/yy')
+                                        : '—'}">
+                                    </span>
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Empty -->
+                    <tr th:if="${#lists.isEmpty(list)}">
+                        <td colspan="9">
+                            <div class="empty-box">
+                                <i class="bi bi-cash-coin"></i>
+                                <h5>Không có phiếu phạt nào</h5>
+                                <p>Chưa có dữ liệu phí phạt trong hệ thống.</p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Table footer -->
+        <div style="padding:12px 18px;border-top:1px solid var(--bdr);
+                    display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:12.5px;color:var(--t3)">
+                Hiển thị <b id="visCount" style="color:var(--t2)"
+                            th:text="${list.size()}">0</b> phiếu phạt
+            </span>
+        </div>
+    </div>
+
+</div>
+
+<th:block layout:fragment="script">
+<script>
+    const sinp = document.getElementById('searchInput');
+    const vcnt = document.getElementById('visCount');
+    sinp.addEventListener('input', function(){
+        const q = this.value.toLowerCase().trim();
+        const rows = document.querySelectorAll('#tableBody tr');
+        let c = 0;
+        rows.forEach(row => {
+            const name = row.querySelector('.row-name')?.textContent.toLowerCase() || '';
+            const txt  = row.textContent.toLowerCase();
+            const show = !q || txt.includes(q);
+            row.style.display = show ? '' : 'none';
+            if (show && row.querySelector('.row-name')) c++;
+        });
+        if (vcnt) vcnt.textContent = q ? c : rows.length;
+    });
+</script>
+</th:block>
+</body>
+</html>

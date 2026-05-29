@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lịch sử liên hệ – LibManage</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: { 50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',300:'#93c5fd',
+                                500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a',950:'#0f2057' },
+                        gold: { 400:'#fbbf24',500:'#f59e0b',600:'#d97706' },
+                    },
+                    fontFamily: { display:['"Playfair Display"','serif'], body:['"DM Sans"','sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; background: #f8faff; color: #0c1b3a; -webkit-font-smoothing: antialiased; }
+
+        .card { background: #fff; border: 1px solid #e2e8f5; border-radius: 16px; box-shadow: 0 2px 8px rgba(14,30,80,.05); }
+
+        .btn-primary { background: linear-gradient(135deg,#1d4ed8,#2563eb); color: #fff; padding: .65rem 1.5rem; border-radius: 10px; font-weight: 600; font-size: .875rem; display: inline-flex; align-items: center; gap: .5rem; border: none; cursor: pointer; transition: all .2s ease; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,.2); }
+
+        .btn-outline { background: #fff; color: #475569; border: 1.5px solid #e2e8f5; padding: .65rem 1.5rem; border-radius: 10px; font-weight: 600; font-size: .875rem; display: inline-flex; align-items: center; gap: .5rem; cursor: pointer; transition: all .2s ease; }
+        .btn-outline:hover { background: #f8faff; border-color: #cbd5e1; color: #1e293b; }
+
+        .input-field { width: 100%; padding: .7rem 1.1rem; border: 1.5px solid #e2e8f5; border-radius: 10px; font-size: .925rem; transition: all .2s ease; background: #fff; }
+        .input-field:focus { border-color: #2563eb; outline: none; box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+
+        .label { display: block; font-size: .8rem; font-weight: 600; color: #475569; margin-bottom: .5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* ===== Chat bubble ===== */
+        .bubble-wrap { display: flex; flex-direction: column; gap: 14px; }
+
+        .bubble-user {
+            align-self: flex-end;
+            max-width: 82%;
+            background: linear-gradient(135deg, #1d4ed8, #2563eb);
+            color: #fff;
+            border-radius: 16px 16px 4px 16px;
+            padding: 14px 18px;
+            position: relative;
+            box-shadow: 0 3px 12px rgba(37,99,235,.25);
+        }
+        .bubble-admin {
+            align-self: flex-start;
+            max-width: 82%;
+            background: #f1f5f9;
+            color: #1e293b;
+            border-radius: 16px 16px 16px 4px;
+            padding: 14px 18px;
+            position: relative;
+            border: 1px solid #e2e8f5;
+        }
+
+        .bubble-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            margin-bottom: 5px;
+            opacity: .7;
+        }
+        .bubble-text { font-size: 14px; line-height: 1.6; white-space: pre-line; }
+        .bubble-time { font-size: 11px; opacity: .55; margin-top: 6px; text-align: right; }
+
+        /* ===== Status badge ===== */
+        .badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 3px 10px; border-radius: 20px;
+            font-size: 11px; font-weight: 700; white-space: nowrap;
+        }
+		.thread-header { cursor: pointer; }
+		.thread-body { padding-top: 8px; }
+		.bubble-user, .bubble-admin { padding: 13px 16px; }
+		.bubble-text { line-height: 1.55; }
+        .badge-unread  { background: #fef3c7; color: #92400e; }
+        .badge-read    { background: #dbeafe; color: #1e40af; }
+        .badge-replied { background: #dcfce7; color: #166534; }
+        .badge .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+        .badge-unread .dot  { background: #f59e0b; }
+        .badge-read .dot    { background: #3b82f6; }
+        .badge-replied .dot { background: #22c55e; }
+
+        /* ===== Timeline item card ===== */
+        .thread-card {
+            border: 1px solid #e2e8f5;
+            border-radius: 14px;
+            overflow: hidden;
+            background: #fff;
+            transition: box-shadow .2s;
+        }
+        .thread-card:hover { box-shadow: 0 4px 20px rgba(14,30,80,.08); }
+        .thread-header {
+            padding: 16px 20px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .thread-body { padding: 0 20px 20px; }
+        .thread-body.collapsed { display: none; }
+
+        /* ===== New message form ===== */
+        .compose-area { resize: vertical; min-height: 110px; }
+
+        /* ===== Empty state ===== */
+        .empty-state { text-align: center; padding: 56px 20px; color: #94a3b8; }
+        .empty-state i { font-size: 42px; display: block; margin-bottom: 14px; opacity: .35; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{navbar :: navbar}"></div>
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 py-10">
+
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-[13px] text-slate-400 mb-8">
+        <a th:href="@{/}" class="hover:text-blue-600 transition-colors">Trang chủ</a>
+        <span>/</span>
+        <a th:href="@{/profile}" class="hover:text-blue-600 transition-colors">Tài khoản</a>
+        <span>/</span>
+        <span class="text-navy-800 font-medium">Lịch sử liên hệ</span>
+    </nav>
+
+    <!-- Flash messages -->
+    <div th:if="${successMsg}" class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-5 py-4 rounded-xl mb-6 flex items-center gap-3 text-[15px]">
+        <i class="fas fa-check-circle text-emerald-500 text-lg"></i>
+        <span th:text="${successMsg}"></span>
+    </div>
+    <div th:if="${errorMsg}" class="bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-xl mb-6 flex items-center gap-3 text-[15px]">
+        <i class="fas fa-exclamation-circle text-red-500 text-lg"></i>
+        <span th:text="${errorMsg}"></span>
+    </div>
+
+    <!-- Page header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="font-display font-bold text-2xl text-navy-900">Lịch sử liên hệ</h1>
+            <p class="text-slate-400 text-sm mt-1">Xem các tin nhắn bạn đã gửi và phản hồi từ thư viện</p>
+        </div>
+		<button onclick="window.location.href='/contact'" 
+		        class="btn-primary">
+		    <i class="fas fa-plus text-xs"></i> Gửi tin mới
+		</button>
+    </div>
+
+    
+
+    <!-- ===== Danh sách lịch sử ===== -->
+
+    <!-- Empty state -->
+    <div th:if="${messages == null or messages.isEmpty()}" class="card">
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p class="font-semibold text-slate-500 text-base mb-2">Bạn chưa gửi tin nhắn nào</p>
+            <p class="text-sm text-slate-400">Nhấn "Gửi tin mới" để liên hệ với thư viện</p>
+        </div>
+    </div>
+
+	<!-- Thread list - Phiên bản gọn -->
+	<div class="space-y-4" th:if="${messages != null and !messages.isEmpty()}">
+	    <div th:each="msg : ${messages}" 
+	         class="thread-card"
+	         th:id="'thread-' + ${msg.id}">
+
+	        <!-- Header -->
+	        <div class="thread-header px-5 py-4" th:onclick="'toggleThread(' + ${msg.id} + ')'">
+	            <div class="flex items-start gap-4 flex-1">
+	                <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+	                     th:classappend="${msg.status.name() == 'REPLIED'} ? 'bg-emerald-100' : 
+	                                    (${msg.status.name() == 'READ'} ? 'bg-blue-100' : 'bg-amber-100')">
+	                    <i class="fas text-lg"
+	                       th:classappend="${msg.status.name() == 'REPLIED'} ? 'fa-reply text-emerald-600' : 
+	                                      (${msg.status.name() == 'READ'} ? 'fa-eye text-blue-600' : 'fa-envelope text-amber-600')"></i>
+	                </div>
+
+	                <div class="flex-1 min-w-0">
+	                    <div class="flex justify-between items-start">
+	                        <div>
+	                            <div class="font-semibold text-navy-900 text-[15.5px] leading-tight truncate"
+	                                 th:text="${msg.subject}"></div>
+	                            <div class="text-slate-500 text-sm mt-1 line-clamp-1"
+	                                 th:text="${#strings.abbreviate(msg.message, 95)}"></div>
+	                        </div>
+	                        <span class="text-xs text-slate-400 whitespace-nowrap ml-4"
+	                              th:text="${#temporals.format(msg.createdAt, 'dd/MM/yyyy')}"></span>
+	                    </div>
+	                </div>
+	            </div>
+
+	            <div class="flex flex-col items-end gap-1 ml-4">
+	                <span class="badge text-xs px-3 py-1"
+	                      th:classappend="${msg.status.name() == 'REPLIED'} ? 'badge-replied' : 
+	                                      (${msg.status.name() == 'READ'} ? 'badge-read' : 'badge-unread')">
+	                    <span class="dot"></span>
+	                    <span th:text="${msg.status.name() == 'REPLIED'} ? 'Đã phản hồi' : 
+	                                   (${msg.status.name() == 'READ'} ? 'Đã đọc' : 'Chờ xử lý')"></span>
+	                </span>
+	                <i class="fas fa-chevron-down text-slate-400 transition-transform" 
+	                   th:id="'chevron-' + ${msg.id}"></i>
+	            </div>
+	        </div>
+
+	        <!-- Body - Nội dung chat -->
+	        <div class="thread-body px-5 pb-5" th:id="'body-' + ${msg.id}">
+	            <div class="bubble-wrap space-y-4">
+
+	                <!-- Tin nhắn của bạn -->
+	                <div class="bubble-user max-w-[85%]">
+	                    <div class="bubble-label">Bạn</div>
+	                    <div class="bubble-text" th:text="${msg.message}"></div>
+	                    <div class="bubble-time" 
+	                         th:text="${#temporals.format(msg.createdAt, 'HH:mm – dd/MM/yyyy')}"></div>
+	                </div>
+
+	                <!-- Phản hồi từ Thư viện -->
+	                <div th:if="${msg.replyContent != null and !msg.replyContent.isEmpty()}" 
+	                     class="bubble-admin max-w-[85%]">
+	                    <div class="bubble-label" style="color:#1e40af;">
+	                        <i class="fas fa-shield-halved mr-1"></i> Thư viện
+	                    </div>
+	                    <div class="bubble-text" th:text="${msg.replyContent}"></div>
+	                    <div class="bubble-time"
+	                         th:text="${msg.repliedAt != null ? #temporals.format(msg.repliedAt, 'HH:mm – dd/MM/yyyy') : 'Vừa xong'}"></div>
+	                </div>
+
+	                <!-- Chưa có phản hồi -->
+	                <div th:if="${msg.replyContent == null or msg.replyContent.isEmpty()}" 
+	                     class="bg-amber-50 border border-amber-100 text-amber-700 px-5 py-4 rounded-2xl text-sm flex items-center gap-3">
+	                    <i class="fas fa-clock"></i>
+	                    <span>Đang chờ phản hồi từ thư viện...</span>
+	                </div>
+
+	            </div>
+	        </div>
+	    </div>
+	</div>
+</div><!-- end max-w-4xl -->
+
+<div th:replace="~{navbar :: footer}"></div>
+
+<script>
+    /* ===== Toggle compose box ===== */
+    function toggleCompose() {
+        const box = document.getElementById('composeBox');
+        box.classList.toggle('hidden');
+        if (!box.classList.contains('hidden')) {
+            box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    /* ===== Toggle thread expand ===== */
+    function toggleThread(id) {
+        const body    = document.getElementById('body-'    + id);
+        const chevron = document.getElementById('chevron-' + id);
+
+        const isOpen = !body.classList.contains('collapsed');
+        body.classList.toggle('collapsed', isOpen);
+        chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+    }
+
+    /* ===== Auto-expand thread có phản hồi mới nhất ===== */
+    document.addEventListener('DOMContentLoaded', function () {
+        // Tự mở thread đầu tiên nếu có phản hồi
+        const firstReplied = document.querySelector('.thread-card .badge-replied');
+        if (firstReplied) {
+            const card = firstReplied.closest('.thread-card');
+            const id   = card.id.replace('thread-', '');
+            toggleThread(id);
+        }
+    });
+</script>
+
+</body>
+</html>

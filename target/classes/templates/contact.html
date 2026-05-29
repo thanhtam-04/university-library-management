@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Liên hệ – LibManage</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: { 50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',300:'#93c5fd',
+                                400:'#60a5fa',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',
+                                800:'#1e40af',900:'#1e3a8a',950:'#0f2057' },
+                        gold: { 400:'#fbbf24',500:'#f59e0b',600:'#d97706' },
+                    },
+                    fontFamily: {
+                        display:['"Playfair Display"','serif'],
+                        body:['"DM Sans"','sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        *, *::before, *::after { box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+        body { font-family:'DM Sans',sans-serif; background:#f8faff; color:#0c1b3a; -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+        .font-display { font-family:'Playfair Display',serif; }
+        .btn-primary { background:linear-gradient(135deg,#1d4ed8,#2563eb); color:#fff; padding:.75rem 1.75rem; border-radius:10px; font-weight:600; font-size:.9375rem; display:inline-flex; align-items:center; gap:.5rem; border:none; cursor:pointer; transition:all .22s; box-shadow:0 4px 16px rgba(37,99,235,.30); text-decoration:none; }
+        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(37,99,235,.38); color:#fff; }
+        .btn-outline { background:transparent; color:#1d4ed8; border:1.5px solid #93c5fd; padding:.7rem 1.5rem; border-radius:10px; font-weight:600; font-size:.9rem; display:inline-flex; align-items:center; gap:.5rem; cursor:pointer; transition:all .2s; text-decoration:none; }
+        .btn-outline:hover { background:#eff6ff; border-color:#2563eb; color:#1d4ed8; }
+        .glass { background:rgba(255,255,255,0.88); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
+        ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-thumb { background:#bfdbfe; border-radius:6px; }
+        input:focus, select:focus, textarea:focus { outline:none; box-shadow:0 0 0 3px rgba(37,99,235,.15); }
+
+        /* Form styles */
+        .form-input { width:100%; padding:.7rem 1rem; border-radius:10px; border:1.5px solid #e2e8f0; font-size:.9rem; font-family:'DM Sans',sans-serif; color:#0c1b3a; background:#fff; transition:border-color .15s; }
+        .form-input:focus { border-color:#2563eb; }
+        .form-input::placeholder { color:#94a3b8; }
+        .form-label { display:block; font-size:.8rem; font-weight:600; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em; }
+
+        /* Info card */
+        .info-card { background:#fff; border:1px solid #e2e8f5; border-radius:16px; padding:24px; transition:all .2s; box-shadow:0 2px 8px rgba(14,30,80,.05); }
+        .info-card:hover { box-shadow:0 8px 24px rgba(14,30,80,.1); transform:translateY(-2px); }
+
+        /* Map */
+        .map-container { border-radius:16px; overflow:hidden; box-shadow:0 4px 20px rgba(14,30,80,.1); }
+
+        /* FAQ */
+        .faq-item { border:1px solid #e2e8f5; border-radius:12px; overflow:hidden; }
+        .faq-header { padding:16px 20px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; background:#fff; transition:background .15s; }
+        .faq-header:hover { background:#f8faff; }
+        .faq-body { padding:0 20px 16px; background:#fff; display:none; }
+        .faq-body.open { display:block; }
+        .faq-chevron { transition:transform .2s; }
+        .faq-chevron.open { transform:rotate(180deg); }
+
+        /* Social */
+        .social-btn { display:inline-flex; align-items:center; justify-content:center; width:42px; height:42px; border-radius:10px; transition:all .2s; text-decoration:none; font-weight:700; font-size:16px; }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div th:replace="~{navbar :: navbar}"></div>
+
+<!-- HERO -->
+<section class="relative overflow-hidden py-16" style="background:linear-gradient(135deg,#0f2057 0%,#1e3a8a 50%,#1d4ed8 100%)">
+    <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle,rgba(255,255,255,.5) 1px,transparent 1px);background-size:32px 32px"></div>
+    <div class="absolute -top-32 -right-32 w-96 h-96 rounded-full opacity-10" style="background:radial-gradient(circle,#60a5fa,transparent 70%)"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-5">
+            <svg class="w-3.5 h-3.5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
+            <span class="text-white/80 text-xs font-semibold tracking-wide uppercase">Hỗ trợ sinh viên</span>
+        </div>
+        <h1 class="font-display text-white text-4xl sm:text-5xl font-bold mb-4">
+            Liên hệ <span style="color:#fbbf24">với chúng tôi</span>
+        </h1>
+        <p class="text-white/70 text-base max-w-xl mx-auto mb-10">
+            Đội ngũ thủ thư luôn sẵn sàng hỗ trợ bạn. Hãy liên hệ qua bất kỳ kênh nào bên dưới.
+        </p>
+        <!-- Quick contact strip -->
+        <div class="flex flex-wrap justify-center gap-4">
+            <a href="tel:02388888888"
+               class="flex items-center gap-2.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl px-5 py-3 transition-all" style="text-decoration:none">
+                <div class="w-8 h-8 rounded-lg bg-green-500/30 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-green-300" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
+                </div>
+                <div class="text-left">
+                    <div class="text-white/60 text-[10px] uppercase font-semibold tracking-wide">Hotline</div>
+                    <div class="text-white font-semibold text-sm">(0238) 888 xxx</div>
+                </div>
+            </a>
+            <a href="mailto:library@naue.edu.vn"
+               class="flex items-center gap-2.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl px-5 py-3 transition-all" style="text-decoration:none">
+                <div class="w-8 h-8 rounded-lg bg-blue-500/30 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                </div>
+                <div class="text-left">
+                    <div class="text-white/60 text-[10px] uppercase font-semibold tracking-wide">Email</div>
+                    <div class="text-white font-semibold text-sm">library@naue.edu.vn</div>
+                </div>
+            </a>
+            <div class="flex items-center gap-2.5 bg-white/10 border border-white/20 rounded-xl px-5 py-3">
+                <div class="w-8 h-8 rounded-lg bg-amber-500/30 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div class="text-left">
+                    <div class="text-white/60 text-[10px] uppercase font-semibold tracking-wide">Giờ làm việc</div>
+                    <div class="text-white font-semibold text-sm">T2–T6: 7:30 – 17:00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="absolute bottom-0 left-0 right-0">
+        <svg viewBox="0 0 1440 40" fill="none"><path d="M0 40V20C360 0 720 40 1080 20C1260 10 1380 30 1440 20V40H0Z" fill="#f8faff"/></svg>
+    </div>
+</section>
+
+<!-- MAIN CONTENT -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- LEFT: Form liên hệ -->
+        <div class="lg:col-span-2 space-y-6">
+
+            <!-- Flash messages -->
+            <div th:if="${successMsg}"
+                 class="flex items-center gap-3 bg-green-50 border border-green-200 text-green-800 rounded-xl px-5 py-4 text-sm font-medium">
+                <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                <span th:text="${successMsg}">Gửi thành công!</span>
+            </div>
+
+            <!-- Form card -->
+            <div class="bg-white border border-blue-50 rounded-2xl p-7 sm:p-8" style="box-shadow:0 2px 12px rgba(14,30,80,.06)">
+                <div class="mb-6">
+                    <h2 class="font-display text-2xl font-bold text-navy-900 mb-1">Gửi tin nhắn</h2>
+                    <p class="text-slate-500 text-sm">Chúng tôi sẽ phản hồi trong vòng 24 giờ làm việc.</p>
+                </div>
+
+                <form th:action="@{/contact}" method="post" class="space-y-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <!-- Họ tên -->
+                        <div>
+                            <label class="form-label">Họ và tên <span class="text-red-500">*</span></label>
+                            <input type="text" name="fullName" class="form-input"
+                                   placeholder="Nguyễn Văn A"
+                                   th:value="${#authentication != null ? #authentication.name : ''}"
+                                   required>
+                        </div>
+                        <!-- Email -->
+						<div>
+						    <label class="form-label">Email <span class="text-red-500">*</span></label>
+						    <input type="email" name="email" class="form-input"
+						           th:value="${user != null ? user.email : ''}"
+						           placeholder="example@naue.edu.vn" required>
+						</div>
+                    </div>
+
+                    <!-- Số điện thoại -->
+                    <div>
+                        <label class="form-label">Số điện thoại</label>
+                        <input type="tel" name="phone" class="form-input"
+                               placeholder="0xxx xxx xxx">
+                    </div>
+
+                    <!-- Chủ đề -->
+                    <div>
+                        <label class="form-label">Chủ đề <span class="text-red-500">*</span></label>
+                        <select name="subject" class="form-input" required>
+                            <option value="">-- Chọn chủ đề --</option>
+                            <option value="borrow">Thắc mắc về mượn / trả sách</option>
+                            <option value="fine">Phiếu phạt & công nợ</option>
+                            <option value="card">Đăng ký / Gia hạn thẻ thành viên</option>
+                            <option value="digital">Tài liệu số</option>
+                            <option value="lost">Báo mất / hư sách</option>
+                            <option value="other">Khác</option>
+                        </select>
+                    </div>
+
+                    <!-- Nội dung -->
+                    <div>
+                        <label class="form-label">Nội dung <span class="text-red-500">*</span></label>
+                        <textarea name="message" rows="5" class="form-input"
+                                  placeholder="Mô tả chi tiết vấn đề bạn cần hỗ trợ..." required
+                                  style="resize:vertical; min-height:130px;"></textarea>
+                    </div>
+
+                    <!-- Mã sinh viên (optional) -->
+                    <div>
+                        <label class="form-label">Mã sinh viên / Mã thẻ thư viện</label>
+                        <input type="text" name="studentCode" class="form-input"
+                               placeholder="VD: 2021001234 hoặc TV2024001">
+                        <p class="text-xs text-slate-400 mt-1.5">Điền để chúng tôi tra cứu thông tin nhanh hơn.</p>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" class="btn-primary w-full justify-center !py-3 !text-[15px]">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                            Gửi tin nhắn
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Bản đồ -->
+            <div class="bg-white border border-blue-50 rounded-2xl overflow-hidden" style="box-shadow:0 2px 12px rgba(14,30,80,.06)">
+                <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+                    <h3 class="font-semibold text-navy-900 text-[15px]">Vị trí thư viện</h3>
+                </div>
+                <div class="map-container" style="height:300px;">
+                    <!-- Google Maps embed — Vinh Phú, Nghệ An -->
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d29893.40623806706!2d105.65!3d18.75!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3139cde2a2a2a2a3%3A0x1!2zTmdoaSBMb2MsIE5naOG7hyBBbg!5e0!3m2!1svi!2svn!4v1700000000000!5m2!1svi!2svn"
+                        width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+                <div class="px-6 py-4 bg-slate-50/50 flex items-center gap-3">
+                    <svg class="w-4 h-4 text-slate-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+                    <p class="text-sm text-slate-500">Trường Đại họcNghệ An, Vinh Phú, Nghệ An</p>
+                    <a href="https://maps.google.com" target="_blank"
+                       class="ml-auto text-xs text-blue-600 font-semibold hover:text-blue-800 flex-shrink-0" style="text-decoration:none">
+                        Xem trên Google Maps →
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Thông tin liên hệ + FAQ -->
+        <div class="space-y-5">
+
+            <!-- Thông tin liên hệ -->
+            <div class="info-card">
+                <h3 class="font-semibold text-navy-900 text-[15px] mb-4 flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
+                        <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
+                    </div>
+                    Thông tin liên hệ
+                </h3>
+                <div class="space-y-3.5">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Địa chỉ</p>
+                            <p class="text-sm font-medium text-navy-800">Trường ĐH  Nghệ An</p>
+                            <p class="text-xs text-slate-500">Vinh Phú, Nghệ An</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Điện thoại</p>
+                            <a href="tel:02388888888" class="text-sm font-medium text-navy-800 hover:text-blue-600 transition-colors" style="text-decoration:none">(0238) 888 xxx</a>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-purple-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Email</p>
+                            <a href="mailto:library@naue.edu.vn" class="text-sm font-medium text-navy-800 hover:text-blue-600 transition-colors" style="text-decoration:none">library@naue.edu.vn</a>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Giờ làm việc</p>
+                            <p class="text-sm font-medium text-navy-800">Thứ 2 – Thứ 6: 7:30 – 17:00</p>
+                            <p class="text-xs text-slate-500">Thứ 7: 7:30 – 12:00 | CN: Nghỉ</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Social -->
+                <div class="mt-5 pt-5 border-t border-slate-100">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Mạng xã hội</p>
+                    <div class="flex gap-2">
+                        <a href="#" class="social-btn bg-blue-600 text-white hover:bg-blue-700" title="Facebook" style="text-decoration:none">f</a>
+                        <a href="#" class="social-btn bg-red-500 text-white hover:bg-red-600" title="YouTube" style="text-decoration:none">▶</a>
+                        <a href="#" class="social-btn bg-sky-500 text-white hover:bg-sky-600" title="Zalo" style="text-decoration:none; font-size:12px;">Z</a>
+                        <a href="#" class="social-btn bg-slate-800 text-white hover:bg-slate-900" title="Email" style="text-decoration:none; font-size:12px;">✉</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trạng thái online -->
+            <div class="rounded-2xl p-5 text-white" style="background:linear-gradient(135deg,#1e3a8a,#0f2057)">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse inline-block"></span>
+                    <span class="font-semibold text-sm">Đang trực tuyến</span>
+                </div>
+                <p class="text-white/70 text-[13px] leading-relaxed mb-4">
+                    Thủ thư đang trực tuyến. Thông thường phản hồi trong <strong class="text-white">vài phút</strong>.
+                </p>
+                <div class="space-y-2 text-[12.5px]">
+                    <div class="flex items-center gap-2 text-white/60">
+                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                        Hỗ trợ tra cứu sách
+                    </div>
+                    <div class="flex items-center gap-2 text-white/60">
+                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                        Giải quyết phiếu phạt
+                    </div>
+                    <div class="flex items-center gap-2 text-white/60">
+                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                        Đăng ký thẻ thành viên
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ -->
+            <div class="bg-white border border-blue-50 rounded-2xl overflow-hidden" style="box-shadow:0 2px 8px rgba(14,30,80,.05)">
+                <div class="px-5 py-4 border-b border-slate-100">
+                    <h3 class="font-semibold text-navy-900 text-[15px]">❓ Câu hỏi thường gặp</h3>
+                </div>
+                <div class="p-3 space-y-2">
+
+                    <div class="faq-item">
+                        <div class="faq-header" onclick="toggleFaq(this)">
+                            <span class="text-[13.5px] font-medium text-navy-800">Làm thế nào để đăng ký thẻ thư viện?</span>
+                            <svg class="faq-chevron w-4 h-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                        <div class="faq-body">
+                            <p class="text-[13px] text-slate-500 leading-relaxed">Mang thẻ sinh viên và 1 ảnh 3×4 đến quầy thư viện. Thủ thư sẽ tạo tài khoản và cấp thẻ ngay trong ngày.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-header" onclick="toggleFaq(this)">
+                            <span class="text-[13.5px] font-medium text-navy-800">Mượn được bao nhiêu cuốn một lần?</span>
+                            <svg class="faq-chevron w-4 h-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                        <div class="faq-body">
+                            <p class="text-[13px] text-slate-500 leading-relaxed">Tối đa <strong>5 cuốn</strong> trong một lần mượn, thời hạn <strong>14 ngày</strong>. Có thể gia hạn thêm 7 ngày nếu chưa có người đặt trước.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-header" onclick="toggleFaq(this)">
+                            <span class="text-[13.5px] font-medium text-navy-800">Phí phạt trả sách trễ là bao nhiêu?</span>
+                            <svg class="faq-chevron w-4 h-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                        <div class="faq-body">
+                            <p class="text-[13px] text-slate-500 leading-relaxed"><strong>2.000đ / ngày / cuốn</strong>, tính từ ngày hết hạn kể cả ngày lễ.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-header" onclick="toggleFaq(this)">
+                            <span class="text-[13.5px] font-medium text-navy-800">Có thể tải tài liệu số về không?</span>
+                            <svg class="faq-chevron w-4 h-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                        <div class="faq-body">
+                            <p class="text-[13px] text-slate-500 leading-relaxed">Có, nhưng cần <strong>đăng nhập bằng tài khoản sinh viên</strong>. Tài liệu chỉ được dùng cho mục đích học tập cá nhân.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<div th:replace="~{navbar :: footer}"></div>
+
+<script>
+    document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+        document.getElementById('mobileMenu').classList.toggle('hidden');
+    });
+
+    function toggleFaq(header) {
+        const body    = header.nextElementSibling;
+        const chevron = header.querySelector('.faq-chevron');
+        const isOpen  = body.classList.contains('open');
+        // Đóng tất cả
+        document.querySelectorAll('.faq-body').forEach(b => b.classList.remove('open'));
+        document.querySelectorAll('.faq-chevron').forEach(c => c.classList.remove('open'));
+        // Mở cái được click nếu chưa mở
+        if (!isOpen) {
+            body.classList.add('open');
+            chevron.classList.add('open');
+        }
+    }
+
+    // Scroll reveal
+    const io = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                e.target.style.opacity = '1';
+                e.target.style.transform = 'translateY(0)';
+                io.unobserve(e.target);
+            }
+        });
+    }, { threshold: 0.08 });
+
+    document.querySelectorAll('.info-card, .faq-item').forEach((el, i) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(14px)';
+        el.style.transition = `opacity .4s ease ${i * 60}ms, transform .4s ease ${i * 60}ms`;
+        io.observe(el);
+    });
+</script>
+</body>
+</html>

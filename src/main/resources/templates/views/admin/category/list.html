@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin_layout}"
+      lang="vi">
+<head>
+    <title>Quản lý Danh mục</title>
+    <th:block layout:fragment="css">
+    <style>
+@keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+.anim{animation:fadeUp .42s cubic-bezier(.4,0,.2,1) both}
+.anim-1{animation-delay:.05s} .anim-2{animation-delay:.10s} .anim-3{animation-delay:.15s}
+
+.bk-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:26px;gap:16px;flex-wrap:wrap}
+.bk-title{font-family:var(--fh);font-size:23px;font-weight:800;color:var(--t1);letter-spacing:-.5px}
+.bk-breadcrumb{display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--t3);margin-top:4px;list-style:none;padding:0}
+.bk-breadcrumb a{color:var(--t2);text-decoration:none;transition:color .14s}
+.bk-breadcrumb a:hover{color:var(--ac)}
+.bk-breadcrumb li:not(:last-child)::after{content:'/';margin-left:5px;color:var(--bdr)}
+
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
+.m-tile{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:18px 20px;display:flex;align-items:center;gap:14px;box-shadow:var(--shd);position:relative;overflow:hidden;transition:transform .2s var(--ease),box-shadow .2s var(--ease);cursor:default}
+.m-tile::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--mc,var(--ac));transform:scaleX(0);transform-origin:left;transition:transform .28s var(--ease)}
+.m-tile:hover{transform:translateY(-3px);box-shadow:0 10px 32px rgba(17,24,39,.10)}
+.m-tile:hover::after{transform:scaleX(1)}
+.m-ic{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;background:var(--mic,var(--ca-bg));color:var(--mc,var(--ca))}
+.m-val{font-family:var(--fh);font-size:28px;font-weight:800;color:var(--t1);line-height:1}
+.m-lbl{font-size:12px;color:var(--t2);margin-top:4px;font-weight:500}
+.m-ghost{position:absolute;right:-6px;top:50%;transform:translateY(-50%);font-size:54px;opacity:.04;color:var(--mc,var(--ac));pointer-events:none}
+
+.bk-wrap{background:var(--card);border:1px solid var(--bdr);border-radius:16px;overflow:hidden;box-shadow:var(--shd)}
+.bk-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 20px;border-bottom:1px solid var(--bdr)}
+.bk-search{display:flex;align-items:center;gap:9px;height:40px;padding:0 14px;border-radius:10px;border:1.5px solid var(--bdr);background:var(--page);transition:all .18s var(--ease);width:280px}
+.bk-search:focus-within{border-color:var(--ac);background:#fff;box-shadow:0 0 0 3px var(--ac-bg)}
+.bk-search i{color:var(--t3);font-size:14px;flex-shrink:0}
+.bk-search input{border:none;background:transparent;outline:none;font-family:var(--fb);font-size:13.5px;color:var(--t1);width:100%}
+.bk-search input::placeholder{color:var(--t3)}
+.tb-btn{display:flex;align-items:center;gap:7px;height:40px;padding:0 16px;border-radius:10px;border:1.5px solid var(--bdr);background:var(--page);font-family:var(--fb);font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;transition:all .15s var(--ease)}
+.tb-btn:hover{background:var(--card);border-color:#c4cdd8;color:var(--t1)}
+.ml-a{margin-left:auto}
+.res-txt{font-size:12.5px;color:var(--t3)}
+.res-txt b{color:var(--t2)}
+
+.bk-tbl{width:100%;border-collapse:collapse}
+.bk-tbl thead th{background:var(--page);padding:11px 18px;font-size:10.5px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--t3);border-bottom:1px solid var(--bdr);white-space:nowrap}
+.bk-tbl tbody tr{border-bottom:1px solid #f0f4fb;transition:background .12s}
+.bk-tbl tbody tr:last-child{border-bottom:none}
+.bk-tbl tbody tr:hover{background:#f7f9ff}
+.bk-tbl td{padding:13px 18px;vertical-align:middle}
+
+.cat-icon-wrap{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--ac-bg),rgba(245,158,11,.2));display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--ac);flex-shrink:0}
+.cat-nm{font-family:var(--fh);font-size:14px;font-weight:700;color:var(--t1)}
+.cat-id{font-family:monospace;font-size:11px;color:var(--t3);margin-top:3px;display:block}
+.parent-chip{display:inline-flex;align-items:center;gap:5px;background:var(--cg-bg);color:var(--cg);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:600}
+.parent-chip i{font-size:11px}
+.parent-root{display:inline-flex;align-items:center;gap:5px;background:var(--page);color:var(--t3);border:1.5px dashed var(--bdr);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:500}
+.desc-pill{display:inline-flex;align-items:center;gap:6px;background:var(--cb-bg);color:var(--cb);border-radius:8px;padding:4px 11px;font-size:12.5px;font-weight:500;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.desc-pill i{font-size:11px;flex-shrink:0}
+.desc-nil{display:inline-flex;align-items:center;gap:5px;background:var(--page);color:var(--t3);border:1.5px dashed var(--bdr);border-radius:8px;padding:4px 10px;font-size:12px}
+.act-g{display:flex;align-items:center;justify-content:flex-end;gap:5px}
+
+.bk-foot{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--page);border-top:1px solid var(--bdr)}
+.bk-foot-t{font-size:12.5px;color:var(--t3)}
+.bk-foot-t b{color:var(--t2)}
+.pag{display:flex;gap:4px}
+.pag-b{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600;cursor:pointer;border:1.5px solid var(--bdr);background:var(--card);color:var(--t2);transition:all .14s var(--ease)}
+.pag-b:hover{background:var(--ac-bg);color:var(--ac);border-color:var(--ac)}
+.pag-b.on{background:var(--ac);color:var(--sb);border-color:var(--ac);box-shadow:var(--ac-glow)}
+
+.bk-empty{text-align:center;padding:70px 20px}
+.bk-empty-ic{width:72px;height:72px;border-radius:20px;background:var(--page);border:2px dashed var(--bdr);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--t3);margin:0 auto 18px}
+.bk-empty h5{font-family:var(--fh);font-size:16px;font-weight:800;color:var(--t2);margin-bottom:6px}
+.bk-empty p{font-size:13px;color:var(--t3)}
+
+.bk-alert{display:flex;align-items:center;gap:11px;padding:13px 18px;border-radius:12px;margin-bottom:20px;font-size:13.5px;font-family:var(--fb);background:var(--cg-bg);color:#065f46;border:1px solid rgba(16,185,129,.2);animation:fadeUp .3s var(--ease)}
+.bk-alert i{font-size:17px;flex-shrink:0}
+.bk-ac{margin-left:auto;background:none;border:none;cursor:pointer;opacity:.55;font-size:14px;color:inherit}
+
+@media(max-width:900px){.metrics{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.bk-head{flex-direction:column;align-items:flex-start}}
+    </style>
+    </th:block>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="bk-head anim anim-1">
+        <div>
+            <div class="bk-title">Danh mục Sách</div>
+            <ol class="bk-breadcrumb">
+                <li><a th:href="@{/admin/dashboard}"><i class="bi bi-house-door"></i> Trang chủ</a></li>
+                <li class="active">Quản lý Danh mục</li>
+            </ol>
+        </div>
+        <a th:href="@{/admin/category/add}" class="btn-p">
+            <i class="bi bi-plus-lg"></i> Thêm danh mục mới
+        </a>
+    </div>
+
+    <div th:if="${successMsg}" class="bk-alert anim anim-1">
+        <i class="bi bi-check-circle-fill"></i><span th:text="${successMsg}"></span>
+        <button class="bk-ac" onclick="this.closest('.bk-alert').remove()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div th:if="${errorMsg}" class="bk-alert anim anim-1" style="background:var(--cr-bg);color:#991b1b;border-color:rgba(239,68,68,.2)">
+        <i class="bi bi-exclamation-triangle-fill"></i><span th:text="${errorMsg}"></span>
+        <button class="bk-ac" onclick="this.closest('.bk-alert').remove()"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <div class="metrics anim anim-2">
+        <div class="m-tile" style="--mc:var(--ca);--mic:var(--ca-bg)">
+            <div class="m-ic"><i class="bi bi-tags"></i></div>
+            <div><div class="m-val" th:text="${list.size()}">0</div><div class="m-lbl">Tổng danh mục</div></div>
+            <div class="m-ghost"><i class="bi bi-tags"></i></div>
+        </div>
+        <div class="m-tile" style="--mc:var(--cg);--mic:var(--cg-bg)">
+            <div class="m-ic"><i class="bi bi-card-checklist"></i></div>
+            <div><div class="m-val" th:text="${list.?[description != null and !description.isEmpty()].size()}">0</div><div class="m-lbl">Có mô tả</div></div>
+            <div class="m-ghost"><i class="bi bi-card-checklist"></i></div>
+        </div>
+        <div class="m-tile" style="--mc:var(--cr);--mic:var(--cr-bg)">
+            <div class="m-ic"><i class="bi bi-clipboard-x"></i></div>
+            <div><div class="m-val" th:text="${list.?[description == null or description.isEmpty()].size()}">0</div><div class="m-lbl">Chưa có mô tả</div></div>
+            <div class="m-ghost"><i class="bi bi-clipboard-x"></i></div>
+        </div>
+    </div>
+
+    <div class="bk-wrap anim anim-3">
+        <div class="bk-toolbar">
+            <div class="bk-search">
+                <i class="bi bi-search"></i>
+                <input type="text" id="searchInput" placeholder="Tìm tên danh mục...">
+            </div>
+            <button class="tb-btn"><i class="bi bi-funnel"></i> Lọc</button>
+            <button class="tb-btn"><i class="bi bi-download"></i> Xuất</button>
+            <div class="ml-a"><span class="res-txt">Tổng <b id="visibleCount" th:text="${list.size()}">0</b> danh mục</span></div>
+        </div>
+
+        <table class="bk-tbl">
+            <thead>
+                <tr>
+                    <th style="width:60px;padding-left:22px">Icon</th>
+                    <th>Tên danh mục</th>
+                    <th>Danh mục cha</th>
+                    <th>Mô tả chi tiết</th>
+                    <th class="text-end" style="padding-right:22px">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr th:each="cat : ${list}">
+                    <td style="padding-left:22px">
+                        <div class="cat-icon-wrap"><i class="bi bi-bookmark-star-fill"></i></div>
+                    </td>
+                    <td>
+                        <div class="cat-nm" th:text="${cat.name}"></div>
+                        <span class="cat-id" th:text="${'ID · #' + cat.id}"></span>
+                    </td>
+                    <td>
+                        <span th:if="${cat.parent != null}" class="parent-chip">
+                            <i class="bi bi-diagram-3-fill"></i>
+                            <span th:text="${cat.parent.name}"></span>
+                        </span>
+                        <span th:unless="${cat.parent != null}" class="parent-root">
+                            <i class="bi bi-circle-fill" style="font-size:6px"></i> Gốc
+                        </span>
+                    </td>
+                    <td>
+                        <span th:if="${cat.description != null and !cat.description.isEmpty()}"
+                              class="desc-pill" th:title="${cat.description}">
+                            <i class="bi bi-card-text"></i>
+                            <span th:text="${#strings.abbreviate(cat.description, 45)}"></span>
+                        </span>
+                        <span th:unless="${cat.description != null and !cat.description.isEmpty()}" class="desc-nil">
+                            <i class="bi bi-dash-circle"></i> Chưa có mô tả
+                        </span>
+                    </td>
+                    <td style="padding-right:22px">
+                        <div class="act-g">
+                            <a th:href="@{/admin/category/edit/{id}(id=${cat.id})}" class="ai ai-edit" title="Sửa"><i class="bi bi-pencil"></i></a>
+                            <a th:href="@{/admin/category/delete/{id}(id=${cat.id})}" class="ai ai-del" title="Xóa"
+                               onclick="return confirm('Bạn chắc chắn muốn xóa danh mục này?')">
+                                <i class="bi bi-trash3"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(list)}">
+                    <td colspan="5">
+                        <div class="bk-empty">
+                            <div class="bk-empty-ic"><i class="bi bi-folder2-open"></i></div>
+                            <h5>Chưa có danh mục nào</h5>
+                            <p>Hãy thêm danh mục đầu tiên để phân loại kho sách.</p>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="bk-foot">
+            <span class="bk-foot-t">Hiển thị <b id="footCount" th:text="${list.size()}">0</b> / <b th:text="${list.size()}">0</b> danh mục</span>
+            <div class="pag">
+                <div class="pag-b"><i class="bi bi-chevron-left"></i></div>
+                <div class="pag-b on">1</div>
+                <div class="pag-b"><i class="bi bi-chevron-right"></i></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<th:block layout:fragment="script">
+<script>
+    const inp = document.getElementById('searchInput');
+    const vc  = document.getElementById('visibleCount');
+    const fc  = document.getElementById('footCount');
+    inp.addEventListener('input', function () {
+        const q = this.value.toLowerCase().trim();
+        let cnt = 0;
+        document.querySelectorAll('#tableBody tr').forEach(row => {
+            const nm   = row.querySelector('.cat-nm')?.textContent.toLowerCase() || '';
+            const desc = row.querySelector('.desc-pill span')?.textContent.toLowerCase() || '';
+            const show = nm.includes(q) || desc.includes(q);
+            row.style.display = show ? '' : 'none';
+            if (show && row.querySelector('.cat-nm')) cnt++;
+        });
+        const total = [...document.querySelectorAll('#tableBody tr')].filter(r=>r.querySelector('.cat-nm')).length;
+        if (vc) vc.textContent = q ? cnt : total;
+        if (fc) fc.textContent = q ? cnt : total;
+    });
+</script>
+</th:block>
+</body>
+</html>

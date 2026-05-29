@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin_layout}"
+      lang="vi">
+<head>
+    <title>Thêm Sách Mới</title>
+    <th:block layout:fragment="css">
+        <style>
+            .form-card {
+                background: #fff;
+                border-radius: 15px;
+                padding: 30px;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+            }
+            .form-label { font-weight: 600; color: #444; }
+            .text-primary-custom { color: #4154f1; }
+            .img-preview { height: 120px; border-radius: 8px; border: 2px dashed #ddd; padding: 5px; }
+        </style>
+    </th:block>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="pagetitle">
+        <h1 style="color: #012970; font-weight: 700;">Thêm Sách Mới</h1>
+    </div>
+
+    <section class="section">
+        <form th:action="@{/admin/book/save}" th:object="${book}" method="post" enctype="multipart/form-data">
+            
+            <div class="form-card">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold text-primary-custom">Tiêu đề sách</label>
+                        <input type="text" th:field="*{title}" class="form-control" placeholder="Nhập tên sách..." required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-primary-custom">ISBN</label>
+                        <input type="text" th:field="*{isbn}" class="form-control" placeholder="Ví dụ: 978-3-16..." required>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-primary-custom">Thể loại</label>
+                        <select th:field="*{category}" class="form-select" required>
+                            <option value="">-- Chọn thể loại --</option>
+                            <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-primary-custom">Nhà xuất bản</label>
+                        <select th:field="*{publisher}" class="form-select" required>
+                            <option value="">-- Chọn NXB --</option>
+                            <option th:each="p : ${publishers}" th:value="${p.id}" th:text="${p.name}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-primary-custom">Tác giả</label>
+                        <select th:field="*{authors}" class="form-select" multiple style="height: 38px;">
+                            <option th:each="a : ${authors}" th:value="${a.id}" th:text="${a.fullName}"></option>
+                        </select>
+                        <small class="text-muted">(Giữ Ctrl để chọn nhiều)</small>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4" style="background: #f8f9fa; padding: 15px; border-radius: 10px;">
+                    <div class="col-md-3">
+                        <label class="form-label text-success">Tổng số bản sao</label>
+                        <input type="number" th:field="*{totalCopies}" class="form-control" min="0">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-danger">Số bản có sẵn</label>
+                        <input type="number" th:field="*{availableCopies}" class="form-control" min="0">
+                        <small class="text-muted">Chỉnh số này để hiện thanh xanh</small>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Vị trí kệ</label>
+                        <input type="text" th:field="*{shelfLocation}" class="form-control" placeholder="A-101">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Ngôn ngữ</label>
+                        <input type="text" th:field="*{language}" class="form-control">
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Đơn giá (VNĐ)</label>
+                        <input type="number" th:field="*{price}" class="form-control" step="1000">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Phí cọc (VNĐ)</label>
+                        <input type="number" th:field="*{depositFee}" class="form-control" step="1000">
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-12">
+                        <label class="form-label">Hình ảnh bìa sách</label>
+                        <div class="input-group">
+                            <input type="file" name="imageFile" class="form-control" accept="image/*">
+                        </div>
+                        <input type="hidden" th:field="*{coverImage}">
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a th:href="@{/admin/book/list}" class="btn btn-secondary px-4" style="border-radius: 10px;">Quay lại</a>
+                    <button type="submit" class="btn btn-primary px-5" style="border-radius: 10px; background: #4154f1;">Thêm sách vào hệ thống</button>
+                </div>
+            </div>
+        </form>
+    </section>
+</div>
+</body>
+</html>

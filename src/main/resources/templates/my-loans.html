@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sách đang mượn – LibManage</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: { 50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',300:'#93c5fd',
+                                500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a',950:'#0f2057' },
+                        gold: { 400:'#fbbf24',500:'#f59e0b',600:'#d97706' },
+                    },
+                    fontFamily: { display:['"Playfair Display"','serif'], body:['"DM Sans"','sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        *,*::before,*::after{box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{font-family:'DM Sans',sans-serif;background:#f8faff;color:#0c1b3a;-webkit-font-smoothing:antialiased}
+        :root{--ease:cubic-bezier(.4,0,.2,1)}
+        .btn-primary{background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;padding:.65rem 1.5rem;border-radius:10px;font-weight:600;font-size:.875rem;display:inline-flex;align-items:center;gap:.5rem;border:none;cursor:pointer;transition:all .2s var(--ease);box-shadow:0 4px 14px rgba(37,99,235,.25);text-decoration:none}
+        .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(37,99,235,.35);color:#fff}
+        .card{background:#fff;border:1px solid #e2e8f5;border-radius:16px;box-shadow:0 2px 8px rgba(14,30,80,.05)}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+        .anim{animation:fadeUp .4s cubic-bezier(.4,0,.2,1) both}
+        .d1{animation-delay:.05s}.d2{animation-delay:.10s}.d3{animation-delay:.15s}
+        ::-webkit-scrollbar{width:6px;height:6px}
+        ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:6px}
+        ::-webkit-scrollbar-track{background:#f1f5f9}
+    </style>
+</head>
+<body>
+
+<div th:replace="~{navbar :: navbar}"></div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+
+    <div class="mb-8 anim d1">
+        <nav class="flex items-center gap-2 text-[13px] text-slate-400 mb-3">
+            <a th:href="@{/}" class="hover:text-blue-600 transition-colors">Trang chủ</a>
+            <span>/</span>
+            <a th:href="@{/profile}" class="hover:text-blue-600 transition-colors">Tài khoản</a>
+            <span>/</span>
+            <span class="text-navy-800 font-medium">Sách đang mượn</span>
+        </nav>
+        <div class="flex items-end justify-between flex-wrap gap-4">
+            <div>
+                <h1 class="font-display font-bold text-navy-900 text-2xl sm:text-3xl">Sách đang mượn</h1>
+                <p class="text-slate-400 text-sm mt-1">Theo dõi trạng thái các sách bạn đang mượn</p>
+            </div>
+            <a th:href="@{/category}" class="btn-primary">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                Tìm thêm sách
+            </a>
+        </div>
+    </div>
+
+   <div class="grid grid-cols-2 sm:grid-cols-4 gap-5 mb-8 anim d2">
+        
+        <div class="card p-5 flex items-center gap-4 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 bg-white">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 bg-blue-50 border border-blue-100 shadow-2xs">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13"/>
+                </svg>
+            </div>
+            <div class="min-w-0">
+                <div class="font-display font-bold text-navy-900 text-2xl leading-none" th:text="${activeLoans?.size() ?: 0}">0</div>
+                <div class="text-sm font-medium text-slate-400 mt-1.5 whitespace-nowrap">Đang mượn</div>
+            </div>
+        </div>
+
+        <div class="card p-5 flex items-center gap-4 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 bg-white">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 bg-amber-50 border border-amber-100 shadow-2xs">
+                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <div class="min-w-0">
+                <div class="font-display font-bold text-navy-900 text-2xl leading-none" th:text="${overdueCount ?: 0}">0</div>
+                <div class="text-sm font-medium text-slate-400 mt-1.5 whitespace-nowrap">Quá hạn</div>
+            </div>
+        </div>
+
+        <div class="card p-5 flex items-center gap-4 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 bg-white">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 bg-emerald-50 border border-emerald-100 shadow-2xs">
+                <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <div class="min-w-0">
+                <div class="font-display font-bold text-navy-900 text-2xl leading-none" th:text="${member?.totalBorrowed ?: 0}">0</div>
+                <div class="text-sm font-medium text-slate-400 mt-1.5 whitespace-nowrap">Tổng đã mượn</div>
+            </div>
+        </div>
+
+        <div class="card p-5 flex items-center gap-4 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 bg-white">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 bg-red-50 border border-red-100 shadow-2xs">
+                <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                </svg>
+            </div>
+            <div class="min-w-0">
+                <div class="font-display font-bold text-2xl leading-none"
+                     th:text="${member?.currentDebt != null and member.currentDebt > 0 ? #numbers.formatDecimal(member.currentDebt,0,'COMMA') + '₫' : '0₫'}"
+                     th:classappend="${member?.currentDebt != null and member.currentDebt > 0 ? 'text-red-600' : 'text-navy-900'}">0₫</div>
+                <div class="text-sm font-medium text-slate-400 mt-1.5 whitespace-nowrap">Tiền phạt</div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="flex bg-white border border-blue-100 rounded-xl p-1 gap-1 mb-6 inline-flex anim d2">
+        <button onclick="filterLoans('all')" id="tab-all"
+                class="filter-tab px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white transition-all">
+            Tất cả
+        </button>
+        <button onclick="filterLoans('active')" id="tab-active"
+                class="filter-tab px-4 py-2 rounded-lg text-sm font-semibold text-slate-500 hover:text-navy-800 transition-all">
+            Đang mượn
+        </button>
+        <button onclick="filterLoans('overdue')" id="tab-overdue"
+                class="filter-tab px-4 py-2 rounded-lg text-sm font-semibold text-slate-500 hover:text-navy-800 transition-all">
+            Quá hạn
+        </button>
+		<button onclick="filterLoans('reserved')" id="tab-reserved"
+		        class="filter-tab px-4 py-2 rounded-lg text-sm font-semibold text-slate-500 hover:text-navy-800 transition-all">
+		    Đợi sách
+		</button>
+        <button onclick="filterLoans('returned')" id="tab-returned"
+                class="filter-tab px-4 py-2 rounded-lg text-sm font-semibold text-slate-500 hover:text-navy-800 transition-all">
+            Đã trả
+        </button>
+    </div>
+
+    <div class="card overflow-hidden anim d3 bg-white" id="loanListContainer">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[900px]">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs font-semibold uppercase tracking-wider">
+                        <th class="px-6 py-4">Mã đơn</th>
+                        <th class="px-6 py-4">Thông tin sách mượn</th>
+                        <th class="px-6 py-4">Ngày mượn</th>
+                        <th class="px-6 py-4">Hạn trả dự kiến</th>
+                        <th class="px-6 py-4">Trạng thái phiếu</th>
+                    </tr>
+                </thead>
+				<tbody class="divide-y divide-slate-100 text-sm text-navy-950" id="loanTableBody">
+				    
+					<tr th:each="loan : ${loans}" 
+					    th:if="${loans != null and !#lists.isEmpty(loans)}"
+					    class="loan-card hover:bg-slate-50/80 transition-colors"
+					    th:data-status="${loanStatusMap.get(loan.id) != null ? loanStatusMap.get(loan.id).toLowerCase() : 'active'}">
+				        
+				        <td class="px-6 py-4 font-mono font-bold text-xs text-blue-600 vertical-baseline">
+				            <span class="bg-blue-50 px-2 py-1 rounded" th:text="${loan.loanCode}">PM-001</span>
+							<br/><small th:text="'status=' + ${loanStatusMap.get(loan.id)}"></small>
+				        </td>
+				        
+				        <td class="px-6 py-4">
+				            <div class="space-y-3.5">
+				                <div th:each="item : ${loan.items}" class="flex items-center gap-3.5">
+				                    <div class="w-8 h-11 flex-shrink-0 rounded overflow-hidden bg-slate-100 border border-slate-200 shadow-3xs">
+				                        <img th:if="${item.bookCopy?.book?.coverImage != null and !item.bookCopy.book.coverImage.isEmpty()}"
+				                             th:src="${item.bookCopy.book.coverImage}" class="w-full h-full object-cover">
+				                        <div th:unless="${item.bookCopy?.book?.coverImage != null and !item.bookCopy.book.coverImage.isEmpty()}"
+				                             class="w-full h-full bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-[8px] text-white/60 font-bold">BOOK</div>
+				                    </div>
+				                    <div class="flex-1 min-w-0">
+				                        <div class="font-semibold text-navy-900 line-clamp-1 text-xs" th:text="${item.bookCopy?.book?.title}"></div>
+				                        <div class="text-[11px] text-slate-400 font-mono mt-0.5" th:text="'Mã vạch: ' + ${item.bookCopy?.barcode}"></div>
+				                    </div>
+									<span th:if="${loanStatusMap.get(loan.id) == 'RETURNED'}" class="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md ml-auto">
+									    ✓ Đã trả
+									</span>
+									<span th:unless="${loanStatusMap.get(loan.id) == 'RETURNED'}" class="text-[10px] font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md ml-auto">
+									    Chưa trả
+									</span>
+				                </div>
+				            </div>
+				        </td>
+				        
+				        <td class="px-6 py-4 text-xs text-slate-500 font-medium whitespace-nowrap"
+				            th:text="${loan.loanDate != null ? #temporals.format(loan.loanDate,'dd/MM/yyyy') : '—'}"></td>
+				        
+				        <td class="px-6 py-4 text-xs font-semibold whitespace-nowrap">
+				            <div th:text="${loan.dueDate != null ? #temporals.format(loan.dueDate,'dd/MM/yyyy') : '—'}"
+				                 th:classappend="${loan.status?.name() == 'OVERDUE'} ? 'text-red-600 font-bold' : 'text-slate-700'"></div>
+				            <div th:if="${loan.returnDate != null}" class="text-[10px] text-emerald-600 font-medium mt-1"
+				                 th:text="'Trả vào: ' + ${#temporals.format(loan.returnDate,'dd/MM/yyyy')}"></div>
+				        </td>
+
+						<td class="px-6 py-4 whitespace-nowrap">
+						        <span th:if="${loanStatusMap.get(loan.id) == 'RETURNED'}" class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+						            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Đã trả
+						        </span>
+						        <span th:if="${loanStatusMap.get(loan.id) == 'OVERDUE'}" class="inline-flex items-center gap-1 bg-red-50 text-red-700 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+						            <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span> Quá hạn
+						        </span>
+						        <span th:if="${loanStatusMap.get(loan.id) == 'ACTIVE'}" class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+						            <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> Đang mượn
+						        </span>
+						    </td>
+				    </tr>
+
+					<tr th:each="res : ${reservations}" 
+					    class="loan-card reservation-row" 
+					    data-status="reserved">
+					    
+					    <td class="px-6 py-4 font-mono font-bold text-xs text-amber-600">
+					        <span class="bg-amber-50 px-2 py-1 rounded">WAITING</span>
+					    </td>
+					    
+					    <td class="px-6 py-4">
+					        <div class="flex items-center gap-3.5">
+					            <div class="w-8 h-11 flex-shrink-0 rounded overflow-hidden bg-slate-100 border border-slate-200 shadow-3xs">
+					                <img th:if="${res.book?.coverImage != null and !res.book.coverImage.isEmpty()}"
+					                     th:src="${res.book.coverImage}" class="w-full h-full object-cover">
+					                <div th:unless="${res.book?.coverImage != null and !res.book.coverImage.isEmpty()}"
+					                     class="w-full h-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-[8px] text-white font-bold">WAIT</div>
+					            </div>
+					            <div class="flex-1 min-w-0">
+					                <div class="font-semibold text-navy-900 line-clamp-1 text-xs" th:text="${res.book != null ? res.book.title : 'Sách chờ'}"></div>
+					                <div class="text-[11px] text-slate-400 font-mono mt-0.5">Trạng thái: Đang chờ</div>
+					            </div>
+					        </div>
+					    </td>
+					    
+					    <td class="px-6 py-4 text-xs text-slate-500 font-medium whitespace-nowrap" 
+					        th:text="${res.reservationDate != null ? #temporals.format(res.reservationDate,'dd/MM/yyyy') : '—'}"></td>
+					    
+					    <td class="px-6 py-4 text-xs text-slate-400 italic">—</td>
+					    
+					    <td class="px-6 py-4 whitespace-nowrap">
+					        <span class="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+					            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Đang đợi sách
+					        </span>
+					    </td>
+					</tr>
+				                    
+				</tbody>
+            </table>
+        </div>
+        
+        <div id="no-loans-target" class="p-16 text-center hidden bg-white">
+            <div class="w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center bg-slate-50 border border-dashed border-slate-200">
+                <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13"/></svg>
+            </div>
+            <h3 class="font-display font-bold text-navy-900 text-base mb-1">Không tìm thấy đơn mượn nào</h3>
+            <p class="text-slate-400 text-xs">Danh mục trạng thái được chọn hiện không có dữ liệu hiển thị.</p>
+        </div>
+    </div>
+    
+    <div th:if="${loans == null or #lists.isEmpty(loans)}" class="card p-16 text-center bg-white anim d3">
+        <h3 class="font-display font-bold text-navy-900 text-lg mb-2">Bạn chưa mượn sách nào</h3>
+        <p class="text-slate-400 text-sm mb-5">Hãy khám phá kho sách và đến thư viện để mượn sách</p>
+        <a th:href="@{/category}" class="btn-primary mx-auto">Khám phá kho sách</a>
+    </div>
+</div>
+
+<div th:replace="~{navbar :: footer}"></div>
+
+<script>
+    function filterLoans(status) {
+        // 1. Cập nhật UI nút bấm
+        document.querySelectorAll('.filter-tab').forEach(b => {
+            b.classList.remove('bg-blue-600', 'text-white');
+            b.classList.add('text-slate-500');
+        });
+        const activeBtn = document.getElementById('tab-' + status);
+        if (activeBtn) {
+            activeBtn.classList.add('bg-blue-600', 'text-white');
+            activeBtn.classList.remove('text-slate-500');
+        }
+
+        const target = status.trim().toLowerCase();
+        let countVisible = 0;
+
+        // 2. Lọc các hàng
+        document.querySelectorAll('.loan-card').forEach(row => {
+            const cardStatus = (row.dataset.status || '').trim().toLowerCase();
+            
+            // Logic so sánh:
+            // Nếu tab là 'active', chấp nhận cả 'active' và 'pending'
+            let isVisible = false;
+            if (target === 'all') {
+                isVisible = true;
+            } else if (target === 'active') {
+                isVisible = (cardStatus === 'active' || cardStatus === 'pending');
+            } else {
+                // Các trường hợp còn lại: reserved, overdue, returned
+                isVisible = (cardStatus === target);
+            }
+
+            // Áp dụng display
+            if (isVisible) {
+                row.style.display = '';
+                countVisible++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // 3. Xử lý thông báo "Không có dữ liệu"
+        const noLoanState = document.getElementById('no-loans-target');
+        if (noLoanState) {
+            noLoanState.style.display = (countVisible === 0) ? 'block' : 'none';
+            noLoanState.classList.toggle('hidden', countVisible > 0);
+        }
+    }
+
+    // Tự động kích hoạt tab 'all' khi trang vừa load
+    document.addEventListener('DOMContentLoaded', () => {
+        filterLoans('all');
+    });
+</script>
+</body>
+</html>

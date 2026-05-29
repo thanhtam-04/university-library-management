@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Danh mục sách – LibManage</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: { 50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',300:'#93c5fd',400:'#60a5fa',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a',950:'#0f2057' },
+                        gold: { 400:'#fbbf24',500:'#f59e0b',600:'#d97706' },
+                    },
+                    fontFamily: { display:['"Playfair Display"','serif'], body:['"DM Sans"','sans-serif'] },
+                }
+            }
+        }
+    </script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family:'DM Sans',sans-serif; background:#f8faff; color:#0c1b3a; -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+        .font-display { font-family:'Playfair Display',serif; }
+        .btn-primary { background:linear-gradient(135deg,#1d4ed8,#2563eb); color:#fff; padding:.75rem 1.75rem; border-radius:10px; font-weight:600; font-size:.9375rem; display:inline-flex; align-items:center; gap:.5rem; border:none; cursor:pointer; transition:all .22s; box-shadow:0 4px 16px rgba(37,99,235,.30); text-decoration:none; }
+        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(37,99,235,.38); color:#fff; }
+        .btn-outline { background:transparent; color:#1d4ed8; border:1.5px solid #93c5fd; padding:.7rem 1.5rem; border-radius:10px; font-weight:600; font-size:.9rem; display:inline-flex; align-items:center; gap:.5rem; cursor:pointer; transition:all .2s; text-decoration:none; }
+        .btn-outline:hover { background:#eff6ff; border-color:#2563eb; color:#1d4ed8; }
+        .book-card { background:#fff; border:1px solid #e2e8f5; border-radius:14px; overflow:hidden; transition:all .25s; box-shadow:0 2px 8px rgba(14,30,80,.05); }
+        .book-card:hover { transform:translateY(-5px); box-shadow:0 20px 40px rgba(14,30,80,.12); border-color:#93c5fd; }
+        .book-card:hover .book-cover-img { transform:scale(1.04); }
+        .book-cover-img { transition:transform .35s; }
+        .badge-available { background:#dcfce7; color:#15803d; font-size:.7rem; font-weight:700; padding:2px 9px; border-radius:20px; }
+        .badge-unavailable { background:#fee2e2; color:#b91c1c; font-size:.7rem; font-weight:700; padding:2px 9px; border-radius:20px; }
+        .tag { display:inline-block; background:#eff6ff; color:#1d4ed8; font-size:.7rem; font-weight:600; padding:3px 10px; border-radius:20px; }
+        .cat-card { background:#fff; border:1.5px solid #e2e8f5; border-radius:16px; padding:24px; cursor:pointer; transition:all .2s; text-decoration:none; display:block; }
+        .cat-card:hover { border-color:#3b82f6; box-shadow:0 8px 24px rgba(37,99,235,.12); transform:translateY(-3px); }
+        .cat-card.active { border-color:#2563eb; background:#eff6ff; box-shadow:0 4px 16px rgba(37,99,235,.15); }
+        ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:#bfdbfe; border-radius:6px; }
+        input:focus, select:focus { outline:none; box-shadow:0 0 0 3px rgba(37,99,235,.15); }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{navbar :: navbar}"></div>
+
+<section class="relative overflow-hidden py-14" style="background:linear-gradient(135deg,#0f2057 0%,#1e3a8a 50%,#1d4ed8 100%)">
+    <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle,rgba(255,255,255,.5) 1px,transparent 1px);background-size:32px 32px"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-5">
+            <svg class="w-3.5 h-3.5 text-gold-400" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            <span class="text-white/80 text-xs font-semibold tracking-wide uppercase">Kho tri thức</span>
+        </div>
+        <h1 class="font-display text-white text-4xl sm:text-5xl font-bold mb-4">Danh mục <span style="color:#fbbf24">sách</span></h1>
+        <p class="text-white/70 text-base max-w-xl mx-auto">Khám phá hàng nghìn đầu sách được phân loại theo chuyên ngành, phù hợp với mọi nhu cầu học tập và nghiên cứu.</p>
+    </div>
+    <div class="absolute bottom-0 left-0 right-0">
+        <svg viewBox="0 0 1440 40" fill="none"><path d="M0 40V20C360 0 720 40 1080 20C1260 10 1380 30 1440 20V40H0Z" fill="#f8faff"/></svg>
+    </div>
+</section>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="flex gap-8 items-start">
+
+        <aside class="hidden lg:block w-72 flex-shrink-0">
+            <div class="bg-white border border-blue-50 rounded-2xl overflow-hidden sticky top-24" style="box-shadow:0 2px 8px rgba(14,30,80,.05)">
+                <div class="px-5 py-4 border-b border-slate-100">
+                    <h3 class="font-semibold text-navy-900 text-[15px]">Chuyên ngành</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Chọn để lọc sách</p>
+                </div>
+                <div class="p-3 space-y-1 max-h-[600px] overflow-y-auto">
+                    <a th:href="@{/category}" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-[13.5px] font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors">
+                        <span class="flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                            Tất cả danh mục
+                        </span>
+                        <span class="text-xs bg-blue-200 text-blue-800 rounded-full px-2 py-0.5 font-bold" th:text="${totalBooks ?: '0'}">0</span>
+                    </a>
+                    <a th:each="cat : ${categories}"
+                       th:href="@{/category(id=${cat.id})}"
+                       th:class="${selectedCat != null and selectedCat == cat.id ? 'flex items-center justify-between px-3 py-2.5 rounded-xl text-[13.5px] font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors' : 'flex items-center justify-between px-3 py-2.5 rounded-xl text-[13.5px] text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition-colors'}">
+                        <span th:text="${cat.name}">Danh mục</span>
+                        <span class="text-xs bg-slate-100 text-slate-500 rounded-full px-2 py-0.5 font-semibold"></span>
+                    </a>
+                    <th:block th:if="${categories == null or #lists.isEmpty(categories)}">
+                        <a href="#" th:each="c : ${#strings.listSplit('Kinh tế học,Quản trị kinh doanh,Công nghệ thông tin,Luật,Kế toán - Tài chính,Ngoại ngữ,Khoa học xã hội,Toán - Thống kê,Marketing,Kỹ năng mềm', ',')}"
+                           class="flex items-center justify-between px-3 py-2.5 rounded-xl text-[13.5px] text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                            <span th:text="${c}"></span>
+                        </a>
+                    </th:block>
+                </div>
+            </div>
+        </aside>
+
+        <div class="flex-1 min-w-0 min-h-0">
+
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                <div>
+                    <h2 class="font-display text-2xl font-bold text-navy-900" th:text="${selectedCatName ?: 'Tất cả sách'}">Tất cả sách</h2>
+                    <p class="text-slate-500 text-sm mt-1" th:text="${(books != null ? books.size() : 0) + ' đầu sách'}">0 đầu sách</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <select id="sortSelect" class="px-3 py-2 rounded-xl border border-blue-100 bg-white text-sm text-navy-900 focus:border-blue-400 transition-all" onchange="window.location.search='?sort='+this.value">
+                        <option value="new">Mới nhất</option>
+                        <option value="popular">Mượn nhiều nhất</option>
+                        <option value="az">A → Z</option>
+                    </select>
+                    <div class="flex bg-white border border-blue-100 rounded-xl p-1 gap-1">
+                        <button onclick="setView('grid')" id="btn-grid" class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center transition-all">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                        </button>
+                        <button onclick="setView('list')" id="btn-list" class="w-8 h-8 rounded-lg text-slate-400 flex items-center justify-center hover:bg-blue-50 transition-all">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 000 2h14a1 1 0 000-2H3zM3 9a1 1 0 000 2h14a1 1 0 000-2H3zM3 14a1 1 0 000 2h14a1 1 0 000-2H3z"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-grid" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div th:each="book : ${books}" th:if="${books != null and !#lists.isEmpty(books)}" class="book-card group dynamic-book-item">
+                    <div class="relative overflow-hidden" style="height:200px">
+                        <img th:src="${book.coverImage != null ? book.coverImage : '/images/book-default.jpg'}" th:alt="${book.title}" class="book-cover-img w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-navy-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <a th:href="@{/books/{id}(id=${book.id})}" class="bg-white text-navy-800 text-xs font-bold px-4 py-2 rounded-lg">Xem chi tiết</a>
+                        </div>
+                        <div class="absolute top-2 left-2">
+                            <span th:if="${book.availableCopies > 0}" class="badge-available">Còn sách</span>
+                            <span th:if="${book.availableCopies == 0}" class="badge-unavailable">Hết sách</span>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-semibold text-navy-900 text-sm leading-snug mb-1 line-clamp-2" th:text="${book.title}"></h3>
+                        <p class="text-slate-500 text-xs mb-2 truncate" th:text="${book.authors != null and !book.authors.isEmpty() ? book.authors.iterator().next() : 'Chưa cập nhật'}"></p>
+                        <div class="flex items-center justify-between">
+                            <span class="tag text-[11px]" th:text="${book.categoryName ?: 'Chung'}"></span>
+                            <span class="text-xs text-slate-400" th:text="${book.availableCopies + '/' + book.totalCopies}"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <th:block th:if="${books == null or #lists.isEmpty(books)}">
+                    <div th:each="i : ${#numbers.sequence(1,8)}" class="book-card group dynamic-book-item">
+                        <div class="relative overflow-hidden" style="height:200px">
+                            <div class="w-full h-full" th:style="${i % 4 == 1 ? 'background:linear-gradient(160deg,#1e3a8a,#3b82f6)' : i % 4 == 2 ? 'background:linear-gradient(160deg,#0f766e,#14b8a6)' : i % 4 == 3 ? 'background:linear-gradient(160deg,#7c3aed,#a78bfa)' : 'background:linear-gradient(160deg,#b45309,#f59e0b)'}"></div>
+                            <div class="absolute top-2 left-2"><span th:class="${i % 3 == 0 ? 'badge-unavailable' : 'badge-available'}" th:text="${i % 3 == 0 ? 'Hết sách' : 'Còn sách'}"></span></div>
+                        </div>
+                        <div class="p-3">
+                            <h3 class="font-semibold text-navy-900 text-sm mb-1">Đầu sách mẫu <span th:text="${i}"></span></h3>
+                            <p class="text-slate-500 text-xs mb-2">Tác giả mẫu</p>
+                            <div class="flex items-center justify-between">
+                                <span class="tag text-[11px]">Kinh tế</span>
+                                <span class="text-xs text-slate-400">3/5 quyển</span>
+                            </div>
+                        </div>
+                    </div>
+                </th:block>
+            </div>
+
+            <div id="view-list" class="hidden space-y-3">
+                <div th:each="book : ${books}" th:if="${books != null and !#lists.isEmpty(books)}" class="bg-white border border-blue-50 rounded-2xl p-4 flex gap-4 items-start hover:border-blue-200 hover:shadow-md transition-all dynamic-book-list-item" style="box-shadow:0 1px 4px rgba(14,30,80,.05)">
+                    <div class="w-16 h-20 rounded-xl overflow-hidden flex-shrink-0">
+                        <img th:src="${book.coverImage != null ? book.coverImage : '/images/book-default.jpg'}" th:alt="${book.title}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-1 min-w-0 min-h-0">
+                        <div class="flex items-start justify-between gap-3 flex-wrap">
+                            <div>
+                                <h3 class="font-semibold text-navy-900 text-[15px] mb-1" th:text="${book.title}"></h3>
+                                <p class="text-slate-500 text-sm" th:text="${book.authors != null and !book.authors.isEmpty() ? book.authors.iterator().next() : 'N/A'}"></p>
+                            </div>
+                            <span th:if="${book.availableCopies > 0}" class="badge-available flex-shrink-0">Còn sách</span>
+                            <span th:if="${book.availableCopies == 0}" class="badge-unavailable flex-shrink-0">Hết sách</span>
+                        </div>
+                        <div class="flex items-center gap-3 mt-2 flex-wrap">
+                            <span class="tag text-[11px]" th:text="${book.categoryName ?: 'Chung'}"></span>
+                            <span class="text-xs text-slate-400" th:text="${book.availableCopies + '/' + book.totalCopies + ' quyển'}"></span>
+                            <a th:href="@{/books/{id}(id=${book.id})}" class="text-xs text-blue-600 font-semibold hover:text-blue-800 ml-auto">Xem chi tiết →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="load-more-container" class="flex justify-center mt-10 hidden">
+                <button id="btnLoadMore" class="btn-primary px-8 py-3 rounded-xl font-bold flex items-center gap-2 transition-all duration-300">
+                    <span>Xem thêm sách</span>
+                    <svg class="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7-7-7m14-6l-7 7-7-7"/></svg>
+                </button>
+                <button id="btnCollapse" class="btn-outline px-8 py-3 rounded-xl font-bold hidden flex items-center gap-2 transition-all duration-300">
+                    <span>Rút gọn danh sách</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7 7 7M5 19l7-7 7 7"/></svg>
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{navbar :: footer}"></div>
+
+<script>
+    document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+        document.getElementById('mobileMenu')?.classList.toggle('hidden');
+    });
+
+    // Cấu hình View Grid/List toàn cục
+    let currentViewMode = 'grid';
+    function setView(v) {
+        currentViewMode = v;
+        document.getElementById('view-grid').classList.toggle('hidden', v !== 'grid');
+        document.getElementById('view-list').classList.toggle('hidden', v !== 'list');
+        document.getElementById('btn-grid').className = v === 'grid'
+            ? 'w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center transition-all'
+            : 'w-8 h-8 rounded-lg text-slate-400 flex items-center justify-center hover:bg-blue-50 transition-all';
+        document.getElementById('btn-list').className = v === 'list'
+            ? 'w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center transition-all'
+            : 'w-8 h-8 rounded-lg text-slate-400 flex items-center justify-center hover:bg-blue-50 transition-all';
+        
+        // Đồng bộ lại hiển thị phân trang khi chuyển đổi View mẫu
+        renderPagination();
+    }
+
+    // ==========================================
+    // LOGIC XỬ LÝ XEM THÊM VÀ RÚT GỌN (12 QUYỂN)
+    // ==========================================
+    const ITEMS_PER_PAGE = 12; 
+    let visibleCount = ITEMS_PER_PAGE;
+
+    function renderPagination() {
+        const gridItems = document.querySelectorAll('.dynamic-book-item');
+        const listItems = document.querySelectorAll('.dynamic-book-list-item');
+        const totalItems = Math.max(gridItems.length, listItems.length);
+
+        const container = document.getElementById('load-more-container');
+        const btnMore = document.getElementById('btnLoadMore');
+        const btnLess = document.getElementById('btnCollapse');
+
+        if (totalItems <= ITEMS_PER_PAGE) {
+            container.classList.add('hidden');
+            // Hiện hết nếu số lượng ít hơn hoặc bằng 12
+            gridItems.forEach(el => el.classList.remove('hidden'));
+            listItems.forEach(el => el.classList.remove('hidden'));
+            return;
+        }
+
+        container.classList.remove('hidden');
+
+        // Xử lý hiển thị Grid View
+        gridItems.forEach((el, index) => {
+            if (index < visibleCount) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        });
+
+        // Xử lý hiển thị List View
+        listItems.forEach((el, index) => {
+            if (index < visibleCount) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        });
+
+        // Điều khiển hiển thị Nút chuyển đổi trạng thái ẩn hiện
+        if (visibleCount >= totalItems) {
+            btnMore.classList.add('hidden');
+            btnLess.classList.remove('hidden');
+        } else {
+            btnMore.classList.remove('hidden');
+            btnLess.classList.add('hidden');
+        }
+    }
+
+    // Sự kiện khi nhấn Xem thêm
+    document.getElementById('btnLoadMore').addEventListener('click', () => {
+        const total = Math.max(
+            document.querySelectorAll('.dynamic-book-item').length,
+            document.querySelectorAll('.dynamic-book-list-item').length
+        );
+        visibleCount += ITEMS_PER_PAGE;
+        renderPagination();
+        
+        // Kích hoạt lại animation scroll reveal cho các phần tử vừa xuất hiện
+        triggerIntersectionObserver();
+    });
+
+    // Sự kiện khi nhấn Rút gọn danh sách
+    document.getElementById('btnCollapse').addEventListener('click', () => {
+        visibleCount = ITEMS_PER_PAGE;
+        renderPagination();
+        
+        // Cuộn mượt màn hình lên đầu vùng danh sách để tiện theo dõi
+        document.getElementById('sortSelect').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    // IntersectionObserver dành cho Scroll Reveal hiệu ứng
+    const io = new IntersectionObserver(entries => {
+        entries.forEach(e => { 
+            if (e.isIntersecting) { 
+                e.target.style.opacity = '1'; 
+                e.target.style.transform = 'translateY(0)'; 
+                io.unobserve(e.target); 
+            }
+        });
+    }, { threshold: 0.04 });
+
+    function triggerIntersectionObserver() {
+        document.querySelectorAll('.book-card').forEach((el, i) => {
+            if (!el.classList.contains('hidden') && el.style.opacity !== '1') {
+                el.style.opacity = '0'; 
+                el.style.transform = 'translateY(16px)';
+                el.style.transition = `opacity .35s ease ${i % 12 * 35}ms, transform .35s ease ${i % 12 * 35}ms`;
+                io.observe(el);
+            }
+        });
+    }
+
+    // Khởi tạo luồng chạy ban đầu của giao diện
+    document.addEventListener('DOMContentLoaded', () => {
+        renderPagination();
+        triggerIntersectionObserver();
+    });
+</script>
+</body>
+</html>

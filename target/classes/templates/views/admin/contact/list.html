@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin_layout}" lang="vi">
+<head>
+    <title>Tin nhắn liên hệ</title>
+    <style>
+        /* ===== Metrics ===== */
+        .ct-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+        .ct-m-card {
+            background: var(--card-bg, #fff);
+            border: 1px solid var(--bdr);
+            border-radius: 14px;
+            padding: 18px 22px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .ct-m-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .ct-m-icon.blue  { background: #E6F1FB; color: #185FA5; }
+        .ct-m-icon.amber { background: #FAEEDA; color: #854F0B; }
+        .ct-m-val { font-size: 26px; font-weight: 600; line-height: 1.1; }
+        .ct-m-lbl { font-size: 13px; color: var(--txt-sub, #888); margin-top: 3px; }
+
+        /* ===== Card / Table ===== */
+        .ct-card {
+            background: var(--card-bg, #fff);
+            border: 1px solid var(--bdr);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        .ct-search {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--bdr);
+        }
+        .ct-search input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 9px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--bdr);
+            background: var(--page, #f5f5f5);
+            font-size: 13px;
+            outline: none;
+            transition: border-color .2s;
+        }
+        .ct-search input:focus { border-color: #185FA5; }
+
+        .ct-tbl { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .ct-tbl col.c-sender  { width: 18%; }
+        .ct-tbl col.c-subject { width: 26%; }
+        .ct-tbl col.c-contact { width: 18%; }
+        .ct-tbl col.c-status  { width: 12%; }
+        .ct-tbl col.c-reply   { width: 13%; }
+        .ct-tbl col.c-action  { width: 13%; }
+
+        .ct-tbl thead tr { border-bottom: 1px solid var(--bdr); }
+        .ct-tbl th {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--txt-sub, #888);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            padding: 10px 18px;
+            text-align: left;
+        }
+        .ct-tbl th:last-child { text-align: right; }
+        .ct-tbl td {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--bdr);
+            vertical-align: top;
+            font-size: 13px;
+        }
+        .ct-tbl tbody tr:last-child td { border-bottom: none; }
+        .ct-tbl tbody tr:hover { background: rgba(0,0,0,.025); }
+        .ct-tbl tbody tr.row-unread { background: #fffbeb; }
+        .ct-tbl tbody tr.row-unread:hover { background: #fef3c7; }
+
+        /* ===== Row content ===== */
+        .sender-name  { font-weight: 600; color: var(--txt-main, #111); margin-bottom: 2px; }
+        .sender-time  { font-size: 11px; color: var(--txt-sub, #888); }
+        .msg-subject  { font-weight: 600; color: var(--txt-main, #111); margin-bottom: 4px; }
+        .msg-preview  {
+            color: var(--txt-sub, #888);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.5;
+        }
+        .sender-email { color: var(--txt-sub, #888); margin-bottom: 2px; word-break: break-all; }
+        .sender-code  { font-size: 11px; color: var(--txt-sub, #888); }
+
+        /* ===== Status pill ===== */
+        .st-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .st-pill .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+        .st-unread  { background: #FAEEDA; color: #854F0B; }
+        .st-unread  .dot { background: #BA7517; }
+        .st-read    { background: #EAF3DE; color: #3B6D11; }
+        .st-read    .dot { background: #639922; }
+
+        /* ===== Action buttons ===== */
+        .ct-actions { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
+        .btn-ct {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all .15s;
+            text-decoration: none;
+        }
+        .btn-ct-read  { background: #EAF3DE; color: #3B6D11; }
+        .btn-ct-read:hover  { background: #C0DD97; }
+        .btn-ct-del   { background: #FCEBEB; color: #A32D2D; }
+        .btn-ct-del:hover   { background: #F7C1C1; }
+        .btn-ct-reply { background: #E6F1FB; color: #185FA5; }
+        .btn-ct-reply:hover { background: #BDD9F5; }
+
+        /* ===== Empty state ===== */
+        .ct-empty {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--txt-sub, #888);
+        }
+        .ct-empty i { font-size: 36px; opacity: .4; display: block; margin-bottom: 10px; }
+
+        /* ===== Modal ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: #fff;
+            padding: 28px;
+            border-radius: 14px;
+            width: 480px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+        .modal-content h5 {
+            margin-top: 0;
+            margin-bottom: 18px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <!-- Breadcrumb -->
+    <div class="bk-head anim anim-1">
+        <div>
+            <div class="bk-title">Tin nhắn liên hệ</div>
+            <ol class="bk-breadcrumb">
+                <li><a th:href="@{/admin/dashboard}">Trang chủ</a></li>
+                <li>Liên hệ</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Flash message -->
+    <div th:if="${successMsg}"
+         style="padding:14px 18px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; margin-bottom:20px; font-size:14px; display:flex; align-items:center; gap:10px;"
+         class="anim anim-1">
+        <i class="bi bi-check-circle-fill" style="color:#16a34a; font-size:16px;"></i>
+        <span th:text="${successMsg}"></span>
+    </div>
+
+    <!-- Metrics -->
+    <div class="ct-metrics anim anim-2">
+        <div class="ct-m-card">
+            <div class="ct-m-icon blue"><i class="bi bi-envelope"></i></div>
+            <div>
+                <div class="ct-m-val" th:text="${messages != null ? messages.size() : 0}">0</div>
+                <div class="ct-m-lbl">Tổng tin nhắn</div>
+            </div>
+        </div>
+        <div class="ct-m-card">
+            <div class="ct-m-icon amber"><i class="bi bi-envelope-exclamation"></i></div>
+            <div>
+                <div class="ct-m-val" th:text="${unreadCount != null ? unreadCount : 0}">0</div>
+                <div class="ct-m-lbl">Chưa đọc</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table card -->
+    <div class="ct-card anim anim-3">
+
+        <!-- Search -->
+        <div class="ct-search">
+            <input type="text" id="ct-search-input"
+                   placeholder="🔍  Tìm theo tên, email, chủ đề…" />
+        </div>
+
+        <!-- Table -->
+        <table class="ct-tbl">
+            <colgroup>
+                <col class="c-sender">
+                <col class="c-subject">
+                <col class="c-contact">
+                <col class="c-status">
+                <col class="c-reply">
+                <col class="c-action">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>Người gửi</th>
+                    <th>Chủ đề &amp; Nội dung</th>
+                    <th>Email / MSSV</th>
+                    <th>Trạng thái</th>
+                    <th>Phản hồi</th>
+                    <th style="text-align: right;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody id="ct-tbody">
+                <tr th:if="${messages == null or messages.isEmpty()}">
+                    <td colspan="6">
+                        <div class="ct-empty">
+                            <i class="bi bi-inbox"></i>
+                            Chưa có tin nhắn nào.
+                        </div>
+                    </td>
+                </tr>
+
+                <tr th:each="msg : ${messages}"
+                    th:classappend="${msg.status.name() == 'UNREAD'} ? 'row-unread' : ''"
+                    th:data-q="${#strings.toLowerCase(msg.fullName + ' ' + msg.subject + ' ' + msg.email + ' ' + (msg.studentCode ?: ''))}">
+
+                    <!-- Người gửi -->
+                    <td>
+                        <div class="sender-name" th:text="${msg.fullName}"></div>
+                        <div class="sender-time"
+                             th:text="${#temporals.format(msg.createdAt, 'dd/MM/yyyy HH:mm')}"></div>
+                    </td>
+
+                    <!-- Chủ đề & Nội dung -->
+                    <td>
+                        <div class="msg-subject" th:text="${msg.subject}"></div>
+                        <div class="msg-preview"
+                             th:text="${#strings.abbreviate(msg.message, 120)}"></div>
+                    </td>
+
+                    <!-- Email / MSSV -->
+                    <td>
+                        <div class="sender-email" th:text="${msg.email}"></div>
+                        <div class="sender-code"
+                             th:if="${msg.studentCode}"
+                             th:text="${msg.studentCode}"></div>
+                    </td>
+
+                    <!-- Trạng thái -->
+                    <td>
+                        <span class="st-pill"
+                              th:classappend="${msg.status.name() == 'UNREAD'} ? 'st-unread' : 'st-read'">
+                            <span class="dot"></span>
+                            <span th:text="${msg.status.name() == 'UNREAD'} ? 'Chưa đọc' : 'Đã phản hồi'"></span>
+                        </span>
+                    </td>
+
+                    <!-- Phản hồi -->
+                    <td>
+                        <button th:if="${msg.status.name() != 'REPLIED'}"
+                                class="btn-ct btn-ct-reply"
+                                th:attr="onclick='openModal(' + ${msg.id} + ', \'' + ${#strings.escapeJavaScript(msg.fullName)} + '\')'">
+                            <i class="bi bi-reply-fill"></i> Phản hồi
+                        </button>
+                        <span th:if="${msg.status.name() == 'REPLIED'}"
+                              style="color:#28a745; font-size:13px; display:inline-flex; align-items:center; gap:4px;">
+                            <i class="bi bi-check-circle-fill"></i> Đã trả lời
+                        </span>
+                    </td>
+
+                    <!-- Thao tác -->
+                    <td>
+                        <div class="ct-actions">
+                            <form th:if="${msg.status.name() == 'UNREAD'}"
+                                  th:action="@{/admin/contact/read/{id}(id=${msg.id})}"
+                                  method="post" style="display:inline;">
+                                <button type="submit" class="btn-ct btn-ct-read" title="Đánh dấu đã đọc">
+                                    <i class="bi bi-check-lg"></i>
+                                </button>
+                            </form>
+
+                            <form th:action="@{/admin/contact/delete/{id}(id=${msg.id})}"
+                                  method="post"
+                                  onsubmit="return confirm('Bạn có chắc muốn xóa tin nhắn này?')">
+                                <button type="submit" class="btn-ct btn-ct-del" title="Xóa">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- No results after search -->
+        <div id="ct-no-results"
+             style="display:none; text-align:center; padding:40px 20px; color:var(--txt-sub,#888); font-size:14px;">
+            <i class="bi bi-search" style="font-size:28px; opacity:.4; display:block; margin-bottom:10px;"></i>
+            Không tìm thấy kết quả phù hợp.
+        </div>
+    </div>
+
+    <!-- ✅ Modal Phản hồi — nằm TRONG layout:fragment="content" -->
+    <div id="replyModal" class="modal">
+        <div class="modal-content">
+            <h5>Gửi phản hồi cho <span id="senderName" style="color:#185FA5;"></span></h5>
+
+            <form th:action="@{/admin/contact/send-reply}" method="post">
+                <input type="hidden" name="messageId" id="messageId">
+
+                <textarea name="replyContent" required
+                          placeholder="Nhập nội dung phản hồi tại đây..."
+                          style="width:100%; height:170px; padding:12px;
+                                 border:1px solid #ddd; border-radius:8px;
+                                 font-size:14px; resize:vertical;
+                                 box-sizing:border-box;"></textarea>
+
+                <div style="margin-top:20px; text-align:right;">
+                    <button type="button" onclick="closeModal()"
+                            class="btn-ct"
+                            style="background:#eee; color:#333; margin-right:10px;">
+                        Hủy
+                    </button>
+                    <button type="submit" class="btn-ct btn-ct-read">
+                        <i class="bi bi-send-fill"></i> Gửi phản hồi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- ✅ Kết thúc Modal -->
+
+</div><!-- end layout:fragment="content" -->
+
+<!-- ✅ Script nằm trong th:block layout:fragment="script" -->
+<th:block layout:fragment="script">
+<script>
+    /* ===== Modal ===== */
+    function openModal(id, name) {
+        if (!id) return;
+        document.getElementById('messageId').value = id;
+        document.getElementById('senderName').innerText = name || 'Khách';
+        document.getElementById('replyModal').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('replyModal').classList.remove('active');
+    }
+
+    // Đóng modal khi click vào backdrop
+    document.getElementById('replyModal').addEventListener('click', function (e) {
+        if (e.target === this) closeModal();
+    });
+
+    /* ===== Tìm kiếm ===== */
+    (function () {
+        var input    = document.getElementById('ct-search-input');
+        var rows     = document.querySelectorAll('#ct-tbody tr[data-q]');
+        var noResult = document.getElementById('ct-no-results');
+
+        if (!input) return;
+
+        input.addEventListener('input', function () {
+            var q = this.value.trim().toLowerCase();
+            var visible = 0;
+
+            rows.forEach(function (row) {
+                var match = !q || (row.dataset.q || '').includes(q);
+                row.style.display = match ? '' : 'none';
+                if (match) visible++;
+            });
+
+            if (noResult) {
+                noResult.style.display = (q && visible === 0) ? 'block' : 'none';
+            }
+        });
+    })();
+</script>
+</th:block>
+
+</body>
+</html>

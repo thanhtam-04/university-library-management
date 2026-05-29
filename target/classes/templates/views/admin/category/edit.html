@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin_layout}"
+      lang="vi">
+<head>
+    <title>Cập nhật Danh mục</title>
+    <th:block layout:fragment="css">
+        <style>
+            /* Style dàn hàng ngang cực rộng y hệt trang Sách */
+            .form-card {
+                background: #fff; border-radius: 12px; padding: 30px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: none;
+                width: 100%; margin: 20px auto;
+            }
+            .section-header-blue {
+                color: #2563eb; font-weight: 700; font-size: 16px;
+                margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;
+                display: flex; align-items: center; gap: 8px;
+            }
+            .form-label { 
+                font-weight: 600; color: #012970; 
+                margin-bottom: 8px; font-size: 14px; 
+            }
+            .form-control, .form-select { 
+                border-radius: 8px; padding: 10px 15px; border: 1px solid #e2e8f0; 
+                font-size: 14px; background-color: #fff;
+            }
+            .form-control:focus, .form-select:focus { 
+                border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); outline: none; 
+            }
+            
+            /* Nút bấm Blue đồng bộ */
+            .btn-update { 
+                background: #2563eb; color: #fff; border: none; padding: 10px 35px; 
+                border-radius: 8px; font-weight: 600; transition: 0.3s;
+            }
+            .btn-update:hover { background: #1d4ed8; transform: translateY(-1px); color: #fff; }
+            .btn-cancel { 
+                background: #64748b; color: #fff; border: none; padding: 10px 25px; 
+                border-radius: 8px; font-weight: 500; text-decoration: none;
+            }
+            .btn-cancel:hover { background: #475569; color: #fff; }
+        </style>
+    </th:block>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="container-fluid">
+        <div class="pagetitle">
+            <h1 style="color: #012970; font-weight: 700;">Cập nhật Danh mục</h1>
+        </div>
+        
+        <div class="form-card">
+            <form th:action="@{/admin/category/update}" th:object="${category}" method="post">
+                <input type="hidden" th:field="*{id}">
+
+                <!-- Hàng 1: Thông tin định danh dàn ngang -->
+                <div class="section-header-blue">
+                    <i class="bi bi-tag-fill"></i> Thông tin danh mục
+                </div>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-5">
+                        <label class="form-label">Tên danh mục <span class="text-danger">*</span></label>
+                        <input type="text" th:field="*{name}" class="form-control" placeholder="Nhập tên danh mục..." required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Danh mục cha</label>
+                        <select name="parentId" class="form-select">
+                            <option value="">-- Không có (Danh mục gốc) --</option>
+                            <option th:each="p : ${parentList}"
+                                    th:value="${p.id}"
+                                    th:text="${p.name}"
+                                    th:selected="${category.parent != null and category.parent.id == p.id}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Mã định danh (ID)</label>
+                        <input type="text" th:value="${category.id}" class="form-control" readonly style="background-color: #f8fafc;">
+                    </div>
+                </div>
+
+                <!-- Hàng 2: Mô tả dài dàn rộng -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-12">
+                        <label class="form-label">Mô tả chi tiết</label>
+                        <textarea th:field="*{description}" class="form-control" rows="3" placeholder="Nhập mô tả ngắn về danh mục này..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Hàng 3: Thông số bổ sung (Nếu Nhi cần giống hệt form Sách) -->
+                <div class="section-header-blue">
+                    <i class="bi bi-info-circle-fill"></i> Thông số hiển thị
+                </div>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label">Vị trí hiển thị (Kệ mẫu)</label>
+                        <input type="text" class="form-control" placeholder="VD: Khu vực A1">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Tổng số lượng sách</label>
+                        <input type="number" class="form-control" placeholder="0" readonly style="background-color: #f8fafc;">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Icon / Ảnh đại diện</label>
+                        <input type="text" class="form-control" placeholder="https://...">
+                    </div>
+                </div>
+
+                <!-- Footer Buttons dàn 2 bên -->
+                <div class="d-flex justify-content-between align-items-center mt-5 pt-3 border-top">
+                    <a th:href="@{/admin/category/list}" class="btn-cancel">Hủy bỏ</a>
+                    <button type="submit" class="btn-update">
+                        <i class="bi bi-save2 me-1"></i> Xác nhận cập nhật
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

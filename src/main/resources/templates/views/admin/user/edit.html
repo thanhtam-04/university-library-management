@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin_layout}"
+      lang="vi">
+<head>
+    <title>Chỉnh sửa tài khoản</title>
+    <th:block layout:fragment="css">
+    <style>
+/* ═══ EDIT USER FORM (Đồng bộ chuẩn Kho Sách) ═══ */
+@keyframes fadeUp {
+    from { opacity:0; transform:translateY(18px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+.anim   { animation: fadeUp .42s cubic-bezier(.4,0,.2,1) both; }
+.anim-1 { animation-delay:.05s } .anim-2 { animation-delay:.10s }
+
+/* ─ Header ─ */
+.form-head {
+    display:flex; flex-direction:column; margin-bottom:26px;
+}
+.form-title { font-family:var(--fh); font-size:23px; font-weight:800;
+    color:var(--t1); letter-spacing:-.5px; }
+.form-breadcrumb { display:flex; align-items:center; gap:5px;
+    font-size:12.5px; color:var(--t3); margin-top:4px; list-style:none; padding:0; }
+.form-breadcrumb a { color:var(--t2); text-decoration:none; transition:color .14s; }
+.form-breadcrumb a:hover { color:var(--ac); }
+.form-breadcrumb li:not(:last-child)::after { content:'/'; margin-left:5px; color:var(--bdr); }
+
+/* ─ Form Wrapper ─ */
+.form-wrap {
+    background:var(--card); border:1px solid var(--bdr);
+    border-radius:16px; overflow:hidden; box-shadow:var(--shd);
+    padding:30px;
+}
+.form-section-title {
+    font-family:var(--fh); font-size:15px; font-weight:700;
+    color:var(--t1); margin-bottom:20px; padding-bottom:10px;
+    border-bottom:1.5px solid var(--page); display:flex; align-items:center; gap:8px;
+}
+.form-section-title i { color:var(--ac); }
+
+/* ─ Input Fields ─ */
+.f-group { margin-bottom:20px; }
+.f-label {
+    display:block; font-family:var(--fb); font-size:13px;
+    font-weight:700; color:var(--t2); margin-bottom:7px;
+}
+.f-control {
+    width:100%; height:42px; padding:0 14px; border-radius:10px;
+    border:1.5px solid var(--bdr); background:var(--card);
+    font-family:var(--fb); font-size:13.5px; color:var(--t1);
+    transition:all .18s var(--ease); outline:none;
+}
+.f-control:focus {
+    border-color:var(--ac); box-shadow:0 0 0 3px var(--ac-bg);
+}
+.f-control::placeholder { color:var(--t3); }
+.f-control:disabled, .f-control[readonly] {
+    background:var(--page); color:var(--t3); border-style:dashed; cursor:not-allowed;
+}
+
+/* ─ Switch Toggle CHUẨN (Fix triệt để lỗi không click được) ─ */
+.f-switch-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+/* Sử dụng form-check-input tiêu chuẩn của Bootstrap nhưng có custom nhẹ để dễ click */
+.custom-switch-input {
+    width: 44px !important;
+    height: 22px !important;
+    cursor: pointer;
+    margin-top: 0 !important;
+    background-color: #e4eaf2;
+    border-color: var(--bdr);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='white'/%3e%3c/svg%3e");
+    background-position: left center;
+    border-radius: 2em;
+    transition: background-position .15s ease-in-out, background-color .15s ease-in-out;
+    appearance: none;
+    -webkit-appearance: none;
+    display: inline-block;
+    position: relative;
+}
+.custom-switch-input:checked {
+    background-color: var(--cg) !important;
+    border-color: var(--cg) !important;
+    background-position: right center;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+}
+.custom-switch-label {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--t2);
+    cursor: pointer;
+    user-select: none;
+    margin: 0;
+}
+
+/* ─ Role Selector Radio Cards ─ */
+.role-grid {
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+    gap:12px; margin-top:8px;
+}
+.role-select-card {
+    border:1.5px solid var(--bdr); border-radius:12px; padding:14px 16px;
+    display:flex; align-items:center; gap:10px; cursor:pointer;
+    transition:all .18s var(--ease); background:var(--card);
+    position: relative;
+}
+.role-select-card:hover {
+    border-color:#c4cdd8; transform:translateY(-1px);
+}
+.role-select-card input[type="radio"] {
+    width:17px; height:17px;
+    cursor:pointer; accent-color:var(--ac);
+    flex-shrink: 0;
+}
+.role-lbl {
+    font-family:var(--fb); font-size:13.5px; font-weight:700; color:var(--t2); 
+    cursor:pointer; margin: 0; width: 100%;
+}
+
+/* Màu trạng thái khi được chọn (Radio Active) */
+.role-select-card.role-adm-card:has(input:checked) {
+    background:var(--cr-bg); border-color:var(--cr);
+}
+.role-select-card.role-adm-card:has(input:checked) .role-lbl { color:var(--cr); }
+
+.role-select-card.role-lib-card:has(input:checked) {
+    background:var(--cb-bg); border-color:var(--cb);
+}
+.role-select-card.role-lib-card:has(input:checked) .role-lbl { color:var(--cb); }
+
+.role-select-card.role-std-card:has(input:checked) {
+    background:var(--cg-bg); border-color:var(--cg);
+}
+.role-select-card.role-std-card:has(input:checked) .role-lbl { color:var(--cg); }
+
+/* ─ Action Buttons ─ */
+.form-actions {
+    display:flex; align-items:center; justify-content:flex-end;
+    gap:12px; margin-top:30px; padding-top:20px; border-top:1.5px solid var(--page);
+}
+.btn-sec {
+    display:inline-flex; align-items:center; justify-content:center;
+    height:42px; padding:0 22px; border-radius:10px; border:1.5px solid var(--bdr);
+    background:var(--card); font-family:var(--fb); font-size:13px; font-weight:600;
+    color:var(--t2) !important; text-decoration:none !important; cursor:pointer !important; 
+    transition:all .15s; position: relative; z-index: 99;
+}
+.btn-sec:hover { background:var(--page); color:var(--t1) !important; border-color:#c4cdd8; }
+
+.btn-pri {
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    height:42px; padding:0 24px; border-radius:10px; border:none;
+    background:var(--ac); font-family:var(--fb); font-size:13px; font-weight:700;
+    color:#fff; cursor:pointer; transition:all .15s; box-shadow:var(--ac-glow);
+    position: relative; z-index: 99;
+}
+.btn-pri:hover { background:#2537d9; transform:translateY(-1px); }
+    </style>
+    </th:block>
+</head>
+
+<body>
+<div layout:fragment="content">
+
+    <div class="form-head anim anim-1">
+        <div class="form-title">Chỉnh sửa tài khoản</div>
+        <ol class="form-breadcrumb">
+            <li><a th:href="@{/admin/dashboard}"><i class="bi bi-house-door"></i> Trang chủ</a></li>
+            <li><a th:href="@{/admin/user}"><i class="bi bi-people-fill"></i> Quản lý Tài khoản</a></li>
+            <li class="active" th:text="${user.username}">Username</li>
+        </ol>
+    </div>
+
+    <section class="section anim anim-2">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <div class="form-wrap">
+                    
+                    <form th:action="@{/admin/user/update}" th:object="${user}" method="post">
+                        <input type="hidden" th:field="*{id}">
+                        <input type="hidden" th:field="*{username}">
+                        <input type="hidden" th:field="*{createdAt}">
+
+                        <div class="form-section-title">
+                            <i class="bi bi-person-badge"></i> Thông tin cơ bản
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 f-group">
+                                <label class="f-label">Tên tài khoản (Không thể đổi)</label>
+                                <div style="position: relative;">
+                                    <input type="text" th:value="*{username}" class="f-control id-tag" style="padding-left: 36px; font-family: monospace; font-weight: 700;" readonly>
+                                    <i class="bi bi-lock-fill" style="position: absolute; left: 14px; top: 11px; color: var(--t3); font-size: 13px;"></i>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 f-group">
+                                <label class="f-label">Mật khẩu mới (Để trống nếu không đổi)</label>
+                                <input type="password" th:field="*{password}" class="f-control" placeholder="••••••••">
+                            </div>
+
+                            <div class="col-md-12 f-group">
+                                <label class="f-label">Họ và tên thành viên</label>
+                                <input type="text" th:field="*{fullName}" class="f-control" required placeholder="Nhập họ và tên...">
+                            </div>
+
+                            <div class="col-md-6 f-group">
+                                <label class="f-label">Địa chỉ Email</label>
+                                <input type="email" th:field="*{email}" class="f-control" placeholder="viethung@gmail.com">
+                            </div>
+
+                            <div class="col-md-6 f-group">
+                                <label class="f-label">Số điện thoại</label>
+                                <input type="text" th:field="*{phone}" class="f-control" placeholder="0987xxxxxx">
+                            </div>
+                        </div>
+
+                        <div class="form-section-title" style="margin-top: 15px;">
+                            <i class="bi bi-shield-check"></i> Cấu hình quyền & Trạng thái
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 f-group">
+                                <label class="f-label">Trạng thái tài khoản</label>
+                                <div class="f-switch-container">
+                                    <input type="checkbox" th:field="*{isActive}" id="activeSwitch" class="custom-switch-input">
+                                    <label for="activeSwitch" class="custom-switch-label">Kích hoạt quyền truy cập hệ thống</label>
+                                </div>
+                            </div>
+
+                            <div class="col-12 f-group">
+                                <label class="f-label">Vai trò thành viên (Chọn một vai trò duy nhất)</label>
+                                <div class="role-grid">
+                                    <div th:each="role : ${allRoles}" 
+                                         class="role-select-card"
+                                         th:classappend="${role.name.name() == 'ROLE_ADMIN' ? 'role-adm-card' : (role.name.name() == 'ROLE_LIBRARIAN' ? 'role-lib-card' : 'role-std-card')}">
+                                        
+                                        <input type="radio" name="roleIds" 
+                                               th:value="${role.id}" th:id="'role' + ${role.id}"
+                                               th:checked="${user.roles.contains(role)}">
+                                               
+                                        <label class="role-lbl" th:for="'role' + ${role.id}"
+                                               th:text="${role.name.name() == 'ROLE_ADMIN' ? 'Quản trị viên' : 
+                                                        (role.name.name() == 'ROLE_LIBRARIAN' ? 'Thủ thư' : 'Sinh viên')}">
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                           <a th:href="@{/admin/user/list}" class="btn btn-secondary px-4" style="border-radius: 10px;">Hủy bỏ</a>
+                            <button type="submit" class="btn-pri">
+                                <i class="bi bi-cloud-arrow-up-fill"></i> Cập nhật ngay
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>

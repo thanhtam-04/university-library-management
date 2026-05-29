@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${author.fullName + ' – Chi tiết tác giả'}">Chi tiết tác giả – LibManage</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: { 50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',300:'#93c5fd',400:'#60a5fa',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a',950:'#0f2057' },
+                        gold: { 400:'#fbbf24',500:'#f59e0b',600:'#d97706' },
+                    },
+                    fontFamily: { display:['"Playfair Display"','serif'], body:['"DM Sans"','sans-serif'] },
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family:'DM Sans',sans-serif; background:#f8faff; color:#0c1b3a; }
+        .font-display { font-family:'Playfair Display',serif; }
+        /* Hiệu ứng zoom nhẹ cho bìa sách */
+        .book-card:hover .book-img { transform: scale(1.05); }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{navbar :: navbar}"></div>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+    <div class="mb-6">
+        <a href="/authors" class="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Quay lại danh sách tác giả
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 sticky top-6 text-center lg:text-left">
+                <div class="w-44 h-44 rounded-2xl overflow-hidden mx-auto lg:mx-0 shadow-md mb-5">
+                    <img th:if="${author.imageUrl != null and !author.imageUrl.isEmpty()}"
+                         th:src="@{'/uploads/authors/' + ${author.imageUrl}}" th:alt="${author.fullName}"
+                         class="w-full h-full object-cover"
+                         onerror="this.src='/images/default-avatar.png';">
+                    <div th:unless="${author.imageUrl != null and !author.imageUrl.isEmpty()}"
+                         class="w-full h-full flex items-center justify-center font-display font-bold text-5xl text-white"
+                         style="background:linear-gradient(135deg,#1d4ed8,#60a5fa)">
+                        <span th:text="${#strings.substring(author.fullName,0,1)}">A</span>
+                    </div>
+                </div>
+
+                <h1 class="font-display font-bold text-navy-900 text-3xl mb-2" th:text="${author.fullName}">Tên tác giả</h1>
+                <p class="text-sm text-slate-400 mb-4 flex items-center justify-center lg:justify-start gap-1.5">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/></svg>
+                    Quốc tịch: <span class="font-medium text-slate-700" th:text="${author.nationality ?: 'Chưa cập nhật'}">Quốc tịch</span>
+                </p>
+
+                <div class="h-px bg-slate-100 my-4"></div>
+
+                <div class="bg-blue-50/50 border border-blue-100 rounded-2xl p-4 mb-5 text-left">
+                    <div class="text-xs text-blue-600 font-semibold uppercase tracking-wider mb-1">Số lượng tác phẩm</div>
+                    <div class="font-display text-2xl font-bold text-blue-800" 
+                         th:text="${(author.books != null ? author.books.size() : 0) + ' quyển sách'}">0 quyển</div>
+                </div>
+
+                <div class="text-left">
+                    <h3 class="text-xs font-bold uppercase text-navy-950 tracking-wider mb-2">Tiểu sử / Giới thiệu</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed text-justify whitespace-pre-line" 
+                       th:text="${author.bio != null and !author.bio.isEmpty() ? author.bio : 'Hiện chưa có thông tin tiểu sử chi tiết của tác giả này.'}">
+                        Nội dung tiểu sử tác giả.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+	<div class="lg:col-span-2">
+            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 sm:p-8">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+                    <h2 class="font-display font-bold text-navy-900 text-2xl">Các tác phẩm tiêu biểu</h2>
+                    <span class="text-xs font-medium text-slate-400" th:text="'Tổng số: ' + ${author.books != null ? author.books.size() : 0}">Số lượng</span>
+                </div>
+
+                <div th:if="${author.books == null or #lists.isEmpty(author.books)}" class="text-center py-16">
+                    <div class="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-3 border border-dashed border-slate-200">
+                        <svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                    </div>
+                    <p class="text-slate-400 text-sm">Hiện tại thư viện chưa cập nhật tác phẩm của tác giả này.</p>
+                </div>
+
+				<div th:unless="${author.books == null or #lists.isEmpty(author.books)}" 
+				                     class="grid grid-cols-2 sm:grid-cols-3 gap-5">
+				                    
+				                    <div th:each="book : ${author.books}" class="book-card border border-slate-100 rounded-2xl p-3 bg-white hover:shadow-md transition-all flex flex-col group">
+				                        <div class="relative overflow-hidden rounded-xl mb-3" style="height:200px">
+				                            <img th:src="${book != null ? (book.coverImage != null ? book.coverImage : (book.image != null ? book.image : '/images/book-default.jpg')) : '/images/book-default.jpg'}" 
+				                                 th:alt="${book.title}" 
+				                                 class="book-cover-img w-full h-full object-cover"
+				                                 onerror="this.removeAttribute('onerror'); this.src='/images/book-default.jpg';">
+				                            
+				                            <div class="absolute inset-0 bg-navy-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+				                                <a th:href="@{/books/{id}(id=${book.id})}" class="bg-white text-navy-800 text-xs font-bold px-4 py-2 rounded-lg">Xem chi tiết</a>
+				                            </div>
+				                        </div>
+
+				                        <h3 class="font-semibold text-navy-900 text-sm leading-snug mb-1 line-clamp-2" th:text="${book.title}">Tên sách</h3>
+				                        
+				                        <div class="flex items-center justify-between mt-auto pt-2">
+				                            <span class="tag text-[11px]" th:text="${book.category != null ? book.category.name : 'Chung'}">Thể loại</span>
+				                        </div>
+				                    </div>
+				                    
+				                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<div th:replace="~{navbar :: footer}"></div>
+
+</body>
+</html>
