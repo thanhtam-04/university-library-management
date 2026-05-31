@@ -18,4 +18,6 @@ public interface FineRepository extends JpaRepository<Fine, Long> {
     // Thêm COALESCE để tránh lỗi trả về null khi không có dữ liệu
     @Query("SELECT COALESCE(SUM(f.fineAmount), 0) FROM Fine f")
     BigDecimal sumFineAmount();
+ // Trong file FineRepository.java
+    boolean existsByLoanId(Long loanId);
 }

@@ -32,4 +32,8 @@ public class CategoryService {
     public boolean existsByName(String name) {
         return categoryRepository.existsByName(name);
     }
+
+    public List<Category> getAll() {
+        return categoryRepository.findAll(); // Đổi từ "return null;" sang dòng này
+    }
 }

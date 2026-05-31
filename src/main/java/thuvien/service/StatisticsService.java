@@ -183,8 +183,13 @@ public class StatisticsService {
         return result;
     }
     
-	public StatisticsResponse getStatistics() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public StatisticsResponse getStatistics() {
+        return StatisticsResponse.builder()
+                .totalBooks(totalBooks())
+                .availableCopies(bookCopyRepository.count()) // Hoặc status phù hợp
+                .activeMembers(totalMembers())
+                .overdueLoans(overdueLoans())
+                .build();
+    }
+    
 }

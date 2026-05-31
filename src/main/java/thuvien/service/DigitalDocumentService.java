@@ -2,9 +2,7 @@ package thuvien.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
 import thuvien.entity.DigitalDocument;
 import thuvien.repository.DigitalDocumentRepository;
 
@@ -13,29 +11,27 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.Normalizer;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
 public class DigitalDocumentService {
 
     private final DigitalDocumentRepository repository;
-    // Đường dẫn này trỏ vào thư mục trong project
-    private final String UPLOAD_DIR = "src/main/resources/static/uploads/documents/";
+
+    // ĐÃ SỬA: Đưa đường dẫn lưu file vào đúng thư mục static bên trong src theo cấu trúc cũ của bạn
+    private final String UPLOAD_DIR = System.getProperty("user.dir") + "/src/main/resources/static/uploads/documents/";
 
     // ── Tìm kiếm ─────────
- // Trong DigitalDocumentService.java
-
     public List<DigitalDocument> searchDocuments(String q, String type) {
         String filterType = (type == null || type.isEmpty() || type.equals("all")) ? null : type;
-        
-        // Sửa lại chỗ này: Gọi đúng tên hàm là searchDigitalDocs
         return repository.searchDigitalDocs(q, filterType);
     }
 
-    // ── CRUD cho Admin ────────────────────────────────────────
-
+    // ── CRUD ─────────────
     public List<DigitalDocument> getAll() {
         return repository.findAll();
     }
@@ -52,21 +48,34 @@ public class DigitalDocumentService {
         repository.deleteById(id);
     }
 
-    // ── Xử lý File ───────────────────────────────────────────
-
+    // ── Xử lý File ───────
     public String uploadAndGetUrl(MultipartFile file) {
         try {
-            // Kiểm tra thư mục, nếu chưa có thì tạo mới
             Path uploadPath = Paths.get(UPLOAD_DIR);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
             
-            // Tạo tên file ngẫu nhiên để tránh trùng lặp
-            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-            Files.copy(file.getInputStream(), uploadPath.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
+            // 1. Lấy tên file gốc
+            String originalFileName = file.getOriginalFilename();
+            if (originalFileName == null) originalFileName = "document.pdf";
             
-            // Trả về đường dẫn để lưu vào database
+            // 2. KHỬ SẠCH DẤU TIẾNG VIỆT & KHOẢNG TRẮNG (Giúp trình duyệt không bị lỗi link %20)
+            String cleanFileName = originalFileName.toLowerCase();
+            cleanFileName = Normalizer.normalize(cleanFileName, Normalizer.Form.NFD);
+            Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+            cleanFileName = pattern.matcher(cleanFileName).replaceAll("");
+            cleanFileName = cleanFileName.replaceAll("đ", "d");
+            cleanFileName = cleanFileName.replaceAll("\\s+", "-"); // Thay khoảng trắng bằng dấu -
+            cleanFileName = cleanFileName.replaceAll("[^a-z0-9_.-]", ""); // Bỏ toàn bộ ký tự lạ
+            
+            // 3. Tạo tên file bằng UUID tránh trùng
+            String fileName = UUID.randomUUID().toString() + "_" + cleanFileName;
+            Path filePath = uploadPath.resolve(fileName);
+            
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            
+            // Đường dẫn URL trả về để khớp với /uploads/** của WebConfig
             return "/uploads/documents/" + fileName; 
         } catch (IOException e) {
             e.printStackTrace();

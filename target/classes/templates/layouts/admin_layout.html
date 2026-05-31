@@ -365,29 +365,28 @@ body.sb-off #lib-main,body.sb-off #lib-footer{margin-left:0}
         <a class="hd-ico" href="#"><i class="bi bi-bell"></i><span class="hd-dot"></span></a>
         <a class="hd-ico" href="#"><i class="bi bi-plus-circle"></i></a>
         <span class="hd-sep"></span>
-        <div class="dropdown">
-            <a class="hd-prof dropdown-toggle" href="#" id="hpd"
-               data-bs-toggle="dropdown" aria-expanded="false" style="text-decoration:none">
-                <div class="hd-av">YN</div>
-                <div class="d-none d-md-block">
-                    <span class="hd-pn">Yến Nhi</span>
-                    <span class="hd-pr">Quản trị viên</span>
-                </div>
-                <i class="bi bi-chevron-down d-none d-md-inline ms-1"
-                   style="font-size:10px;color:var(--t3)"></i>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="hpd">
-                <li><div class="hd-di">
-                    <strong>Yến Nhi</strong>
-                    <small>admin@library.edu.vn</small>
-                </div></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" th:href="@{/admin/profile}"><i class="bi bi-person-circle"></i> Hồ sơ cá nhân</a></li>
-                <li><a class="dropdown-item" th:href="@{/admin/settings}"><i class="bi bi-gear"></i> Cài đặt hệ thống</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item text-danger" th:href="@{/logout}"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
-            </ul>
-        </div>
+		<div class="dropdown" sec:authorize="isAuthenticated()">
+		    <a class="hd-prof dropdown-toggle" href="#" id="hpd"
+		       data-bs-toggle="dropdown" aria-expanded="false" style="text-decoration:none">
+		        <div class="hd-av" th:text="${#authentication.principal.username.substring(0, 2).toUpperCase()}">UN</div>
+		        
+		        <div class="d-none d-md-block">
+		            <span class="hd-pn" th:text="${#authentication.principal.username}">Username</span>
+		            <span class="hd-pr" th:text="${#authentication.principal.authorities[0].authority}">Role</span>
+		        </div>
+		        <i class="bi bi-chevron-down d-none d-md-inline ms-1" style="font-size:10px;color:var(--t3)"></i>
+		    </a>
+		    
+		    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="hpd">
+		        <li><div class="hd-di">
+		            <strong th:text="${#authentication.principal.username}">Username</strong>
+		           
+		        </div></li>
+		        <li><hr class="dropdown-divider"></li>
+		       
+		        <li><a class="dropdown-item text-danger" th:href="@{/logout}"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
+		    </ul>
+		</div>
     </div>
 </header>
 

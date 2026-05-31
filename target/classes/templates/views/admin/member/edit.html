@@ -68,7 +68,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <form th:action="@{/admin/member/update}" th:object="${member}" method="post">
+       <form th:action="@{/admin/member/update}" th:object="${member}" method="post">
             <input type="hidden" th:field="*{id}">
 
             <div class="form-card">

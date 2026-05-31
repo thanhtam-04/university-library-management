@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layouts/admin_layout}" lang="vi">
+<head><title>Hồ sơ thành viên</title></head>
+<body>
+<div layout:fragment="content">
+
+    <!-- Header -->
+    <div class="page-header anim anim-1">
+        <div class="header-left">
+            <a th:href="@{/admin/member/list}" class="back-btn">
+                <i class="bi bi-arrow-left"></i> Quay lại
+            </a>
+            <div>
+                <div class="page-title" th:text="${m.user.fullName}">Tên thành viên</div>
+                <div class="page-sub">Hồ sơ thành viên thư viện</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-layout anim anim-2">
+
+        <!-- Sidebar Card -->
+        <div class="sidebar">
+            <div class="profile-card">
+                <div class="avatar-wrap">
+                    <div class="avatar" th:text="${#strings.substring(m.user.fullName,0,1)}"></div>
+                    <div class="avatar-ring"></div>
+                </div>
+                <h3 class="member-name" th:text="${m.user.fullName}">Nguyễn Văn A</h3>
+                <p class="member-email" th:text="${m.user.email}">email@example.com</p>
+
+                <div class="divider"></div>
+
+              
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="quick-stats">
+                <div class="qs-item">
+                    <i class="bi bi-book"></i>
+                    <div>
+                        <div class="qs-num" th:text="${#lists.size(loans)}">0</div>
+                        <div class="qs-lbl">Lần mượn</div>
+                    </div>
+                </div>
+                <div class="qs-item">
+                    <i class="bi bi-check2-circle"></i>
+                    <div>
+                        <div class="qs-num">—</div>
+                        <div class="qs-lbl">Đã trả</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="content-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="bi bi-clock-history"></i>
+                        Lịch sử mượn sách
+                    </div>
+                    <span class="loan-count" th:text="${#lists.size(loans) + ' phiếu'}">0 phiếu</span>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="loan-table">
+                        <thead>
+                            <tr>
+                                <th>Mã phiếu</th>
+                                <th>Ngày mượn</th>
+                                <th>Hạn trả</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="l, stat : ${loans}" th:classappend="${stat.index % 2 == 0} ? 'row-even' : 'row-odd'">
+                                <td>
+                                    <span class="loan-code" th:text="${l.loanCode}">PM-0001</span>
+                                </td>
+                                <td>
+                                    <span class="date-badge">
+                                        <i class="bi bi-calendar3"></i>
+                                        <span th:text="${#temporals.format(l.loanDate, 'dd/MM/yyyy')}">01/01/2024</span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="date-badge due">
+                                        <i class="bi bi-calendar-x"></i>
+                                        <span th:text="${#temporals.format(l.dueDate, 'dd/MM/yyyy')}">15/01/2024</span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-pill" th:text="${l.status}">Đang mượn</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(loans)}" class="empty-row">
+                                <td colspan="4">
+                                    <div class="empty-state">
+                                        <i class="bi bi-inbox"></i>
+                                        <p>Chưa có lịch sử mượn sách</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="css">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap');
+
+    :root {
+        --accent: #5b6af0;
+        --accent-soft: #eef0fe;
+        --accent2: #f97316;
+        --card: #ffffff;
+        --page: #f5f6fa;
+        --bdr: #e8eaf0;
+        --t1: #111827;
+        --t2: #374151;
+        --t3: #9ca3af;
+        --shd: 0 2px 20px rgba(91,106,240,.08);
+        --shd-hover: 0 8px 32px rgba(91,106,240,.15);
+        --radius: 20px;
+        --font: 'Outfit', sans-serif;
+        --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--page); color: var(--t1); }
+
+    /* ── Animations ── */
+    .anim { opacity: 0; transform: translateY(18px); animation: fadeUp .5s ease forwards; }
+    .anim-1 { animation-delay: .05s; }
+    .anim-2 { animation-delay: .18s; }
+    @keyframes fadeUp {
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Header ── */
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+    }
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border-radius: 10px;
+        background: var(--card);
+        border: 1px solid var(--bdr);
+        color: var(--t2);
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all .2s;
+        white-space: nowrap;
+    }
+    .back-btn:hover {
+        background: var(--accent-soft);
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+    .page-title {
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--t1);
+        line-height: 1.2;
+    }
+    .page-sub {
+        font-size: 13px;
+        color: var(--t3);
+        margin-top: 2px;
+    }
+
+    /* ── Layout ── */
+    .profile-layout {
+        display: flex;
+        gap: 22px;
+        align-items: flex-start;
+    }
+    .sidebar { flex: 0 0 300px; display: flex; flex-direction: column; gap: 14px; }
+    .main-content { flex: 1; min-width: 0; }
+
+    /* ── Profile Card ── */
+    .profile-card {
+        background: var(--card);
+        border: 1px solid var(--bdr);
+        border-radius: var(--radius);
+        padding: 32px 24px 24px;
+        text-align: center;
+        box-shadow: var(--shd);
+        position: relative;
+        overflow: hidden;
+    }
+    .profile-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 80px;
+        background: linear-gradient(135deg, #5b6af0 0%, #818cf8 100%);
+        z-index: 0;
+    }
+    .avatar-wrap {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 14px;
+        z-index: 1;
+    }
+    .avatar {
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #5b6af0, #818cf8);
+        color: #fff;
+        font-size: 36px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 4px solid #fff;
+        box-shadow: 0 4px 20px rgba(91,106,240,.3);
+        position: relative;
+        z-index: 2;
+    }
+    .avatar-ring {
+        position: absolute;
+        inset: -6px;
+        border-radius: 50%;
+        border: 2px dashed rgba(91,106,240,.3);
+        animation: spin 12s linear infinite;
+        z-index: 1;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .member-name {
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--t1);
+        margin-bottom: 4px;
+        position: relative;
+        z-index: 1;
+    }
+    .member-email {
+        font-size: 13px;
+        color: var(--t3);
+        margin-bottom: 0;
+        position: relative;
+        z-index: 1;
+    }
+    .divider {
+        height: 1px;
+        background: var(--bdr);
+        margin: 18px 0;
+    }
+    .stat-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        background: #fef3c7;
+        border-radius: 12px;
+        border: 1px solid #fde68a;
+    }
+    .stat-label {
+        font-size: 13px;
+        color: #92400e;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .stat-val.debt {
+        font-size: 15px;
+        font-weight: 700;
+        color: #b45309;
+        font-family: var(--font-mono);
+    }
+
+    /* ── Quick Stats ── */
+    .quick-stats {
+        background: var(--card);
+        border: 1px solid var(--bdr);
+        border-radius: var(--radius);
+        padding: 18px 20px;
+        box-shadow: var(--shd);
+        display: flex;
+        gap: 0;
+    }
+    .qs-item {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 4px 10px;
+    }
+    .qs-item:not(:last-child) {
+        border-right: 1px solid var(--bdr);
+    }
+    .qs-item .bi {
+        font-size: 22px;
+        color: var(--accent);
+        background: var(--accent-soft);
+        padding: 8px;
+        border-radius: 10px;
+    }
+    .qs-num {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--t1);
+        font-family: var(--font-mono);
+    }
+    .qs-lbl {
+        font-size: 11px;
+        color: var(--t3);
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        font-weight: 600;
+    }
+
+    /* ── Content Card ── */
+    .content-card {
+        background: var(--card);
+        border: 1px solid var(--bdr);
+        border-radius: var(--radius);
+        box-shadow: var(--shd);
+        overflow: hidden;
+    }
+    .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 24px;
+        border-bottom: 1px solid var(--bdr);
+        background: var(--page);
+    }
+    .card-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--t1);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .card-title .bi { color: var(--accent); }
+    .loan-count {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--accent);
+        background: var(--accent-soft);
+        padding: 4px 12px;
+        border-radius: 20px;
+    }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; }
+    .loan-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .loan-table thead th {
+        padding: 11px 20px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .6px;
+        color: var(--t3);
+        font-weight: 700;
+        background: #fafbff;
+        border-bottom: 1px solid var(--bdr);
+        text-align: left;
+    }
+    .loan-table tbody tr {
+        transition: background .15s;
+    }
+    .loan-table tbody tr:hover {
+        background: #f8f9ff;
+    }
+    .loan-table td {
+        padding: 14px 20px;
+        border-bottom: 1px solid #f0f2fa;
+        font-size: 14px;
+        color: var(--t2);
+        vertical-align: middle;
+    }
+    .loan-table tbody tr:last-child td { border-bottom: none; }
+
+    .loan-code {
+        font-family: var(--font-mono);
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--accent);
+        background: var(--accent-soft);
+        padding: 3px 10px;
+        border-radius: 6px;
+    }
+    .date-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 13px;
+        color: var(--t2);
+    }
+    .date-badge .bi { color: var(--t3); font-size: 12px; }
+    .date-badge.due .bi { color: var(--accent2); }
+
+    .status-pill {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        background: #dcfce7;
+        color: #166534;
+        letter-spacing: .2px;
+    }
+
+    /* ── Empty State ── */
+    .empty-state {
+        padding: 60px 20px;
+        text-align: center;
+        color: var(--t3);
+    }
+    .empty-state .bi {
+        font-size: 48px;
+        display: block;
+        margin-bottom: 12px;
+        opacity: .4;
+    }
+    .empty-state p {
+        font-size: 14px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+        .profile-layout { flex-direction: column; }
+        .sidebar { flex: none; width: 100%; }
+    }
+</style>
+</th:block>
+</body>
+</html>

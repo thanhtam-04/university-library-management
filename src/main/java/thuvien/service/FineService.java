@@ -9,12 +9,16 @@ import thuvien.entity.Payment;
 import thuvien.entity.Payment.PaymentMethod;
 import thuvien.entity.Payment.PaymentType;
 import thuvien.entity.Member;
+import thuvien.entity.Loan; // Đã thêm
 import thuvien.repository.FineRepository;
 import thuvien.repository.PaymentRepository;
 import thuvien.repository.MemberRepository;
+import thuvien.repository.LoanRepository; // Đã thêm
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalDate; // Đã thêm
+import java.time.temporal.ChronoUnit; // Đã thêm
 import java.util.List;
 
 @Service
@@ -24,6 +28,7 @@ public class FineService {
     private final FineRepository fineRepository;
     private final PaymentRepository paymentRepository;
     private final MemberRepository memberRepository;
+    private final LoanRepository loanRepository; // Đã thêm
 
     public List<Fine> findAll() { return fineRepository.findAll(); }
 
@@ -42,6 +47,43 @@ public class FineService {
 
     public void save(Fine fine) { fineRepository.save(fine); }
 
+    /**
+     * Tự động quét các phiếu mượn quá hạn và tạo phiếu phạt nếu chưa có
+     */
+  @Transactional
+public void syncOverdueLoans() {
+    // 1. Lấy tất cả các phiếu ĐANG MƯỢN (ACTIVE)
+    List<Loan> activeLoans = loanRepository.findByStatus(Loan.Status.ACTIVE);
+    
+    for (Loan loan : activeLoans) {
+        // 2. Tự kiểm tra: Nếu ngày quá hạn đã qua (today > due_date)
+        if (LocalDate.now().isAfter(loan.getDueDate())) {
+            
+            // Chuyển trạng thái phiếu sang OVERDUE trong DB
+            loan.setStatus(Loan.Status.OVERDUE);
+            loanRepository.save(loan);
+            
+            // 3. Tạo phiếu phạt nếu chưa tồn tại
+            if (!fineRepository.existsByLoanId(loan.getId())) {
+                Fine newFine = new Fine();
+                newFine.setLoan(loan);
+                newFine.setMember(loan.getMember());
+                
+                long days = ChronoUnit.DAYS.between(loan.getDueDate(), LocalDate.now());
+                newFine.setDaysOverdue((int) days);
+                
+                BigDecimal feePerDay = new BigDecimal("2000");
+                newFine.setFineAmount(feePerDay.multiply(BigDecimal.valueOf(days)));
+                newFine.setFinePerDay(feePerDay);
+                newFine.setStatus(Fine.Status.UNPAID);
+                newFine.setCreatedAt(LocalDateTime.now());
+                
+                fineRepository.save(newFine);
+                System.out.println("--- ĐÃ TỰ ĐỘNG CẬP NHẬT PHIẾU QUÁ HẠN: " + loan.getLoanCode() + " ---");
+            }
+        }
+    }
+}
     /**
      * Xử lý thanh toán phí phạt:
      * 1. Cập nhật trạng thái phiếu phạt thành PAID
@@ -66,9 +108,8 @@ public class FineService {
         payment.setMember(fine.getMember());
         payment.setFine(fine);
         payment.setAmount(fine.getFineAmount());
-        payment.setPaymentType(PaymentType.FINE); // Loại thanh toán phạt tiền
+        payment.setPaymentType(PaymentType.FINE);
         
-        // Chuẩn hóa phương thức thanh toán truyền lên từ giao diện (CASH hoặc TRANSFER)
         PaymentMethod method = PaymentMethod.CASH;
         if (methodStr != null && methodStr.equalsIgnoreCase("TRANSFER")) {
             method = PaymentMethod.TRANSFER;
@@ -84,7 +125,6 @@ public class FineService {
         if (member != null) {
             BigDecimal currentDebt = member.getCurrentDebt() != null ? member.getCurrentDebt() : BigDecimal.ZERO;
             BigDecimal newDebt = currentDebt.subtract(fine.getFineAmount());
-            // Đảm bảo số nợ không bị âm dưới 0đ
             member.setCurrentDebt(newDebt.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : newDebt);
             memberRepository.save(member);
         }

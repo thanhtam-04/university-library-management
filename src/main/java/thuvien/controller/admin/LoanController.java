@@ -9,7 +9,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import thuvien.entity.*;
 import thuvien.entity.Loan.Status;
 import thuvien.repository.*;
-
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,7 +27,9 @@ public class LoanController {
     private final BookCopyRepository   bookCopyRepository;
     private final FineRepository       fineRepository;
     private final BookRepository       bookRepository;
-
+    private final MemberRepository     memberRepository;
+    private final UserRepository       userRepository;
+    
     /**
      * 1. DANH SÁCH PHIẾU MƯỢN
      */
@@ -37,14 +41,36 @@ public class LoanController {
     }
 
     /**
-     * GIAO DIỆN THÊM MỚI PHIẾU MƯỢN
+  /**
+     * GIAO DIỆN THÊM MỚI PHIẾU MƯỢN - LỌC THỦ THƯ BẰNG JAVA STREAM (CHỐNG LỖI ÉP KIỂU)
      */
+ // CHỈ GIỮ LẠI MỘT HÀM NÀY DUY NHẤT
     @GetMapping("/add")
-    public String showAddForm(Model model) {
+    public String showAddForm(Model model, Principal principal) {
         model.addAttribute("loan", new Loan());
+        model.addAttribute("members", memberRepository.findAll());
+
+        List<User> allUsers = userRepository.findAll();
+        List<User> librarians = allUsers.stream()
+                .filter(u -> u.getRoles() != null && u.getRoles().stream()
+                        .anyMatch(r -> {
+                            String roleName = r.getName().name(); // Lấy tên Enum ROLE_ADMIN, v.v.
+                            return roleName.contains("ADMIN") || roleName.contains("LIBRARIAN");
+                        }))
+                .toList();
+        model.addAttribute("librarians", librarians);
+
+        // Tự động lấy ID người đang đăng nhập
+        if (principal != null) {
+            userRepository.findByUsername(principal.getName()).ifPresent(currentUser -> {
+                model.addAttribute("currentLibrarianId", currentUser.getId());
+            });
+        }
+        
+        model.addAttribute("copies", bookCopyRepository.findByStatus(BookCopy.Status.AVAILABLE));
+        
         return "views/admin/loan/add";
     }
-
     /**
      * GIAO DIỆN CHỈNH SỬA PHIẾU MƯỢN
      */
@@ -171,7 +197,67 @@ public class LoanController {
         }
         return "redirect:/admin/loan/list";
     }
-
+    
+    @PostMapping("/save")
+    @Transactional
+    public String saveLoan(@ModelAttribute("loan") Loan loan, 
+                           @RequestParam("memberId") Long memberId,
+                           @RequestParam(value = "copyIds", required = false) List<Long> copyIds,
+                           java.security.Principal principal, // Lấy thông tin User đang đăng nhập
+                           RedirectAttributes redirectAttributes) {
+        try {
+            // 1. Tìm đối tượng Member
+            Member member = memberRepository.findById(memberId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy thành viên với ID: " + memberId));
+            
+            // 2. TỰ ĐỘNG LẤY THỦ THƯ TỪ HỆ THỐNG (Không cần chọn thủ công nữa)
+            User currentUser = userRepository.findByUsername(principal.getName())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin thủ thư"));
+            
+            loan.setMember(member);
+            loan.setLibrarian(currentUser); // Tự động gán thủ thư
+            loan.setStatus(Loan.Status.ACTIVE);
+            
+            // 3. Thiết lập thông tin phiếu mượn
+            loan.setMember(member);
+            loan.setLibrarian(currentUser); // Gán thủ thư đang đăng nhập
+            loan.setStatus(Loan.Status.ACTIVE);
+            
+            // Xử lý tiền cọc
+            if (loan.getDepositPaid() != null && loan.getDepositPaid().compareTo(java.math.BigDecimal.ZERO) > 0) {
+                loan.setDepositStatus(Loan.DepositStatus.PAID);
+            } else {
+                loan.setDepositStatus(Loan.DepositStatus.NONE);
+            }
+            
+            // 4. Lưu danh sách sách (LoanItem)
+            List<LoanItem> items = new ArrayList<>();
+            if (copyIds != null) {
+                for (Long copyId : copyIds) {
+                    bookCopyRepository.findById(copyId).ifPresent(copy -> {
+                        LoanItem item = new LoanItem();
+                        item.setLoan(loan);
+                        item.setBookCopy(copy);
+                        item.setReturned(false);
+                        items.add(item);
+                        
+                        copy.setStatus(BookCopy.Status.BORROWED);
+                        bookCopyRepository.save(copy);
+                    });
+                }
+            }
+            loan.setItems(items);
+            
+            // 5. Lưu phiếu mượn
+            loanRepository.save(loan);
+            
+            redirectAttributes.addFlashAttribute("successMsg", "Tạo phiếu mượn thành công!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMsg", "Lỗi tạo phiếu: " + e.getMessage());
+        }
+        return "redirect:/admin/loan/list";
+    }
     /**
      * 4. XÓA PHIẾU MƯỢN
      */

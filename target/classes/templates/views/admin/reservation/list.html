@@ -1,237 +1,502 @@
 <!DOCTYPE html>
-
 <html xmlns:th="http://www.thymeleaf.org"
-
-xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-
-layout:decorate="~{layouts/admin_layout}"
-
-lang="vi">
-
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin_layout}"
+      lang="vi">
 <head>
-
 <title>Quản lý Đặt chỗ</title>
-
 <th:block layout:fragment="css">
-
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap');
 
-.bk-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:26px;gap:16px;flex-wrap:wrap}
+    :root {
+        --accent:      #4f6ef7;
+        --accent-soft: #eef1fe;
+        --accent-dark: #3451d1;
+        --amber:       #f59e0b;
+        --amber-soft:  #fef3c7;
+        --green:       #16a34a;
+        --green-soft:  #dcfce7;
+        --blue:        #2563eb;
+        --blue-soft:   #eff6ff;
+        --red:         #dc2626;
+        --red-soft:    #fee2e2;
+        --t1: #0f172a;
+        --t2: #334155;
+        --t3: #94a3b8;
+        --bdr: #e2e8f0;
+        --page: #f1f5f9;
+        --card: #ffffff;
+        --shd: 0 1px 16px rgba(15,23,42,.07);
+        --radius: 18px;
+        --font: 'Outfit', sans-serif;
+        --mono: 'JetBrains Mono', monospace;
+    }
 
-.bk-title{font-family:var(--fh);font-size:23px;font-weight:800;color:var(--t1);letter-spacing:-.5px}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-.bk-breadcrumb{display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--t3);margin-top:4px;list-style:none;padding:0}
+    /* ── Animations ── */
+    .anim { opacity: 0; transform: translateY(16px); animation: fadeUp .48s ease forwards; }
+    .anim-1 { animation-delay: .04s; }
+    .anim-2 { animation-delay: .14s; }
+    .anim-3 { animation-delay: .24s; }
+    @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
 
-.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
+    /* ── Page Header ── */
+    .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        margin-bottom: 26px;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+    .page-title {
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--t1);
+        font-family: var(--font);
+        letter-spacing: -.4px;
+        line-height: 1.2;
+    }
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        list-style: none;
+        font-size: 13px;
+        color: var(--t3);
+        margin-top: 4px;
+        padding: 0;
+    }
+    .breadcrumb li + li::before { content: '/'; margin-right: 6px; opacity: .5; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
 
-.m-tile{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:18px 20px;display:flex;align-items:center;gap:14px;box-shadow:var(--shd)}
+    /* ── Alerts ── */
+    .alert {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 13px 18px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+    .alert-success { background: var(--green-soft); color: #166534; border: 1px solid #86efac; }
+    .alert-error   { background: var(--red-soft);   color: #991b1b; border: 1px solid #fca5a5; }
 
-.m-ic{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--mic,var(--ca-bg));color:var(--mc,var(--ca))}
+    /* ── Metrics ── */
+    .metrics {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+        margin-bottom: 22px;
+    }
+    .metric-card {
+        background: var(--card);
+        border: 1px solid var(--bdr);
+        border-radius: var(--radius);
+        padding: 20px 22px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        box-shadow: var(--shd);
+        position: relative;
+        overflow: hidden;
+        transition: transform .18s, box-shadow .18s;
+    }
+    .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 28px rgba(15,23,42,.11);
+    }
+    .metric-card::after {
+        content: '';
+        position: absolute;
+        top: -16px; right: -16px;
+        width: 72px; height: 72px;
+        border-radius: 50%;
+        opacity: .07;
+    }
+    .metric-card.total::after  { background: var(--accent); }
+    .metric-card.pending::after { background: var(--amber); }
+    .metric-card.ready::after  { background: var(--green); }
 
-.m-val{font-family:var(--fh);font-size:28px;font-weight:800;color:var(--t1);line-height:1}
+    .metric-icon {
+        width: 50px; height: 50px;
+        border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 22px;
+        flex-shrink: 0;
+    }
+    .metric-icon.total   { background: var(--accent-soft); color: var(--accent); }
+    .metric-icon.pending { background: var(--amber-soft);  color: #b45309; }
+    .metric-icon.ready   { background: var(--green-soft);  color: var(--green); }
 
-.m-lbl{font-size:12px;color:var(--t2);margin-top:4px;font-weight:500}
+    .metric-val {
+        font-size: 32px;
+        font-weight: 800;
+        color: var(--t1);
+        font-family: var(--mono);
+        line-height: 1;
+    }
+    .metric-lbl {
+        font-size: 12px;
+        color: var(--t3);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        margin-top: 5px;
+    }
 
-.bk-wrap{background:var(--card);border:1px solid var(--bdr);border-radius:16px;overflow:hidden;box-shadow:var(--shd)}
+    /* ── Main card ── */
+    .main-card {
+        background: var(--card);
+        border: 1px solid var(--bdr);
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: var(--shd);
+    }
+    .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 22px;
+        border-bottom: 1px solid var(--bdr);
+        background: #fafbff;
+    }
+    .card-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--t1);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .card-title .bi { color: var(--accent); }
+    .total-badge {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--accent);
+        background: var(--accent-soft);
+        padding: 4px 12px;
+        border-radius: 20px;
+    }
 
-.bk-tbl{width:100%;border-collapse:collapse}
+    /* ── Table ── */
+    .res-tbl { width: 100%; border-collapse: collapse; }
+    .res-tbl thead th {
+        padding: 11px 20px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .6px;
+        color: var(--t3);
+        border-bottom: 1px solid var(--bdr);
+        background: #fafbff;
+        text-align: left;
+        white-space: nowrap;
+    }
+    .res-tbl thead th:last-child { text-align: right; }
+    .res-tbl td {
+        padding: 15px 20px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+    .res-tbl tbody tr:last-child td { border-bottom: none; }
+    .res-tbl tbody tr { transition: background .12s; }
+    .res-tbl tbody tr:hover { background: #f8f9ff; }
 
-.bk-tbl thead th{background:var(--page);padding:11px 18px;font-size:10.5px;font-weight:700;text-transform:uppercase;color:var(--t3);border-bottom:1px solid var(--bdr)}
+    /* ── Book cell ── */
+    .book-cell { display: flex; align-items: center; gap: 13px; }
+    .book-thumb {
+        width: 38px; height: 52px;
+        border-radius: 6px;
+        object-fit: cover;
+        background: var(--page);
+        border: 1px solid var(--bdr);
+        flex-shrink: 0;
+        box-shadow: 0 2px 6px rgba(15,23,42,.1);
+    }
+    .book-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--t1);
+        margin-bottom: 3px;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .book-isbn {
+        font-size: 11px;
+        font-family: var(--mono);
+        color: var(--t3);
+    }
 
-.bk-tbl td{padding:13px 18px;vertical-align:middle}
+    /* ── User cell ── */
+    .user-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--t1);
+        margin-bottom: 3px;
+    }
+    .user-email { font-size: 12px; color: var(--t3); }
 
+    /* ── Stock badge ── */
+    .stock-ok  {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--green);
+        font-family: var(--mono);
+    }
+    .stock-empty {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--red);
+        background: var(--red-soft);
+        padding: 3px 10px;
+        border-radius: 6px;
+    }
 
-.status-pill{padding:4px 10px;border-radius:8px;font-size:11px;font-weight:600;display:inline-block}
+    /* ── Status pill ── */
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 11px;
+        border-radius: 20px;
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: .1px;
+        white-space: nowrap;
+    }
+    .status-pill .dot {
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+    .st-pending   { background: var(--amber-soft); color: #92400e; }
+    .st-pending   .dot { background: var(--amber); }
+    .st-ready     { background: var(--green-soft); color: #166534; }
+    .st-ready     .dot { background: var(--green); }
+    .st-completed { background: var(--blue-soft);  color: var(--blue); }
+    .st-completed .dot { background: var(--blue); }
 
-.st-pending{background:#fef3c7;color:#92400e}
+    /* ── Action form ── */
+    .action-form {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        justify-content: flex-end;
+    }
+    .status-select {
+        padding: 7px 28px 7px 11px;
+        border-radius: 9px;
+        border: 1px solid var(--bdr);
+        background: var(--page);
+        font-size: 12.5px;
+        font-family: var(--font);
+        color: var(--t1);
+        outline: none;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 9px center;
+        transition: border-color .18s, box-shadow .18s;
+    }
+    .status-select:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(79,110,247,.1);
+    }
+    .btn-save {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 7px 14px;
+        border-radius: 9px;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        font-size: 12.5px;
+        font-weight: 600;
+        font-family: var(--font);
+        cursor: pointer;
+        transition: background .15s, transform .12s;
+        white-space: nowrap;
+    }
+    .btn-save:hover {
+        background: var(--accent-dark);
+        transform: translateY(-1px);
+    }
+    .btn-save:active { transform: translateY(0); }
 
-.st-ready{background:#dcfce7;color:#166534}
+    /* ── Empty state ── */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--t3);
+    }
+    .empty-state .bi {
+        font-size: 44px;
+        opacity: .3;
+        display: block;
+        margin-bottom: 12px;
+    }
+    .empty-state p { font-size: 14px; }
 
-.st-completed{background:#eff6ff;color:#2563eb}
-
-
-.book-thumb{width:36px;height:48px;border-radius:4px;object-fit:cover;background:#eee}
-
-.usr-info{font-size:13px;font-weight:600;color:var(--t1)}
-
-.usr-sub{font-size:11.5px;color:var(--t3)}
-
-.bk-alert{display:flex;align-items:center;gap:11px;padding:13px 18px;border-radius:12px;margin-bottom:20px;font-size:13.5px;background:var(--cg-bg);color:#065f46;border:1px solid rgba(16,185,129,.2)}
-
+    @media (max-width: 768px) {
+        .metrics { grid-template-columns: 1fr; }
+    }
 </style>
-
 </th:block>
-
 </head>
 
-
-
 <body>
-
 <div layout:fragment="content">
 
-<div class="bk-head">
+    <!-- Header -->
+    <div class="page-header anim anim-1">
+        <div>
+            <div class="page-title">Quản lý Đặt chỗ</div>
+            <ol class="breadcrumb">
+                <li><a th:href="@{/admin/dashboard}">Trang chủ</a></li>
+                <li>Quản lý Đặt chỗ</li>
+            </ol>
+        </div>
+    </div>
 
-<div>
+    <!-- Alerts -->
+    <div th:if="${successMsg}" class="alert alert-success anim anim-1">
+        <i class="bi bi-check-circle-fill"></i>
+        <span th:text="${successMsg}"></span>
+    </div>
+    <div th:if="${errorMsg}" class="alert alert-error anim anim-1">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span th:text="${errorMsg}"></span>
+    </div>
 
-<div class="bk-title">Quản lý Đặt chỗ</div>
+    <!-- Metrics -->
+    <div class="metrics anim anim-2">
+        <div class="metric-card total">
+            <div class="metric-icon total"><i class="bi bi-calendar-check-fill"></i></div>
+            <div>
+                <div class="metric-val" th:text="${reservations.size()}">0</div>
+                <div class="metric-lbl">Tổng đơn đặt</div>
+            </div>
+        </div>
+        <div class="metric-card pending">
+            <div class="metric-icon pending"><i class="bi bi-clock-history"></i></div>
+            <div>
+                <div class="metric-val" th:text="${reservations.?[status == 'PENDING'].size()}">0</div>
+                <div class="metric-lbl">Đang chờ</div>
+            </div>
+        </div>
+        <div class="metric-card ready">
+            <div class="metric-icon ready"><i class="bi bi-check2-all"></i></div>
+            <div>
+                <div class="metric-val" th:text="${reservations.?[status == 'READY'].size()}">0</div>
+                <div class="metric-lbl">Sẵn sàng</div>
+            </div>
+        </div>
+    </div>
 
-<ol class="bk-breadcrumb">
+    <!-- Table card -->
+    <div class="main-card anim anim-3">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="bi bi-bookmark-fill"></i> Danh sách đặt chỗ
+            </div>
+            <span class="total-badge" th:text="${reservations.size() + ' đơn'}">0 đơn</span>
+        </div>
 
-<li><a th:href="@{/admin/dashboard}">Trang chủ</a></li>
+        <table class="res-tbl">
+            <thead>
+                <tr>
+                    <th style="padding-left:24px">Sách</th>
+                    <th>Người đặt</th>
+                    <th>Tồn kho</th>
+                    <th>Trạng thái</th>
+                    <th style="padding-right:24px">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${reservations == null or reservations.isEmpty()}">
+                    <td colspan="5">
+                        <div class="empty-state">
+                            <i class="bi bi-inbox"></i>
+                            <p>Chưa có đơn đặt chỗ nào.</p>
+                        </div>
+                    </td>
+                </tr>
 
-<li>Quản lý Đặt chỗ</li>
+                <tr th:each="r : ${reservations}">
 
-</ol>
+                    <!-- Sách -->
+                    <td style="padding-left:24px">
+                        <div class="book-cell">
+                            <img class="book-thumb" th:src="${r.book.coverImage}" alt="Cover">
+                            <div>
+                                <div class="book-title" th:text="${r.book.title}"></div>
+                                <div class="book-isbn" th:text="${'ISBN: ' + r.book.isbn}"></div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <!-- Người đặt -->
+                    <td>
+                        <div class="user-name" th:text="${r.member.user.fullName}"></div>
+                        <div class="user-email" th:text="${r.member.user.email}"></div>
+                    </td>
+
+                    <!-- Tồn kho -->
+                    <td>
+                        <span th:if="${r.book.availableCopies > 0}" class="stock-ok">
+                            <i class="bi bi-check-circle-fill" style="font-size:13px;"></i>
+                            <span th:text="${r.book.availableCopies}"></span>
+                        </span>
+                        <span th:if="${r.book.availableCopies == 0}" class="stock-empty">
+                            <i class="bi bi-x-circle-fill" style="font-size:12px;"></i> Hết hàng
+                        </span>
+                    </td>
+
+                    <!-- Trạng thái -->
+                    <td>
+                        <span class="status-pill"
+                              th:classappend="${r.status == 'PENDING' ? 'st-pending' : (r.status == 'READY' ? 'st-ready' : 'st-completed')}">
+                            <span class="dot"></span>
+                            <span th:text="${r.status == 'PENDING' ? 'Đang chờ' : (r.status == 'READY' ? 'Sẵn sàng' : 'Đã mượn')}"></span>
+                        </span>
+                    </td>
+
+                    <!-- Thao tác -->
+                    <td style="padding-right:24px">
+                        <form th:action="@{'/admin/reservation/update/' + ${r.id}}" method="post" class="action-form">
+                            <select name="status" class="status-select">
+                                <option value="PENDING"   th:selected="${r.status == 'PENDING'}">Chờ xử lý</option>
+                                <option value="READY"
+                                        th:disabled="${r.book.availableCopies == 0}"
+                                        th:selected="${r.status == 'READY'}">Sẵn sàng</option>
+                                <option value="COMPLETED" th:selected="${r.status == 'COMPLETED'}">Đã mượn</option>
+                            </select>
+                            <button type="submit" class="btn-save">
+                                <i class="bi bi-floppy2-fill"></i> Lưu
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
 </div>
-
-</div>
-
-
-
-<div th:if="${successMsg}" class="bk-alert"><i class="bi bi-check-circle-fill"></i><span th:text="${successMsg}"></span></div>
-
-<div th:if="${errorMsg}" class="bk-alert" style="background:#fef2f2;color:#991b1b;border-color:rgba(239,68,68,.2)">
-
-<i class="bi bi-exclamation-triangle-fill"></i><span th:text="${errorMsg}"></span>
-
-</div>
-
-
-
-<div class="metrics">
-
-<div class="m-tile" style="--mc:var(--ac);--mic:var(--ac-bg)">
-
-<div class="m-ic"><i class="bi bi-calendar-check"></i></div>
-
-<div><div class="m-val" th:text="${reservations.size()}">0</div><div class="m-lbl">Tổng đơn đặt</div></div>
-
-</div>
-
-<div class="m-tile" style="--mc:#d97706;--mic:#fffbeb">
-
-<div class="m-ic"><i class="bi bi-clock-history"></i></div>
-
-<div><div class="m-val" th:text="${reservations.?[status == 'PENDING'].size()}">0</div><div class="m-lbl">Đang chờ</div></div>
-
-</div>
-
-<div class="m-tile" style="--mc:#16a34a;--mic:#f0fdf4">
-
-<div class="m-ic"><i class="bi bi-check2-all"></i></div>
-
-<div><div class="m-val" th:text="${reservations.?[status == 'READY'].size()}">0</div><div class="m-lbl">Sẵn sàng</div></div>
-
-</div>
-
-</div>
-
-
-
-<div class="bk-wrap">
-
-<table class="bk-tbl">
-
-<thead>
-
-<tr>
-
-<th style="padding-left:22px">Sách</th>
-
-<th>Người đặt</th>
-
-<th>Tồn kho</th>
-
-<th>Trạng thái</th>
-
-<th class="text-end" style="padding-right:22px">Thao tác</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr th:each="r : ${reservations}">
-
-<td style="padding-left:22px">
-
-<div class="flex items-center gap-3">
-
-<img class="book-thumb" th:src="${r.book.coverImage}" alt="Cover">
-
-<div>
-
-<div class="usr-info" th:text="${r.book.title}"></div>
-
-<div class="usr-sub" th:text="${'ISBN: ' + r.book.isbn}"></div>
-
-</div>
-
-</div>
-
-</td>
-
-<td>
-
-<div class="usr-info" th:text="${r.member.user.fullName}"></div>
-
-<div class="usr-sub" th:text="${r.member.user.email}"></div>
-
-</td>
-
-<td>
-
-<span th:text="${r.book.availableCopies > 0 ? r.book.availableCopies : 'Hết hàng'}"
-
-th:classappend="${r.book.availableCopies > 0 ? 'text-green-600 font-bold' : 'text-red-500'}"></span>
-
-</td>
-
-<td>
-
-<span class="status-pill"
-
-th:classappend="${r.status == 'PENDING' ? 'st-pending' : (r.status == 'READY' ? 'st-ready' : 'st-completed')}"
-
-th:text="${r.status}"></span>
-
-</td>
-
-<td style="padding-right:22px">
-
-<form th:action="@{'/admin/reservation/update/' + ${r.id}}" method="post" class="flex justify-end gap-2">
-
-<select name="status" class="bg-page border border-bdr rounded-lg px-2 py-1 text-xs">
-
-<option value="PENDING" th:selected="${r.status == 'PENDING'}">Chờ</option>
-
-<option value="READY" th:disabled="${r.book.availableCopies == 0}"
-
-th:selected="${r.status == 'READY'}">Sẵn sàng</option>
-
-<option value="COMPLETED" th:selected="${r.status == 'COMPLETED'}">Đã mượn</option>
-
-</select>
-
-<button type="submit" class="bg-blue-600 text-white rounded-lg px-3 py-1 text-xs hover:bg-blue-700">Lưu</button>
-
-</form>
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-</div>
-
-</div>
-
 </body>
-
 </html>

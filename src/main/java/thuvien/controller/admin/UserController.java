@@ -5,17 +5,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import thuvien.entity.User; // Đã sửa lại import chuẩn Entity User của dự án
 import thuvien.service.UserService;
 
 /**
- * Chỉ xử lý tính năng DUYỆT tài khoản.
- * Route base: /admin/user  (KHÔNG có GET /list để tránh xung đột với AdminUserController)
- *
- * AdminUserController đã map:  GET /admin/user/list
- * Controller này map:          GET /admin/user/pending
- *                              POST /admin/user/approve/{id}
- *                              POST /admin/user/reject/{id}
- *                              POST /admin/user/toggle/{id}
+ * Xử lý tính năng duyệt tài khoản và cập nhật quyền hạn nhân sự.
  */
 @Controller
 @RequestMapping("/admin/user")
@@ -80,4 +74,23 @@ public class UserController {
         }
         return "redirect:/admin/user/list";     // về trang list của AdminUserController
     }
+
+    /* ────────────────────────────────────────────
+       POST /admin/user/update-role
+       Đã đổi URL để tránh trùng lặp hoàn toàn với AdminUserController
+    ──────────────────────────────────────────── */
+    @PostMapping("/update-role")
+    public String updateUser(@ModelAttribute("user") User user, 
+                             @RequestParam("roleIds") Long roleId, 
+                             RedirectAttributes ra) {
+        try {
+            // Đã nhận đúng Entity thuvien.entity.User
+            userService.update(user, roleId);
+            ra.addFlashAttribute("successMsg", "✅ Cập nhật thông tin và vai trò tài khoản thành công!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMsg", "❌ Lỗi cập nhật: " + e.getMessage());
+        }
+        return "redirect:/admin/user/list";
+    }
+    
 }

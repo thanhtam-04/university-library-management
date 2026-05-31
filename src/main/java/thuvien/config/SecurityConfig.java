@@ -37,40 +37,52 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .headers(headers -> headers.frameOptions(f -> f.disable()))
             .authorizeHttpRequests(auth -> auth
-                // 1. Cho phép tất cả tài nguyên tĩnh thực sự để load CSS/JS/Images
-                .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico", "/uploads/**").permitAll()
+                    // 1. Cho phép tất cả tài nguyên tĩnh thực sự để load CSS/JS/Images
+                    .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico", "/uploads/**").permitAll()
+                    
+                    // 2. Cấu hình luồng mượn sách yêu cầu xác thực
+                    .requestMatchers("/books/*/borrow").authenticated()
+                    
+                    // 3. Chỉ giữ duy nhất đường dẫn "/books/detail/**" để bao quát mọi cấp độ ID
+                    .requestMatchers("/books", "/books/detail/**").permitAll()
+                    
+                    // Các trang CÔNG KHAI khác
+                    .requestMatchers("/", "/home", "/login", "/register", "/search/**", "/error",
+                                       "/authors", "/tac-gia", "/author", "/author/**", "/contact", "/contact/**").permitAll()
+                    
+                    // =========================================================================
+                    // 🛠️ PHẦN SỬA LỖI: PHÂN TÁCH URL TƯỜNG MINH ĐỂ TRÁNH LỖI PATTERNPARSEEXCEPTION
+                    // Chỉ ADMIN mới có quyền gọi các hành động chứa /delete hoặc update-role
+                    // =========================================================================
+                    .requestMatchers("/admin/user/update-role").hasAuthority("ROLE_ADMIN")
+                    .requestMatchers("/admin/*/delete/**", "/admin/*/*/delete/**").hasAuthority("ROLE_ADMIN")
+                    // =========================================================================
+
+                    // 4. Phân quyền rõ ràng cho ban quản trị và tài khoản cá nhân
+                    // Hệ thống sẽ tự hiểu /admin/reservation/list nằm trong nhóm này
+                    .requestMatchers("/admin/profile", "/admin/profile/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_LIBRARIAN")
+
+                    // Sau đó mới đến quy tắc chung cho các trang admin khác
+                    .requestMatchers("/admin/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_LIBRARIAN")
+                    .requestMatchers("/admin/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_LIBRARIAN")
+                    
+                    .requestMatchers("/profile/**", "/my-loans", "/my-loans/**", "/contact/history", "/contact/send").authenticated()
+                    
+                    // Độc giả được phép truy cập /reservation/list (đã có xác thực)
+                    .requestMatchers("/reservation/**").authenticated()
+                    
+                    // 5. Các request còn lại mặc định phải đăng nhập
+                    .anyRequest().authenticated()
                 
-                // 2. Cấu hình luồng mượn sách yêu cầu xác thực
-                .requestMatchers("/books/*/borrow").authenticated()
-                
-                // 3. Chỉ giữ duy nhất đường dẫn "/books/detail/**" để bao quát mọi cấp độ ID
-                .requestMatchers("/books", "/books/detail/**").permitAll()
-                
-                // Các trang CÔNG KHAI khác
-             // Các trang CÔNG KHAI khác
-                .requestMatchers("/", "/home", "/login", "/register", "/search/**", "/error",
-                                   "/authors", "/tac-gia", "/author", "/author/**", "/contact", "/contact/**").permitAll()
-                
-                // 4. Phân quyền rõ ràng cho ban quản trị và tài khoản cá nhân
-                // Hệ thống sẽ tự hiểu /admin/reservation/list nằm trong nhóm này
-                .requestMatchers("/admin/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_LIBRARIAN")
-                
-                .requestMatchers("/profile/**", "/my-loans", "/my-loans/**", "/contact/history", "/contact/send").authenticated()
-                
-                // Độc giả được phép truy cập /reservation/list (đã có xác thực)
-                .requestMatchers("/reservation/**").authenticated()
-                
-                // 5. Các request còn lại mặc định phải đăng nhập
-                .anyRequest().authenticated()
             )
             .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
                 .successHandler((request, response, authentication) -> {
                     var roles = authentication.getAuthorities().stream()
-                                              .map(r -> r.getAuthority()).toList();
+                                                      .map(r -> r.getAuthority()).toList();
                     if (roles.contains("ROLE_ADMIN") || roles.contains("ROLE_LIBRARIAN")) {
-                        response.sendRedirect("/admin/dashboard");
+                        response.sendRedirect("/admin/book/list");
                     } else {
                         response.sendRedirect("/");
                     }
@@ -97,7 +109,8 @@ public class SecurityConfig {
             .exceptionHandling(ex -> ex
                 .accessDeniedHandler((req, res, e) -> {
                     if (!res.isCommitted()) {
-                        res.sendRedirect("/access-denied");
+                        // Khi bị chặn (ví dụ Thủ thư bấm vào link xóa), đá thẳng sang trang báo lỗi không có quyền
+                        res.sendRedirect("/admin/403");
                     }
                 })
             );

@@ -42,4 +42,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Transactional
     @Query("UPDATE User u SET u.isApproved = :isApproved WHERE u.id = :id")
     void updateApprovalStatus(Long id, Boolean isApproved);
+ // ── 🛠️ THAY THẾ HÀM CŨ BẰNG ĐOẠN NÀY ──
+    // Câu lệnh này sẽ quét vào bên trong danh sách roles của User và lọc theo tên quyền
+    @Query("SELECT DISTINCT u FROM User u JOIN u.roles r WHERE r.name IN :roleNames")
+    List<User> findByRolesIn(List<String> roleNames);
 }

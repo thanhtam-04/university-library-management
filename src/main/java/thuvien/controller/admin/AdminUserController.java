@@ -1,6 +1,8 @@
 package thuvien.controller.admin;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -79,6 +81,7 @@ public class AdminUserController {
      * URL: http://localhost:8080/admin/user/edit/{id}
      */
     @GetMapping("/edit/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public String showEditForm(@PathVariable Long id, Model model) {
         User user = userService.findById(id);
         model.addAttribute("user", user);
@@ -109,6 +112,7 @@ public class AdminUserController {
      * 4. Xóa tài khoản
      */
     @GetMapping("/delete/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public String deleteUser(@PathVariable Long id, RedirectAttributes ra) {
         try {
             userService.deleteById(id);
@@ -123,18 +127,22 @@ public class AdminUserController {
      * 5. Duyệt nhanh trực tiếp từ dropdown danh sách thành viên
      * URL: POST http://localhost:8080/admin/user/approve-quick/{id}
      */
+    /**
+     * Duyệt nhanh hoặc Khóa tài khoản trực tiếp từ danh sách
+     * URL: POST http://localhost:8080/admin/user/approve-quick/{id}
+     */
     @PostMapping("/approve-quick/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public String approveQuick(@PathVariable Long id, 
                                @RequestParam boolean approve, 
                                RedirectAttributes ra) {
         try {
-            // Cập nhật trạng thái duyệt của User thông qua service
+            // 1. Cập nhật trạng thái duyệt của User trong bảng users
             userService.approveUser(id, approve);
             User user = userService.findById(id);
 
             if (approve) {
                 // ── TRƯỜNG HỢP: ĐỒNG Ý DUYỆT ──
-                // Kiểm tra xem đã tồn tại Member liên kết với Email của User này chưa
                 boolean memberExists = memberRepository.existsByUserEmail(user.getEmail());
                 
                 if (!memberExists) {
@@ -143,40 +151,43 @@ public class AdminUserController {
                     newMember.setFullName(user.getFullName());
                     newMember.setStudentCode(user.getUsername());
                     
-                    // 1. Tạo mã thẻ
                     String studentCode = "SV-" + LocalDate.now().getYear() + "-" + user.getId();
                     newMember.setCardNumber(studentCode); 
-                    
-                    // 2. PHẢI CÓ DÒNG NÀY: Gán ngày cấp thẻ (không được để null)
                     newMember.setCardIssuedDate(LocalDate.now()); 
-                    
-                    // 3. Gán ngày hết hạn (Hàm này đã được sửa ở Bước 1)
                     newMember.setExpiryDate(LocalDate.now().plusYears(4)); 
+                    newMember.setStatus(Member.Status.ACTIVE); // Trạng thái hoạt động
                     
-                    newMember.setStatus(Member.Status.ACTIVE);
                     memberRepository.save(newMember);
-                }
-                
-                ra.addFlashAttribute("successMsg", "Đã duyệt tài khoản '" + user.getFullName() + "' và tự động cấp thẻ Bạn đọc thành công!");
-            } else {
-                // ── TRƯỜNG HỢP: KHÔNG DUYỆT / HỦY PHÊ DUYỆT ──
-                
-                // 1. Chuyển trạng thái tài khoản User sang "Không hoạt động" (Khóa đăng nhập)
-                User userToLock = userService.findById(id); 
-                userToLock.setIsActive(false); 
-                userService.update(userToLock);
-
-                // 2. Tìm và xóa hẳn bản ghi bên bảng Thành viên (Member)
-                Optional<Member> memberOpt = memberRepository.findByUserEmail(userToLock.getEmail());
-                if (memberOpt.isPresent()) {
-                    memberRepository.delete(memberOpt.get());
-                    ra.addFlashAttribute("successMsg", "Đã hủy duyệt: Tài khoản đã bị khóa và thẻ Thành viên đã được gỡ bỏ.");
                 } else {
-                    ra.addFlashAttribute("successMsg", "Đã hủy phê duyệt và khóa tài khoản thành công.");
+                    // Nếu đã tồn tại member nhưng status đang INACTIVE thì cho quay lại ACTIVE
+                    Optional<Member> memberOpt = memberRepository.findByUserEmail(user.getEmail());
+                    memberOpt.ifPresent(m -> {
+                        m.setStatus(Member.Status.ACTIVE);
+                        memberRepository.save(m);
+                    });
+                }
+                ra.addFlashAttribute("successMsg", "Đã duyệt tài khoản '" + user.getFullName() + "' thành công!");
+            } else {
+                // ── TRƯỜNG HỢP: HỦY DUYỆT / KHÓA TÀI KHOẢN ──
+                
+                // 1. Khóa đăng nhập của User
+                user.setIsActive(false); 
+                userService.update(user);
+
+                // 2. VÔ HIỆU HÓA THẺ THÀNH VIÊN (Thay vì xóa, tránh lỗi khóa ngoại)
+                Optional<Member> memberOpt = memberRepository.findByUserEmail(user.getEmail());
+                if (memberOpt.isPresent()) {
+                    Member member = memberOpt.get();
+                    member.setIsActive(false);
+                    memberRepository.save(member);
+                    ra.addFlashAttribute("successMsg", "Đã khóa tài khoản và vô hiệu hóa thẻ thành viên.");
+                } else {
+                    ra.addFlashAttribute("successMsg", "Đã khóa tài khoản thành công.");
                 }
             }
         } catch (Exception e) {
-            ra.addFlashAttribute("errorMsg", "Lỗi xử lý duyệt: " + e.getMessage());
+            e.printStackTrace(); // In lỗi ra console để debug
+            ra.addFlashAttribute("errorMsg", "Lỗi xử lý: " + e.getMessage());
         }
         return "redirect:/admin/user/list";
     }

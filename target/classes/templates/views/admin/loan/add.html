@@ -86,14 +86,7 @@
                             </option>
                         </select>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Thủ thư thực hiện <span class="text-danger">*</span></label>
-                        <select name="librarianId" class="form-select" required>
-                            <option value="">-- Chọn thủ thư xử lý --</option>
-                            <option th:each="u : ${librarians}" th:value="${u.id}" th:text="${u.fullName}">
-                            </option>
-                        </select>
-                    </div>
+                    
                 </div>
 
                 <!-- 2. Mã & Thời hạn -->

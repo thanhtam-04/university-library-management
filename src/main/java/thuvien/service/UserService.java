@@ -187,4 +187,70 @@ public class UserService {
 		// TODO Auto-generated method stub
 		
 	}
+	/* ══════════════════════════════
+    LOGIC XỬ LÝ ĐĂNG NHẬP
+ ══════════════════════════════ */
+public User login(String username, String password) throws Exception {
+    // 1. Tìm tài khoản trong Database theo username
+    User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new Exception("Tên đăng nhập không tồn tại!"));
+
+    // 2. Kiểm tra mật khẩu đã mã hóa BCrypt bằng passwordEncoder.matches
+    if (!passwordEncoder.matches(password, user.getPassword())) {
+        throw new Exception("Mật khẩu không chính xác!");
+    }
+
+    // 3. Kiểm tra xem tài khoản đã được Admin duyệt chưa
+    if (user.getIsApproved() != null && !user.getIsApproved()) {
+        throw new Exception("Tài khoản của bạn đang chờ quản trị viên phê duyệt!");
+    }
+
+    // 4. Kiểm tra xem tài khoản có bị khóa không
+    if (user.getIsActive() != null && !user.getIsActive()) {
+        throw new Exception("Tài khoản này đã bị khóa hoặc ngừng hoạt động!");
+    }
+
+    return user;
+}
+@Transactional
+public User update(User user, Long roleId) {
+    // 1. Tìm user gốc từ DB
+    User existing = findById(user.getId());
+    
+    // 2. Cập nhật các thông tin cơ bản
+    existing.setFullName(user.getFullName());
+    existing.setEmail(user.getEmail());
+    existing.setPhone(user.getPhone());
+    existing.setIsActive(user.getIsActive());
+
+    // 3. Xử lý đổi mật khẩu nếu có nhập mới
+    if (user.getPassword() != null 
+            && !user.getPassword().isBlank() 
+            && !user.getPassword().startsWith("$2a$")) {
+        existing.setPassword(passwordEncoder.encode(user.getPassword()));
+    }
+    
+    // 4. LOGIC QUAN TRỌNG: Cập nhật lại vai trò mới vào bảng user_roles
+    if (roleId != null) {
+        Role newRole = roleRepository.findById(roleId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy vai trò có ID: " + roleId));
+        
+        existing.getRoles().clear(); // Xóa quyền cũ trong Set
+        existing.getRoles().add(newRole); // Add quyền mới được chọn từ giao diện vào
+    }
+
+    return userRepository.save(existing);
+}
+
+@Transactional
+public void updateProfile(User userDto) {
+    User user = userRepository.findById(userDto.getId())
+        .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
+    
+    user.setFullName(userDto.getFullName());
+    user.setEmail(userDto.getEmail());
+    // Có thể thêm cập nhật số điện thoại, địa chỉ...
+    
+    userRepository.save(user);
+}
 }

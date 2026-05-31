@@ -32,4 +32,5 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
 
     @Query("SELECT l FROM Loan l ORDER BY l.loanDate DESC")
     List<Loan> findRecentLoans(Pageable pageable);
+    List<Loan> findByStatus(String status);
 }

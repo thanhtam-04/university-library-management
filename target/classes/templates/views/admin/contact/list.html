@@ -5,107 +5,260 @@
 <head>
     <title>Tin nhắn liên hệ</title>
     <style>
-        /* ===== Metrics ===== */
-        .ct-metrics {
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap');
+
+        :root {
+            --accent:       #4f6ef7;
+            --accent-soft:  #eef1fe;
+            --accent-dark:  #3451d1;
+            --amber:        #f59e0b;
+            --amber-soft:   #fef3c7;
+            --green:        #16a34a;
+            --green-soft:   #dcfce7;
+            --red:          #dc2626;
+            --red-soft:     #fee2e2;
+            --t1: #0f172a;
+            --t2: #334155;
+            --t3: #94a3b8;
+            --bdr: #e2e8f0;
+            --page: #f1f5f9;
+            --card: #ffffff;
+            --shd: 0 1px 16px rgba(15,23,42,.07);
+            --radius: 18px;
+            --font: 'Outfit', sans-serif;
+            --mono: 'JetBrains Mono', monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        /* ── Animations ── */
+        .anim { opacity: 0; transform: translateY(16px); animation: fadeUp .48s ease forwards; }
+        .anim-1 { animation-delay: .04s; }
+        .anim-2 { animation-delay: .14s; }
+        .anim-3 { animation-delay: .24s; }
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+        /* ── Page Header ── */
+        .page-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 26px;
+        }
+        .page-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--t1);
+            line-height: 1.2;
+        }
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            list-style: none;
+            font-size: 13px;
+            color: var(--t3);
+            margin-top: 4px;
+        }
+        .breadcrumb li + li::before { content: '/'; margin-right: 6px; opacity: .5; }
+        .breadcrumb a { color: var(--accent); text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+
+        /* ── Flash ── */
+        .flash-success {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 18px;
+            background: var(--green-soft);
+            border: 1px solid #86efac;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #166534;
+        }
+
+        /* ── Metrics ── */
+        .metrics {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(2, 1fr);
             gap: 14px;
             margin-bottom: 22px;
         }
-        .ct-m-card {
-            background: var(--card-bg, #fff);
+        .metric-card {
+            background: var(--card);
             border: 1px solid var(--bdr);
-            border-radius: 14px;
-            padding: 18px 22px;
+            border-radius: var(--radius);
+            padding: 20px 22px;
             display: flex;
             align-items: center;
             gap: 16px;
+            box-shadow: var(--shd);
+            position: relative;
+            overflow: hidden;
+            transition: transform .18s, box-shadow .18s;
         }
-        .ct-m-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(15,23,42,.11);
+        }
+        .metric-card::after {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            opacity: .06;
+            transform: translate(20px, -20px);
+        }
+        .metric-card.blue::after  { background: var(--accent); }
+        .metric-card.amber::after { background: var(--amber); }
+
+        .metric-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px;
             flex-shrink: 0;
         }
-        .ct-m-icon.blue  { background: #E6F1FB; color: #185FA5; }
-        .ct-m-icon.amber { background: #FAEEDA; color: #854F0B; }
-        .ct-m-val { font-size: 26px; font-weight: 600; line-height: 1.1; }
-        .ct-m-lbl { font-size: 13px; color: var(--txt-sub, #888); margin-top: 3px; }
+        .metric-icon.blue  { background: var(--accent-soft); color: var(--accent); }
+        .metric-icon.amber { background: var(--amber-soft);  color: #b45309; }
 
-        /* ===== Card / Table ===== */
-        .ct-card {
-            background: var(--card-bg, #fff);
-            border: 1px solid var(--bdr);
-            border-radius: 14px;
-            overflow: hidden;
+        .metric-val {
+            font-size: 30px;
+            font-weight: 800;
+            color: var(--t1);
+            font-family: var(--mono);
+            line-height: 1;
         }
-        .ct-search {
-            padding: 14px 20px;
-            border-bottom: 1px solid var(--bdr);
-        }
-        .ct-search input {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 9px 14px;
-            border-radius: 8px;
-            border: 1px solid var(--bdr);
-            background: var(--page, #f5f5f5);
-            font-size: 13px;
-            outline: none;
-            transition: border-color .2s;
-        }
-        .ct-search input:focus { border-color: #185FA5; }
-
-        .ct-tbl { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        .ct-tbl col.c-sender  { width: 18%; }
-        .ct-tbl col.c-subject { width: 26%; }
-        .ct-tbl col.c-contact { width: 18%; }
-        .ct-tbl col.c-status  { width: 12%; }
-        .ct-tbl col.c-reply   { width: 13%; }
-        .ct-tbl col.c-action  { width: 13%; }
-
-        .ct-tbl thead tr { border-bottom: 1px solid var(--bdr); }
-        .ct-tbl th {
-            font-size: 11px;
+        .metric-lbl {
+            font-size: 12px;
+            color: var(--t3);
             font-weight: 600;
-            color: var(--txt-sub, #888);
             text-transform: uppercase;
-            letter-spacing: .05em;
+            letter-spacing: .5px;
+            margin-top: 4px;
+        }
+
+        /* ── Main Card ── */
+        .main-card {
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shd);
+        }
+
+        /* ── Toolbar ── */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--bdr);
+            background: #fafbff;
+        }
+        .toolbar-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--t1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toolbar-title .bi { color: var(--accent); }
+        .search-wrap {
+            flex: 1;
+            position: relative;
+            max-width: 340px;
+            margin-left: auto;
+        }
+        .search-wrap .bi {
+            position: absolute;
+            left: 11px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--t3);
+            font-size: 14px;
+            pointer-events: none;
+        }
+        .search-input {
+            width: 100%;
+            padding: 8px 14px 8px 34px;
+            border-radius: 10px;
+            border: 1px solid var(--bdr);
+            background: var(--card);
+            font-size: 13px;
+            font-family: var(--font);
+            color: var(--t1);
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        .search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(79,110,247,.12);
+        }
+        .search-input::placeholder { color: var(--t3); }
+
+        /* ── Table ── */
+        .ct-tbl { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .ct-tbl col.c-sender  { width: 17%; }
+        .ct-tbl col.c-subject { width: 26%; }
+        .ct-tbl col.c-contact { width: 17%; }
+        .ct-tbl col.c-status  { width: 11%; }
+        .ct-tbl col.c-reply   { width: 13%; }
+        .ct-tbl col.c-action  { width: 16%; }
+
+        .ct-tbl thead th {
             padding: 10px 18px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--t3);
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            border-bottom: 1px solid var(--bdr);
+            background: #fafbff;
             text-align: left;
         }
-        .ct-tbl th:last-child { text-align: right; }
+        .ct-tbl thead th:last-child { text-align: right; }
+
         .ct-tbl td {
-            padding: 14px 18px;
-            border-bottom: 1px solid var(--bdr);
-            vertical-align: top;
-            font-size: 13px;
+            padding: 15px 18px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+            font-size: 13.5px;
+            color: var(--t2);
         }
         .ct-tbl tbody tr:last-child td { border-bottom: none; }
-        .ct-tbl tbody tr:hover { background: rgba(0,0,0,.025); }
+        .ct-tbl tbody tr { transition: background .12s; }
+        .ct-tbl tbody tr:hover { background: #f8f9ff; }
         .ct-tbl tbody tr.row-unread { background: #fffbeb; }
-        .ct-tbl tbody tr.row-unread:hover { background: #fef3c7; }
+        .ct-tbl tbody tr.row-unread:hover { background: #fef9ec; }
 
-        /* ===== Row content ===== */
-        .sender-name  { font-weight: 600; color: var(--txt-main, #111); margin-bottom: 2px; }
-        .sender-time  { font-size: 11px; color: var(--txt-sub, #888); }
-        .msg-subject  { font-weight: 600; color: var(--txt-main, #111); margin-bottom: 4px; }
+        /* ── Row content ── */
+        .sender-name  { font-weight: 700; color: var(--t1); margin-bottom: 3px; }
+        .sender-time  { font-size: 11px; color: var(--t3); display: flex; align-items: center; gap: 3px; }
+        .msg-subject  { font-weight: 600; color: var(--t1); margin-bottom: 4px; font-size: 13px; }
         .msg-preview  {
-            color: var(--txt-sub, #888);
+            color: var(--t3);
+            font-size: 12px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            line-height: 1.5;
+            line-height: 1.55;
         }
-        .sender-email { color: var(--txt-sub, #888); margin-bottom: 2px; word-break: break-all; }
-        .sender-code  { font-size: 11px; color: var(--txt-sub, #888); }
+        .sender-email { color: var(--t3); font-size: 12px; word-break: break-all; margin-bottom: 3px; }
+        .sender-code  {
+            display: inline-block;
+            font-size: 11px;
+            font-family: var(--mono);
+            background: var(--accent-soft);
+            color: var(--accent);
+            padding: 2px 7px;
+            border-radius: 5px;
+        }
 
-        /* ===== Status pill ===== */
+        /* ── Status pill ── */
         .st-pill {
             display: inline-flex;
             align-items: center;
@@ -113,118 +266,222 @@
             padding: 4px 10px;
             border-radius: 20px;
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 700;
             white-space: nowrap;
+            letter-spacing: .2px;
         }
-        .st-pill .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
-        .st-unread  { background: #FAEEDA; color: #854F0B; }
-        .st-unread  .dot { background: #BA7517; }
-        .st-read    { background: #EAF3DE; color: #3B6D11; }
-        .st-read    .dot { background: #639922; }
+        .st-pill .dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .st-unread { background: var(--amber-soft); color: #92400e; }
+        .st-unread .dot { background: var(--amber); }
+        .st-read   { background: var(--green-soft);  color: #166534; }
+        .st-read   .dot { background: var(--green); }
 
-        /* ===== Action buttons ===== */
-        .ct-actions { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
+        /* ── Buttons ── */
         .btn-ct {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            padding: 6px 12px;
-            border-radius: 8px;
+            gap: 5px;
+            padding: 6px 13px;
+            border-radius: 9px;
             font-size: 12px;
             font-weight: 600;
+            font-family: var(--font);
             border: none;
             cursor: pointer;
             transition: all .15s;
             text-decoration: none;
         }
-        .btn-ct-read  { background: #EAF3DE; color: #3B6D11; }
-        .btn-ct-read:hover  { background: #C0DD97; }
-        .btn-ct-del   { background: #FCEBEB; color: #A32D2D; }
-        .btn-ct-del:hover   { background: #F7C1C1; }
-        .btn-ct-reply { background: #E6F1FB; color: #185FA5; }
-        .btn-ct-reply:hover { background: #BDD9F5; }
+        .btn-reply { background: var(--accent-soft); color: var(--accent); }
+        .btn-reply:hover { background: #d8dffd; }
+        .btn-read  { background: var(--green-soft); color: #166534; }
+        .btn-read:hover { background: #bbf7d0; }
+        .btn-del   { background: var(--red-soft); color: var(--red); }
+        .btn-del:hover { background: #fecaca; }
 
-        /* ===== Empty state ===== */
-        .ct-empty {
-            text-align: center;
-            padding: 50px 20px;
-            color: var(--txt-sub, #888);
+        .ct-actions { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
+
+        .replied-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: var(--green);
+            font-weight: 600;
         }
-        .ct-empty i { font-size: 36px; opacity: .4; display: block; margin-bottom: 10px; }
 
-        /* ===== Modal ===== */
+        /* ── Empty state ── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--t3);
+        }
+        .empty-state .bi {
+            font-size: 44px;
+            opacity: .3;
+            display: block;
+            margin-bottom: 12px;
+        }
+        .empty-state p { font-size: 14px; }
+
+        /* ── No search results ── */
+        #ct-no-results {
+            display: none;
+            text-align: center;
+            padding: 44px 20px;
+            color: var(--t3);
+            font-size: 14px;
+        }
+        #ct-no-results .bi {
+            font-size: 32px;
+            opacity: .3;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        /* ── Modal ── */
         .modal {
             display: none;
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.6);
+            inset: 0;
+            background: rgba(15,23,42,.55);
+            backdrop-filter: blur(3px);
             z-index: 9999;
             align-items: center;
             justify-content: center;
         }
         .modal.active { display: flex; }
-        .modal-content {
-            background: #fff;
-            padding: 28px;
-            border-radius: 14px;
-            width: 480px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        .modal-box {
+            background: var(--card);
+            border-radius: 20px;
+            width: 500px;
+            max-width: 92vw;
+            box-shadow: 0 20px 60px rgba(15,23,42,.25);
+            overflow: hidden;
+            animation: popIn .22s ease;
         }
-        .modal-content h5 {
-            margin-top: 0;
-            margin-bottom: 18px;
-            font-size: 18px;
+        @keyframes popIn { from { opacity:0; transform: scale(.94) translateY(10px); } }
+        .modal-header {
+            padding: 22px 26px 0;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
         }
+        .modal-header h5 {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--t1);
+        }
+        .modal-header h5 span { color: var(--accent); }
+        .modal-close {
+            background: var(--page);
+            border: none;
+            width: 30px; height: 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--t3);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: background .15s;
+        }
+        .modal-close:hover { background: var(--bdr); color: var(--t1); }
+        .modal-body { padding: 18px 26px 26px; }
+        .reply-textarea {
+            width: 100%;
+            height: 160px;
+            padding: 13px 15px;
+            border: 1px solid var(--bdr);
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: var(--font);
+            color: var(--t1);
+            resize: vertical;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+            background: #fafbff;
+        }
+        .reply-textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(79,110,247,.1);
+            background: var(--card);
+        }
+        .reply-textarea::placeholder { color: var(--t3); }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .btn-cancel {
+            background: var(--page);
+            color: var(--t2);
+            border: 1px solid var(--bdr);
+        }
+        .btn-cancel:hover { background: var(--bdr); }
+        .btn-send {
+            background: var(--accent);
+            color: #fff;
+        }
+        .btn-send:hover { background: var(--accent-dark); }
     </style>
 </head>
 <body>
 <div layout:fragment="content">
 
-    <!-- Breadcrumb -->
-    <div class="bk-head anim anim-1">
+    <!-- Header -->
+    <div class="page-header anim anim-1">
         <div>
-            <div class="bk-title">Tin nhắn liên hệ</div>
-            <ol class="bk-breadcrumb">
+            <div class="page-title">Tin nhắn liên hệ</div>
+            <ol class="breadcrumb">
                 <li><a th:href="@{/admin/dashboard}">Trang chủ</a></li>
                 <li>Liên hệ</li>
             </ol>
         </div>
     </div>
 
-    <!-- Flash message -->
-    <div th:if="${successMsg}"
-         style="padding:14px 18px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; margin-bottom:20px; font-size:14px; display:flex; align-items:center; gap:10px;"
-         class="anim anim-1">
-        <i class="bi bi-check-circle-fill" style="color:#16a34a; font-size:16px;"></i>
+    <!-- Flash -->
+    <div th:if="${successMsg}" class="flash-success anim anim-1">
+        <i class="bi bi-check-circle-fill"></i>
         <span th:text="${successMsg}"></span>
     </div>
 
     <!-- Metrics -->
-    <div class="ct-metrics anim anim-2">
-        <div class="ct-m-card">
-            <div class="ct-m-icon blue"><i class="bi bi-envelope"></i></div>
+    <div class="metrics anim anim-2">
+        <div class="metric-card blue">
+            <div class="metric-icon blue"><i class="bi bi-envelope-fill"></i></div>
             <div>
-                <div class="ct-m-val" th:text="${messages != null ? messages.size() : 0}">0</div>
-                <div class="ct-m-lbl">Tổng tin nhắn</div>
+                <div class="metric-val" th:text="${messages != null ? messages.size() : 0}">0</div>
+                <div class="metric-lbl">Tổng tin nhắn</div>
             </div>
         </div>
-        <div class="ct-m-card">
-            <div class="ct-m-icon amber"><i class="bi bi-envelope-exclamation"></i></div>
+        <div class="metric-card amber">
+            <div class="metric-icon amber"><i class="bi bi-envelope-exclamation-fill"></i></div>
             <div>
-                <div class="ct-m-val" th:text="${unreadCount != null ? unreadCount : 0}">0</div>
-                <div class="ct-m-lbl">Chưa đọc</div>
+                <div class="metric-val" th:text="${unreadCount != null ? unreadCount : 0}">0</div>
+                <div class="metric-lbl">Chưa đọc</div>
             </div>
         </div>
     </div>
 
-    <!-- Table card -->
-    <div class="ct-card anim anim-3">
+    <!-- Main card -->
+    <div class="main-card anim anim-3">
 
-        <!-- Search -->
-        <div class="ct-search">
-            <input type="text" id="ct-search-input"
-                   placeholder="🔍  Tìm theo tên, email, chủ đề…" />
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="toolbar-title">
+                <i class="bi bi-chat-left-text-fill"></i> Danh sách tin nhắn
+            </div>
+            <div class="search-wrap">
+                <i class="bi bi-search"></i>
+                <input type="text" id="ct-search-input" class="search-input"
+                       placeholder="Tìm theo tên, email, chủ đề…" />
+            </div>
         </div>
 
         <!-- Table -->
@@ -244,15 +501,16 @@
                     <th>Email / MSSV</th>
                     <th>Trạng thái</th>
                     <th>Phản hồi</th>
-                    <th style="text-align: right;">Thao tác</th>
+                    <th>Thao tác</th>
                 </tr>
             </thead>
             <tbody id="ct-tbody">
+
                 <tr th:if="${messages == null or messages.isEmpty()}">
                     <td colspan="6">
-                        <div class="ct-empty">
+                        <div class="empty-state">
                             <i class="bi bi-inbox"></i>
-                            Chưa có tin nhắn nào.
+                            <p>Chưa có tin nhắn nào.</p>
                         </div>
                     </td>
                 </tr>
@@ -264,23 +522,24 @@
                     <!-- Người gửi -->
                     <td>
                         <div class="sender-name" th:text="${msg.fullName}"></div>
-                        <div class="sender-time"
-                             th:text="${#temporals.format(msg.createdAt, 'dd/MM/yyyy HH:mm')}"></div>
+                        <div class="sender-time">
+                            <i class="bi bi-clock"></i>
+                            <span th:text="${#temporals.format(msg.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                        </div>
                     </td>
 
-                    <!-- Chủ đề & Nội dung -->
+                    <!-- Chủ đề -->
                     <td>
                         <div class="msg-subject" th:text="${msg.subject}"></div>
-                        <div class="msg-preview"
-                             th:text="${#strings.abbreviate(msg.message, 120)}"></div>
+                        <div class="msg-preview" th:text="${#strings.abbreviate(msg.message, 120)}"></div>
                     </td>
 
                     <!-- Email / MSSV -->
                     <td>
                         <div class="sender-email" th:text="${msg.email}"></div>
-                        <div class="sender-code"
-                             th:if="${msg.studentCode}"
-                             th:text="${msg.studentCode}"></div>
+                        <span class="sender-code"
+                              th:if="${msg.studentCode}"
+                              th:text="${msg.studentCode}"></span>
                     </td>
 
                     <!-- Trạng thái -->
@@ -295,12 +554,11 @@
                     <!-- Phản hồi -->
                     <td>
                         <button th:if="${msg.status.name() != 'REPLIED'}"
-                                class="btn-ct btn-ct-reply"
+                                class="btn-ct btn-reply"
                                 th:attr="onclick='openModal(' + ${msg.id} + ', \'' + ${#strings.escapeJavaScript(msg.fullName)} + '\')'">
                             <i class="bi bi-reply-fill"></i> Phản hồi
                         </button>
-                        <span th:if="${msg.status.name() == 'REPLIED'}"
-                              style="color:#28a745; font-size:13px; display:inline-flex; align-items:center; gap:4px;">
+                        <span th:if="${msg.status.name() == 'REPLIED'}" class="replied-badge">
                             <i class="bi bi-check-circle-fill"></i> Đã trả lời
                         </span>
                     </td>
@@ -311,15 +569,14 @@
                             <form th:if="${msg.status.name() == 'UNREAD'}"
                                   th:action="@{/admin/contact/read/{id}(id=${msg.id})}"
                                   method="post" style="display:inline;">
-                                <button type="submit" class="btn-ct btn-ct-read" title="Đánh dấu đã đọc">
-                                    <i class="bi bi-check-lg"></i>
+                                <button type="submit" class="btn-ct btn-read" title="Đánh dấu đã đọc">
+                                    <i class="bi bi-check-lg"></i> Đã đọc
                                 </button>
                             </form>
-
                             <form th:action="@{/admin/contact/delete/{id}(id=${msg.id})}"
                                   method="post"
                                   onsubmit="return confirm('Bạn có chắc muốn xóa tin nhắn này?')">
-                                <button type="submit" class="btn-ct btn-ct-del" title="Xóa">
+                                <button type="submit" class="btn-ct btn-del" title="Xóa">
                                     <i class="bi bi-trash3"></i>
                                 </button>
                             </form>
@@ -329,87 +586,70 @@
             </tbody>
         </table>
 
-        <!-- No results after search -->
-        <div id="ct-no-results"
-             style="display:none; text-align:center; padding:40px 20px; color:var(--txt-sub,#888); font-size:14px;">
-            <i class="bi bi-search" style="font-size:28px; opacity:.4; display:block; margin-bottom:10px;"></i>
+        <div id="ct-no-results">
+            <i class="bi bi-search"></i>
             Không tìm thấy kết quả phù hợp.
         </div>
     </div>
 
-    <!-- ✅ Modal Phản hồi — nằm TRONG layout:fragment="content" -->
+    <!-- Modal -->
     <div id="replyModal" class="modal">
-        <div class="modal-content">
-            <h5>Gửi phản hồi cho <span id="senderName" style="color:#185FA5;"></span></h5>
-
-            <form th:action="@{/admin/contact/send-reply}" method="post">
-                <input type="hidden" name="messageId" id="messageId">
-
-                <textarea name="replyContent" required
-                          placeholder="Nhập nội dung phản hồi tại đây..."
-                          style="width:100%; height:170px; padding:12px;
-                                 border:1px solid #ddd; border-radius:8px;
-                                 font-size:14px; resize:vertical;
-                                 box-sizing:border-box;"></textarea>
-
-                <div style="margin-top:20px; text-align:right;">
-                    <button type="button" onclick="closeModal()"
-                            class="btn-ct"
-                            style="background:#eee; color:#333; margin-right:10px;">
-                        Hủy
-                    </button>
-                    <button type="submit" class="btn-ct btn-ct-read">
-                        <i class="bi bi-send-fill"></i> Gửi phản hồi
-                    </button>
-                </div>
-            </form>
+        <div class="modal-box">
+            <div class="modal-header">
+                <h5>Gửi phản hồi cho <span id="senderName"></span></h5>
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form th:action="@{/admin/contact/send-reply}" method="post">
+                    <input type="hidden" name="messageId" id="messageId">
+                    <textarea name="replyContent" required class="reply-textarea"
+                              placeholder="Nhập nội dung phản hồi tại đây…"></textarea>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-ct btn-cancel" onclick="closeModal()">
+                            Hủy
+                        </button>
+                        <button type="submit" class="btn-ct btn-send">
+                            <i class="bi bi-send-fill"></i> Gửi phản hồi
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-    <!-- ✅ Kết thúc Modal -->
 
-</div><!-- end layout:fragment="content" -->
+</div>
 
-<!-- ✅ Script nằm trong th:block layout:fragment="script" -->
 <th:block layout:fragment="script">
 <script>
-    /* ===== Modal ===== */
     function openModal(id, name) {
         if (!id) return;
         document.getElementById('messageId').value = id;
         document.getElementById('senderName').innerText = name || 'Khách';
         document.getElementById('replyModal').classList.add('active');
     }
-
     function closeModal() {
         document.getElementById('replyModal').classList.remove('active');
     }
-
-    // Đóng modal khi click vào backdrop
     document.getElementById('replyModal').addEventListener('click', function (e) {
         if (e.target === this) closeModal();
     });
 
-    /* ===== Tìm kiếm ===== */
     (function () {
         var input    = document.getElementById('ct-search-input');
         var rows     = document.querySelectorAll('#ct-tbody tr[data-q]');
         var noResult = document.getElementById('ct-no-results');
-
         if (!input) return;
-
         input.addEventListener('input', function () {
             var q = this.value.trim().toLowerCase();
             var visible = 0;
-
             rows.forEach(function (row) {
                 var match = !q || (row.dataset.q || '').includes(q);
                 row.style.display = match ? '' : 'none';
                 if (match) visible++;
             });
-
-            if (noResult) {
-                noResult.style.display = (q && visible === 0) ? 'block' : 'none';
-            }
+            if (noResult) noResult.style.display = (q && visible === 0) ? 'block' : 'none';
         });
     })();
 </script>

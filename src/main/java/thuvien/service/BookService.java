@@ -249,4 +249,8 @@ public class BookService {
 
         return true;
     }
+
+    public Page<Book> findAll(Pageable pageable) {
+        return bookRepository.findAll(pageable);
+    }
 }

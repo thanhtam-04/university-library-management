@@ -47,4 +47,8 @@ public class AuthorService {
                 .limit(limit)
                 .toList();
     }
+
+    public List<Author> getAll() {
+        return authorRepository.findAll(); // Đổi từ "return null;" sang dòng này
+    }
 }

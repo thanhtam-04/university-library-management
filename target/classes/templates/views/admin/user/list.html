@@ -77,11 +77,25 @@
 .usr-tbl td { padding:14px 18px; vertical-align:middle; }
 
 /* ─ User Avatar Info ─ */
+/* ─ User Avatar Info cải tiến ─ */
 .usr-av-w {
-    width:38px; height:38px; border-radius:50%; overflow:hidden; flex-shrink:0;
-    box-shadow:0 2px 6px rgba(17,24,39,.06); background:#e9ecef;
+    width: 40px; 
+    height: 40px; 
+    border-radius: 50%; /* Bo tròn hoàn hảo */
+    overflow: hidden; 
+    flex-shrink: 0;
+    border: 1px solid #e0e6ed; /* Viền nhẹ cho ảnh nổi bật */
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-.usr-av-w img { width:100%; height:100%; object-fit:cover; display:block; }
+.usr-av-w img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; /* QUAN TRỌNG: Cắt ảnh lấp đầy khung mà không bị méo */
+    display: block; 
+}
 .usr-info-wrap { display:flex; align-items:center; gap:12px; }
 .usr-nm {
     font-family:var(--fh); font-size:14px; font-weight:700; color:var(--t1); line-height:1.2;
@@ -277,7 +291,13 @@
                     <td style="padding-left:22px">
                         <div class="usr-info-wrap">
                             <div class="usr-av-w">
-                                <img th:src="${u.avatar != null and !u.avatar.isEmpty() ? u.avatar : '/assets/img/default-avatar.png'}" alt="Avatar">
+								<img th:if="${u.avatar != null and !u.avatar.isEmpty()}" 
+								         th:src="${u.avatar}" alt="Avatar">
+								         
+								    <div th:if="${u.avatar == null or u.avatar.isEmpty()}" 
+								         style="width:100%; height:100%; background:#e0e0e0; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#777; font-size:14px;">
+								         <span th:text="${#strings.substring(u.fullName, 0, 1).toUpperCase()}">A</span>
+								    </div>
                             </div>
                             <div>
                                 <div class="usr-nm" th:text="${u.fullName}"></div>
@@ -300,33 +320,42 @@
                         </div>
                     </td>
 
-                    <td class="text-center">
-                        <div class="approve-dropdown">
-                            <button type="button" class="btn-approve-trigger"
-                                    th:classappend="${u.isApproved} ? 'bdg-approve-yes' : 'bdg-approve-no'"
-                                    onclick="toggleApproveMenu(this, event)">
-                                <i th:class="${u.isApproved} ? 'bi bi-patch-check-fill' : 'bi bi-clock-fill'"></i>
-                                <span th:text="${u.isApproved ? 'Đã duyệt' : 'Chờ duyệt'}"></span>
-                                <i class="bi bi-chevron-down" style="font-size: 9px; opacity: 0.8;"></i>
-                            </button>
+					<td class="text-center">
+					    <div class="approve-dropdown" sec:authorize="hasRole('ADMIN')">
+					        <button type="button" class="btn-approve-trigger"
+					                th:classappend="${u.isApproved} ? 'bdg-approve-yes' : 'bdg-approve-no'"
+					                onclick="toggleApproveMenu(this, event)">
+					            <i th:class="${u.isApproved} ? 'bi bi-patch-check-fill' : 'bi bi-clock-fill'"></i>
+					            <span th:text="${u.isApproved ? 'Đã duyệt' : 'Chờ duyệt'}"></span>
+					            <i class="bi bi-chevron-down" style="font-size: 9px; opacity: 0.8;"></i>
+					        </button>
 
-                            <div class="approve-menu">
-                                <form th:action="@{/admin/user/approve-quick/{id}(id=${u.id})}" method="post">
-                                    <input type="hidden" name="approve" value="true"/>
-                                    <button type="submit" class="approve-item opt-approve">
-                                        <i class="bi bi-check-circle"></i> Duyệt tài khoản
-                                    </button>
-                                </form>
-                                <form th:action="@{/admin/user/approve-quick/{id}(id=${u.id})}" method="post"
-                                      th:onsubmit="'return confirm(\'Hủy phê duyệt tài khoản này sẽ khóa quyền truy cập. Bạn chắc chắn chứ?\')'">
-                                    <input type="hidden" name="approve" value="false"/>
-                                    <button type="submit" class="approve-item opt-reject">
-                                        <i class="bi bi-slash-circle"></i> Hủy duyệt/Khóa
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </td>
+					        <div class="approve-menu">
+					            <form th:action="@{/admin/user/approve-quick/{id}(id=${u.id})}" method="post">
+					                <input type="hidden" name="approve" value="true"/>
+					                <button type="submit" class="approve-item opt-approve">
+					                    <i class="bi bi-check-circle"></i> Duyệt tài khoản
+					                </button>
+					            </form>
+					            <form th:action="@{/admin/user/approve-quick/{id}(id=${u.id})}" method="post"
+					                  th:onsubmit="'return confirm(\'Hủy phê duyệt sẽ khóa tài khoản này. Bạn chắc chắn chứ?\')'">
+					                <input type="hidden" name="approve" value="false"/>
+					                <button type="submit" class="approve-item opt-reject">
+					                    <i class="bi bi-slash-circle"></i> Hủy duyệt/Khóa
+					                </button>
+					            </form>
+					        </div>
+					    </div>
+
+					    <div class="approve-dropdown" sec:authorize="!hasRole('ADMIN')">
+					        <span class="btn-approve-trigger" 
+					              th:classappend="${u.isApproved} ? 'bdg-approve-yes' : 'bdg-approve-no'"
+					              style="cursor: default; display: inline-flex;">
+					            <i th:class="${u.isApproved} ? 'bi bi-patch-check-fill' : 'bi bi-clock-fill'"></i>
+					            <span th:text="${u.isApproved ? 'Đã duyệt' : 'Chờ duyệt'}"></span>
+					        </span>
+					    </div>
+					</td>
 
                     <td class="text-center">
                         <span class="s-bdg" 
@@ -341,20 +370,22 @@
                         </span>
                     </td>
 
-                    <td style="padding-right:22px">
-                        <div class="act-g">
-                            <a th:href="@{/admin/user/edit/{id}(id=${u.id})}"
-                               class="btn-action-icon" title="Chỉnh sửa thông tin">
-                                <i class="bi bi-pencil"></i>
-                            </a>
+					<td style="padding-right:22px">
+					    <div class="act-g">
+					        <a sec:authorize="hasRole('ADMIN')" 
+					           th:href="@{/admin/user/edit/{id}(id=${u.id})}"
+					           class="btn-action-icon" title="Chỉnh sửa thông tin">
+					            <i class="bi bi-pencil"></i>
+					        </a>
 
-                            <a th:href="@{/admin/user/delete/{id}(id=${u.id})}"
-                               class="btn-action-icon ai-del" title="Xóa tài khoản"
-                               onclick="return confirm('Bạn có chắc muốn xóa vĩnh viễn tài khoản này khỏi hệ thống?')">
-                                <i class="bi bi-trash"></i>
-                            </a>
-                        </div>
-                    </td>
+					        <a sec:authorize="hasRole('ADMIN')" 
+					           th:href="@{/admin/user/delete/{id}(id=${u.id})}"
+					           class="btn-action-icon ai-del" title="Xóa tài khoản"
+					           onclick="return confirm('Bạn có chắc muốn xóa vĩnh viễn tài khoản này khỏi hệ thống?')">
+					            <i class="bi bi-trash"></i>
+					        </a>
+					    </div>
+					</td>
                 </tr>
 
                 <tr th:if="${users == null or #lists.isEmpty(users)}">

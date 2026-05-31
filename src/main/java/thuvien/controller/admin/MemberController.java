@@ -5,10 +5,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import thuvien.entity.Fine;
+import thuvien.entity.Loan;
 import thuvien.entity.Member;
 import thuvien.service.MemberService;
 import thuvien.service.UserService;
-
+import java.util.List;
 @Controller
 @RequestMapping("/admin/member")
 @RequiredArgsConstructor
@@ -16,7 +19,9 @@ public class MemberController {
 
     private final MemberService memberService;
     private final UserService   userService;
-
+    private final thuvien.repository.MemberRepository memberRepository;
+    private final thuvien.repository.LoanRepository loanRepository;
+    private final thuvien.repository.FineRepository fineRepository;
     /* ── LIST ── */
     @GetMapping("/list")
     public String list(Model model) {
@@ -82,5 +87,21 @@ public class MemberController {
                 "Không thể xóa thành viên này (có thể đang có lịch sử mượn sách).");
         }
         return "redirect:/admin/member/list";
+    }
+    @GetMapping("/profile/{id}")
+    public String profile(@PathVariable Long id, Model model) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thành viên"));
+        
+        // Lấy danh sách phiếu mượn của thành viên này
+        List<Loan> loanHistory = loanRepository.findByMemberId(id);
+        // Lấy danh sách phí phạt (nếu bạn muốn hiển thị)
+        List<Fine> fines = fineRepository.findByMemberId(id);
+        
+        model.addAttribute("m", member);
+        model.addAttribute("loans", loanHistory);
+        model.addAttribute("fines", fines);
+        model.addAttribute("activePage", "member");
+        return "views/admin/member/profile";
     }
 }
