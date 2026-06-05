@@ -15,6 +15,7 @@ import thuvien.repository.MemberRepository;
 import thuvien.service.LoanService;
 import thuvien.service.UserService;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -46,6 +47,7 @@ public class MyLoansController {
             model.addAttribute("activeLoans",  Collections.emptyList());
             model.addAttribute("reservations", Collections.emptyList());
             model.addAttribute("overdueCount", 0L);
+            model.addAttribute("totalDepositPaid", BigDecimal.ZERO);
             return "my-loans";
         }
 
@@ -59,7 +61,6 @@ public class MyLoansController {
         model.addAttribute("reservations", uniqueReservations);
 
         // 2. Lấy danh sách đơn mượn (Loans)
-     // 2. Lấy danh sách đơn mượn (Loans)
         List<Loan> allLoans = loanService.findByMember(member.getId());
         model.addAttribute("loans", (allLoans != null) ? allLoans : Collections.emptyList());
 
@@ -71,6 +72,8 @@ public class MyLoansController {
                 String status;
                 if (l.getStatus() == Loan.Status.RETURNED) {
                     status = "RETURNED";
+                } else if (l.getStatus() == Loan.Status.PENDING) {
+                    status = "PENDING"; 
                 } else if (l.getDueDate() != null && l.getDueDate().isBefore(today)) {
                     status = "OVERDUE";
                 } else if (l.getStatus() == Loan.Status.OVERDUE) {
@@ -82,7 +85,7 @@ public class MyLoansController {
             }
         }
         model.addAttribute("loanStatusMap", loanStatusMap);
-        // ----------------------------------------------
+
         // 3. Tính toán Active Loans
         List<Loan> activeLoans = (allLoans != null) ? allLoans.stream()
                 .filter(l -> l.getStatus() == Loan.Status.ACTIVE
@@ -92,12 +95,20 @@ public class MyLoansController {
         model.addAttribute("activeLoans", activeLoans);
 
         // 4. Tính toán số lượng quá hạn
-     // 4. Tính toán số lượng quá hạn (dùng loanStatusMap đã tính đúng)
         long overdueCount = loanStatusMap.values().stream()
                 .filter(s -> s.equals("OVERDUE"))
                 .count();
         model.addAttribute("overdueCount", overdueCount);
-        return "my-loans";
+
+        // 5. Tính tổng tiền cọc đã nạp
+        BigDecimal totalDepositPaid = (allLoans != null) ? allLoans.stream()
+                .filter(l -> l.getDepositPaid() != null)
+                .map(l -> l.getDepositPaid())
+                .reduce(BigDecimal.ZERO, BigDecimal::add) : BigDecimal.ZERO;
+
+        model.addAttribute("totalDepositPaid", totalDepositPaid);
+        
+        return "my-loans"; // Đã thêm lại dòng này để trả về view
     }
 
     /* ─── Helper: Lọc phần tử duy nhất trong Stream ─── */

@@ -77,10 +77,10 @@
                     </div>
 
                     <div class="bg-blue-50/50 border border-blue-100 p-4 rounded-2xl space-y-2.5">
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="text-slate-600">Phí mượn đọc sách:</span>
-                            <strong class="text-slate-800 text-emerald-600">Miễn phí (0đ)</strong>
-                        </div>
+						<div class="flex justify-between items-center text-sm">
+						    <span class="text-slate-600">Phí mượn đọc sách:</span>
+						    <strong class="text-slate-800 text-emerald-600">50.000 VNĐ</strong>
+						</div>
                         <div class="flex justify-between items-center text-sm border-t border-blue-100 pt-2">
                             <span class="text-slate-600">Tiền đặt cọc sách:</span>
                             <strong class="text-blue-700 text-base" th:text="${#numbers.formatDecimal(calculatedDeposit, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></strong>
@@ -137,7 +137,7 @@
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.location.href = '/admin/loan/list'; // Đá về bảng danh sách quản lý để tiện kiểm tra cọc
+                    window.location.href = '/my-loans'; // Đá về bảng danh sách quản lý để tiện kiểm tra cọc
                 }
             });
         }

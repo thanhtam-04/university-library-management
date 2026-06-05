@@ -22,14 +22,11 @@ public class FineController {
     private final FineService fineService;
     private final UserRepository userRepository;
 
- // ─── DANH SÁCH TẤT CẢ ────────────────────────────────────
+    // ─── DANH SÁCH TẤT CẢ ────────────────────────────────────
     @GetMapping("/list")
     public String list(
             @RequestParam(required = false) String status,
             Model model) {
-
-        // KÍCH HOẠT: Tự động đồng bộ các phiếu mượn quá hạn vào bảng phí phạt
-        fineService.syncOverdueLoans();
 
         List<Fine> list;
         if (status != null && !status.isBlank()) {
@@ -96,5 +93,4 @@ public class FineController {
         }
         return "redirect:/admin/fine/list";
     }
-    
 }

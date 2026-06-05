@@ -50,39 +50,58 @@ public class FineService {
     /**
      * Tự động quét các phiếu mượn quá hạn và tạo phiếu phạt nếu chưa có
      */
-  @Transactional
-public void syncOverdueLoans() {
-    // 1. Lấy tất cả các phiếu ĐANG MƯỢN (ACTIVE)
-    List<Loan> activeLoans = loanRepository.findByStatus(Loan.Status.ACTIVE);
-    
-    for (Loan loan : activeLoans) {
-        // 2. Tự kiểm tra: Nếu ngày quá hạn đã qua (today > due_date)
-        if (LocalDate.now().isAfter(loan.getDueDate())) {
-            
-            // Chuyển trạng thái phiếu sang OVERDUE trong DB
-            loan.setStatus(Loan.Status.OVERDUE);
-            loanRepository.save(loan);
-            
-            // 3. Tạo phiếu phạt nếu chưa tồn tại
-            if (!fineRepository.existsByLoanId(loan.getId())) {
-                Fine newFine = new Fine();
-                newFine.setLoan(loan);
-                newFine.setMember(loan.getMember());
+    /**
+     * Tự động quét các phiếu mượn quá hạn:
+     * 1. Tạo phiếu phạt cho các phiếu chưa có phạt.
+     * 2. Cập nhật số ngày trễ và số tiền cho các phiếu đang trong trạng thái UNPAID.
+     */
+    @Transactional
+    public void syncOverdueLoans() {
+        // 1. Quét các phiếu ACTIVE để kiểm tra quá hạn và tạo phiếu phạt mới
+        List<Loan> activeLoans = loanRepository.findByStatus(Loan.Status.ACTIVE);
+        
+        for (Loan loan : activeLoans) {
+            if (LocalDate.now().isAfter(loan.getDueDate())) {
+                // Chuyển trạng thái sang OVERDUE
+                loan.setStatus(Loan.Status.OVERDUE);
+                loanRepository.save(loan);
                 
-                long days = ChronoUnit.DAYS.between(loan.getDueDate(), LocalDate.now());
-                newFine.setDaysOverdue((int) days);
-                
-                BigDecimal feePerDay = new BigDecimal("2000");
-                newFine.setFineAmount(feePerDay.multiply(BigDecimal.valueOf(days)));
-                newFine.setFinePerDay(feePerDay);
-                newFine.setStatus(Fine.Status.UNPAID);
-                newFine.setCreatedAt(LocalDateTime.now());
-                
-                fineRepository.save(newFine);
-                System.out.println("--- ĐÃ TỰ ĐỘNG CẬP NHẬT PHIẾU QUÁ HẠN: " + loan.getLoanCode() + " ---");
+                // Tạo mới nếu chưa có phiếu phạt
+                if (!fineRepository.existsByLoanId(loan.getId())) {
+                    Fine newFine = new Fine();
+                    newFine.setLoan(loan);
+                    newFine.setMember(loan.getMember());
+                    
+                    long days = ChronoUnit.DAYS.between(loan.getDueDate(), LocalDate.now());
+                    newFine.setDaysOverdue((int) days);
+                    
+                    BigDecimal feePerDay = new BigDecimal("2000");
+                    newFine.setFinePerDay(feePerDay);
+                    newFine.setFineAmount(feePerDay.multiply(BigDecimal.valueOf(days)));
+                    newFine.setStatus(Fine.Status.UNPAID);
+                    newFine.setCreatedAt(LocalDateTime.now());
+                    
+                    fineRepository.save(newFine);
+                }
             }
         }
-    }
+
+        // 2. CẬP NHẬT LẠI CÁC PHIẾU ĐANG CHỜ (UNPAID) để số ngày trễ tăng theo thực tế
+        List<Fine> unpaidFines = fineRepository.findByStatus(Fine.Status.UNPAID);
+        for (Fine fine : unpaidFines) {
+            if (fine.getLoan() != null) {
+                long days = ChronoUnit.DAYS.between(fine.getLoan().getDueDate(), LocalDate.now());
+                
+                // Chỉ cập nhật nếu số ngày trễ thực tế khác với dữ liệu cũ trong DB
+                if (days > 0 && days != fine.getDaysOverdue()) {
+                    fine.setDaysOverdue((int) days);
+                    // Cập nhật lại số tiền phạt mới
+                    fine.setFineAmount(fine.getFinePerDay().multiply(BigDecimal.valueOf(days)));
+                    fineRepository.save(fine);
+                }
+            }
+        }
+    
 }
     /**
      * Xử lý thanh toán phí phạt:

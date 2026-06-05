@@ -20,4 +20,11 @@ public interface FineRepository extends JpaRepository<Fine, Long> {
     BigDecimal sumFineAmount();
  // Trong file FineRepository.java
     boolean existsByLoanId(Long loanId);
+ // Thêm vào FineRepository.java
+    @Query("SELECT COALESCE(SUM(f.fineAmount), 0) FROM Fine f WHERE f.loan.id = :loanId")
+    BigDecimal sumFineAmountByLoanId(@org.springframework.data.repository.query.Param("loanId") Long loanId);
+ // Trong FineRepository.java
+    @Query("SELECT COALESCE(SUM(f.fineAmount), 0) FROM Fine f WHERE f.status = 'UNPAID'")
+    BigDecimal sumUnpaidFineAmount();
+    
 }

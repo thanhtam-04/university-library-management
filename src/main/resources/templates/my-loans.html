@@ -151,6 +151,7 @@
                     <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs font-semibold uppercase tracking-wider">
                         <th class="px-6 py-4">Mã đơn</th>
                         <th class="px-6 py-4">Thông tin sách mượn</th>
+                        <th class="px-6 py-4">Tiền cọc</th>
                         <th class="px-6 py-4">Ngày mượn</th>
                         <th class="px-6 py-4">Hạn trả dự kiến</th>
                         <th class="px-6 py-4">Trạng thái phiếu</th>
@@ -165,7 +166,6 @@
 				        
 				        <td class="px-6 py-4 font-mono font-bold text-xs text-blue-600 vertical-baseline">
 				            <span class="bg-blue-50 px-2 py-1 rounded" th:text="${loan.loanCode}">PM-001</span>
-							<br/><small th:text="'status=' + ${loanStatusMap.get(loan.id)}"></small>
 				        </td>
 				        
 				        <td class="px-6 py-4">
@@ -179,17 +179,14 @@
 				                    </div>
 				                    <div class="flex-1 min-w-0">
 				                        <div class="font-semibold text-navy-900 line-clamp-1 text-xs" th:text="${item.bookCopy?.book?.title}"></div>
-				                        <div class="text-[11px] text-slate-400 font-mono mt-0.5" th:text="'Mã vạch: ' + ${item.bookCopy?.barcode}"></div>
 				                    </div>
-									<span th:if="${loanStatusMap.get(loan.id) == 'RETURNED'}" class="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md ml-auto">
-									    ✓ Đã trả
-									</span>
-									<span th:unless="${loanStatusMap.get(loan.id) == 'RETURNED'}" class="text-[10px] font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md ml-auto">
-									    Chưa trả
-									</span>
 				                </div>
 				            </div>
 				        </td>
+
+                        <td class="px-6 py-4 text-xs font-bold text-emerald-600">
+                            <span th:text="${loan.depositPaid != null ? #numbers.formatDecimal(loan.depositPaid, 0, 'COMMA', 0, 'POINT') + '₫' : '0₫'}">0₫</span>
+                        </td>
 				        
 				        <td class="px-6 py-4 text-xs text-slate-500 font-medium whitespace-nowrap"
 				            th:text="${loan.loanDate != null ? #temporals.format(loan.loanDate,'dd/MM/yyyy') : '—'}"></td>
@@ -197,11 +194,13 @@
 				        <td class="px-6 py-4 text-xs font-semibold whitespace-nowrap">
 				            <div th:text="${loan.dueDate != null ? #temporals.format(loan.dueDate,'dd/MM/yyyy') : '—'}"
 				                 th:classappend="${loan.status?.name() == 'OVERDUE'} ? 'text-red-600 font-bold' : 'text-slate-700'"></div>
-				            <div th:if="${loan.returnDate != null}" class="text-[10px] text-emerald-600 font-medium mt-1"
-				                 th:text="'Trả vào: ' + ${#temporals.format(loan.returnDate,'dd/MM/yyyy')}"></div>
 				        </td>
 
 						<td class="px-6 py-4 whitespace-nowrap">
+							<span th:if="${loanStatusMap.get(loan.id) == 'PENDING'}" 
+							          class="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+							        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Chờ duyệt
+							    </span>
 						        <span th:if="${loanStatusMap.get(loan.id) == 'RETURNED'}" class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-[11px] font-semibold px-2.5 py-1 rounded-full">
 						            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Đã trả
 						        </span>
@@ -232,10 +231,11 @@
 					            </div>
 					            <div class="flex-1 min-w-0">
 					                <div class="font-semibold text-navy-900 line-clamp-1 text-xs" th:text="${res.book != null ? res.book.title : 'Sách chờ'}"></div>
-					                <div class="text-[11px] text-slate-400 font-mono mt-0.5">Trạng thái: Đang chờ</div>
 					            </div>
 					        </div>
 					    </td>
+
+                        <td class="px-6 py-4 text-xs italic text-slate-400">—</td>
 					    
 					    <td class="px-6 py-4 text-xs text-slate-500 font-medium whitespace-nowrap" 
 					        th:text="${res.reservationDate != null ? #temporals.format(res.reservationDate,'dd/MM/yyyy') : '—'}"></td>
@@ -254,22 +254,14 @@
         </div>
         
         <div id="no-loans-target" class="p-16 text-center hidden bg-white">
-            <div class="w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center bg-slate-50 border border-dashed border-slate-200">
-                <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13"/></svg>
-            </div>
             <h3 class="font-display font-bold text-navy-900 text-base mb-1">Không tìm thấy đơn mượn nào</h3>
-            <p class="text-slate-400 text-xs">Danh mục trạng thái được chọn hiện không có dữ liệu hiển thị.</p>
         </div>
     </div>
     
-    <div th:if="${loans == null or #lists.isEmpty(loans)}" class="card p-16 text-center bg-white anim d3">
-        <h3 class="font-display font-bold text-navy-900 text-lg mb-2">Bạn chưa mượn sách nào</h3>
-        <p class="text-slate-400 text-sm mb-5">Hãy khám phá kho sách và đến thư viện để mượn sách</p>
-        <a th:href="@{/category}" class="btn-primary mx-auto">Khám phá kho sách</a>
-    </div>
 </div>
 
 <div th:replace="~{navbar :: footer}"></div>
+
 
 <script>
     function filterLoans(status) {
@@ -288,30 +280,25 @@
         let countVisible = 0;
 
         // 2. Lọc các hàng
-        document.querySelectorAll('.loan-card').forEach(row => {
-            const cardStatus = (row.dataset.status || '').trim().toLowerCase();
-            
-            // Logic so sánh:
-            // Nếu tab là 'active', chấp nhận cả 'active' và 'pending'
-            let isVisible = false;
-            if (target === 'all') {
-                isVisible = true;
-            } else if (target === 'active') {
-                isVisible = (cardStatus === 'active' || cardStatus === 'pending');
-            } else {
-                // Các trường hợp còn lại: reserved, overdue, returned
-                isVisible = (cardStatus === target);
-            }
-
-            // Áp dụng display
-            if (isVisible) {
-                row.style.display = '';
-                countVisible++;
-            } else {
-                row.style.display = 'none';
-            }
-        });
-
+		document.querySelectorAll('.loan-card').forEach(row => {
+		    const cardStatus = (row.dataset.status || '').trim().toLowerCase();
+		    
+		    let isVisible = false;
+		    if (target === 'all') {
+		        isVisible = true;
+		    } else if (target === 'active') {
+		        // Chỉ cho phép hiển thị khi status là 'active' (đã duyệt)
+		        isVisible = (cardStatus === 'active');
+		    } else if (target === 'pending') {
+		        // Bạn có thể thêm một tab riêng hoặc ẩn nó đi
+		        isVisible = (cardStatus === 'pending');
+		    } else {
+		        isVisible = (cardStatus === target);
+		    }
+		    
+		    row.style.display = isVisible ? '' : 'none';
+		    if (isVisible) countVisible++;
+		});
         // 3. Xử lý thông báo "Không có dữ liệu"
         const noLoanState = document.getElementById('no-loans-target');
         if (noLoanState) {

@@ -10,7 +10,7 @@ import thuvien.repository.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Month;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class StatisticsService {
 
-    private final BookRepository     bookRepository;
+    private final BookRepository       bookRepository;
     private final BookCopyRepository bookCopyRepository;
     private final MemberRepository   memberRepository;
     private final LoanRepository     loanRepository;
@@ -63,6 +63,9 @@ public class StatisticsService {
                 thuvien.entity.Payment.PaymentType.FINE);
         return total != null ? total : BigDecimal.ZERO;
     }
+    public BigDecimal calculateActualTotalDebt() {
+        return fineRepository.sumUnpaidFineAmount();
+    }
 
     /* ══════════════════════════════════════════
        BIỂU ĐỒ MƯỢN/TRẢ THEO THÁNG (năm hiện tại)
@@ -91,7 +94,6 @@ public class StatisticsService {
 
         return result;
     }
-    
 
     /**
      * Trả về map tháng → số phiếu đã trả trong tháng đó.
@@ -120,9 +122,6 @@ public class StatisticsService {
        TOP SÁCH MƯỢN NHIỀU NHẤT
     ══════════════════════════════════════════ */
 
-    /**
-     * Trả về danh sách [tên sách, số lần mượn] giảm dần, tối đa `limit` cuốn.
-     */
     public List<Map<String, Object>> topBorrowedBooks(int limit) {
         return loanItemRepository.findAll().stream()
                 .filter(item -> item.getBookCopy() != null
@@ -151,30 +150,28 @@ public class StatisticsService {
         return fineRepository.countByStatus(status);
     }
 
-    /**
-     * Top thành viên nợ nhiều nhất.
-     */
     public List<Map<String, Object>> topDebtMembers(int limit) {
-        return memberRepository.findAll().stream()
-                .filter(m -> m.getCurrentDebt() != null
-                        && m.getCurrentDebt().compareTo(BigDecimal.ZERO) > 0)
-                .sorted(Comparator.comparing(
-                        thuvien.entity.Member::getCurrentDebt).reversed())
+        // Lấy tất cả các phiếu phạt chưa thanh toán
+        List<Fine> unpaidFines = fineRepository.findByStatus(Fine.Status.UNPAID);
+        
+        // Nhóm theo Member và tính tổng tiền nợ
+        return unpaidFines.stream()
+                .filter(f -> f.getMember() != null)
+                .collect(Collectors.groupingBy(Fine::getMember, 
+                         Collectors.reducing(BigDecimal.ZERO, Fine::getFineAmount, BigDecimal::add)))
+                .entrySet().stream()
+                .sorted(Map.Entry.<thuvien.entity.Member, BigDecimal>comparingByValue().reversed())
                 .limit(limit)
-                .map(m -> {
+                .map(e -> {
                     Map<String, Object> map = new LinkedHashMap<>();
-                    map.put("name",    m.getUser() != null ? m.getUser().getFullName() : "—");
-                    map.put("card",    m.getCardNumber());
-                    map.put("debt",    m.getCurrentDebt());
+                    map.put("name", e.getKey().getUser() != null ? e.getKey().getUser().getFullName() : "—");
+                    map.put("card", e.getKey().getCardNumber());
+                    map.put("debt", e.getValue()); // Nợ thực tế từ bảng Fine
                     return map;
                 })
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Phân bố phiếu phạt theo trạng thái cho biểu đồ Doughnut.
-     * Trả về map: "UNPAID" → count, "PAID" → count, "WAIVED" → count
-     */
     public Map<String, Long> fineStatusDistribution() {
         Map<String, Long> result = new LinkedHashMap<>();
         result.put("Chưa thanh toán", fineRepository.countByStatus(Fine.Status.UNPAID));
@@ -182,14 +179,64 @@ public class StatisticsService {
         result.put("Miễn giảm",       fineRepository.countByStatus(Fine.Status.WAIVED));
         return result;
     }
-    
+
     public StatisticsResponse getStatistics() {
         return StatisticsResponse.builder()
                 .totalBooks(totalBooks())
-                .availableCopies(bookCopyRepository.count()) // Hoặc status phù hợp
+                .availableCopies(bookCopyRepository.count())
                 .activeMembers(totalMembers())
                 .overdueLoans(overdueLoans())
                 .build();
     }
+
+    /* ══════════════════════════════════════════
+       BỔ SUNG: THỐNG KÊ DOANH THU THEO THÁNG
+    ══════════════════════════════════════════ */
+    public Map<String, Long> getMonthlyRevenue() {
+        int currentYear = LocalDate.now().getYear();
+        List<Loan> allLoans = loanRepository.findAll();
+
+        Map<String, Long> result = new LinkedHashMap<>();
+        for (int m = 1; m <= 12; m++) {
+            result.put("T" + m, 0L);
+        }
+
+        allLoans.stream()
+                // Lọc theo trạng thái RETURNED (đảm bảo đúng Enum trong Loan.java)
+                .filter(l -> l.getStatus() == Loan.Status.RETURNED && l.getReturnDate() != null 
+                        && l.getReturnDate().getYear() == currentYear)
+                .forEach(l -> {
+                    String key = "T" + l.getReturnDate().getMonthValue();
+                    
+                    // Gọi Repository lấy tổng tiền phạt cho phiếu mượn này
+                    BigDecimal fineSum = fineRepository.sumFineAmountByLoanId(l.getId());
+                    long fine = (fineSum != null) ? fineSum.longValue() : 0L;
+                    
+                    long revenue = 50000L + fine; // Phí mượn 50k + tiền phạt
+                    result.merge(key, revenue, Long::sum);
+                });
+
+        return result;
+    }
+    public BigDecimal getTotalRevenue() {
+        // Lấy tất cả các phiếu đã trả
+        List<Loan> returnedLoans = loanRepository.findAll().stream()
+            .filter(l -> "RETURNED".equals(l.getStatus().toString()))
+            .collect(Collectors.toList());
+
+        BigDecimal totalRentalFee = new BigDecimal("50000").multiply(new BigDecimal(returnedLoans.size()));
+        
+        // Chỉ cộng tiền phạt đã thu (status = PAID)
+        BigDecimal totalCollectedFine = fineRepository.findAll().stream()
+            .filter(f -> f.getStatus() == Fine.Status.PAID)
+            .map(Fine::getFineAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return totalRentalFee.add(totalCollectedFine);
+    }
+    /**
+     * Tính tổng nợ = Tổng tiền các phiếu phạt có trạng thái UNPAID
+     */
+ // Cập nhật lại hàm này trong StatisticsService.java
     
 }

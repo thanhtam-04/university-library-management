@@ -90,7 +90,7 @@ public class BookController {
 
         model.addAttribute("book", bookResponse);
         model.addAttribute("loanDate", LocalDateTime.now()); 
-        model.addAttribute("dueDate", LocalDate.now().plusDays(14)); 
+        model.addAttribute("dueDate", LocalDate.now().plusDays(1)); 
         model.addAttribute("calculatedDeposit", depositAmount != null ? depositAmount : BigDecimal.ZERO);
 
         try {
@@ -122,7 +122,7 @@ public class BookController {
             model.addAttribute("error", "Tài khoản của bạn chưa được liên kết với mã độc giả thư viện. Vui lòng liên hệ thủ thư!");
             model.addAttribute("book", bookService.getBookById(bookId));
             model.addAttribute("loanDate", LocalDateTime.now());
-            model.addAttribute("dueDate", LocalDate.now().plusDays(14));
+            model.addAttribute("dueDate", LocalDate.now().plusDays(1));
             model.addAttribute("calculatedDeposit", BigDecimal.ZERO);
             return "borrow";
         }
@@ -132,7 +132,7 @@ public class BookController {
             model.addAttribute("error", "Rất tiếc, đầu sách này hiện tại không khả dụng hoặc đã hết sách!");
             model.addAttribute("book", bookService.getBookById(bookId));
             model.addAttribute("loanDate", LocalDateTime.now());
-            model.addAttribute("dueDate", LocalDate.now().plusDays(14));
+            model.addAttribute("dueDate", LocalDate.now().plusDays(1));
             model.addAttribute("calculatedDeposit", BigDecimal.ZERO);
             return "borrow";
         }
@@ -144,7 +144,7 @@ public class BookController {
             loan.setMember(member);
             loan.setNote(note);
             loan.setLoanDate(LocalDateTime.now());
-            loan.setDueDate(LocalDate.now().plusDays(14)); 
+            loan.setDueDate(LocalDate.now().plusDays(1)); 
             loan.setStatus(Loan.Status.PENDING); 
 
             // Tính toán số tiền cọc từ cấu hình sách
@@ -189,7 +189,7 @@ public class BookController {
             model.addAttribute("error", "Không thể tạo yêu cầu mượn: " + e.getMessage());
             model.addAttribute("book", bookService.getBookById(bookId));
             model.addAttribute("loanDate", LocalDateTime.now());
-            model.addAttribute("dueDate", LocalDate.now().plusDays(14));
+            model.addAttribute("dueDate", LocalDate.now().plusDays(1));
             model.addAttribute("calculatedDeposit", BigDecimal.ZERO);
             return "borrow";
         }

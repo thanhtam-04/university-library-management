@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import thuvien.service.StatisticsService;
 
+import java.util.Map; // Cần import thêm Map
+
 @Controller
 @RequestMapping("/admin/statistics")
 @RequiredArgsConstructor
@@ -31,6 +33,12 @@ public class StatisticsController {
         model.addAttribute("totalDebt",        statisticsService.totalDebt());
         model.addAttribute("totalFineAmount",  statisticsService.totalFineAmount());
         model.addAttribute("totalPaidAmount",  statisticsService.totalPaidAmount());
+     // Trong StatisticsController.java, chỉ để 1 dòng này thôi:
+        model.addAttribute("totalDebt", statisticsService.totalDebt());
+        /* ── MỚI: Doanh thu theo tháng (Phần thêm vào) ── */
+        Map<String, Long> revenueByMonth = statisticsService.getMonthlyRevenue();
+        model.addAttribute("revenueLabels", objectMapper.writeValueAsString(revenueByMonth.keySet()));
+        model.addAttribute("revenueValues", objectMapper.writeValueAsString(revenueByMonth.values()));
 
         /* ── Biểu đồ mượn/trả theo tháng (JSON cho Chart.js) ── */
         var loansByMonth   = statisticsService.loansByMonth();
@@ -41,7 +49,8 @@ public class StatisticsController {
                 loansByMonth.values().stream().toList()));
         model.addAttribute("chartReturns", objectMapper.writeValueAsString(
                 returnsByMonth.values().stream().toList()));
-
+     // Trong StatisticsController.java
+        model.addAttribute("totalDebt", statisticsService.calculateActualTotalDebt());
         /* ── Top sách mượn nhiều ── */
         var topBooks = statisticsService.topBorrowedBooks(10);
         model.addAttribute("topBookTitles", objectMapper.writeValueAsString(
@@ -49,7 +58,7 @@ public class StatisticsController {
         model.addAttribute("topBookCounts", objectMapper.writeValueAsString(
                 topBooks.stream().map(b -> b.get("count")).toList()));
         model.addAttribute("topBooks", topBooks);
-
+        model.addAttribute("totalRevenue", statisticsService.getTotalRevenue());
         /* ── Phiếu phạt ── */
         model.addAttribute("fineDist",      objectMapper.writeValueAsString(
                 statisticsService.fineStatusDistribution().values().stream().toList()));
@@ -60,4 +69,5 @@ public class StatisticsController {
         model.addAttribute("activePage", "statistics");
         return "views/admin/statistics/index";
     }
+    
 }

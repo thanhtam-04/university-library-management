@@ -16,7 +16,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
+import java.math.BigDecimal;
 @Service
 @RequiredArgsConstructor
 public class LoanService {
@@ -173,6 +173,11 @@ public class LoanService {
     /** * ĐĂNG KÝ MƯỢN ONLINE (Client):
      * Tự động đặt trạng thái cọc ban đầu dựa vào giá trị deposit_amount của cuốn sách
      */
+    /** * ĐĂNG KÝ MƯỢN ONLINE (Client):
+     * 1. Kiểm tra tồn kho.
+     * 2. Tính toán phí mượn (50k) và tiền cọc (75% giá sách).
+     * 3. Lưu phiếu mượn và cập nhật trạng thái kho.
+     */
     @Transactional
     public Loan createOnlineLoan(Loan loan, Book book) {
         // 1. Kiểm tra số lượng tồn kho khả dụng
@@ -180,7 +185,21 @@ public class LoanService {
             throw new RuntimeException("Rất tiếc, đầu sách này hiện tại đã hết quyển sẵn sàng!");
         }
         
-        // 2. Trừ bớt 1 quyển sách khả dụng và ép đồng bộ xuống DB ngay
+        // 2. Tính toán phí mượn và tiền cọc theo chính sách mới
+        // Phí mượn cố định 50.000đ
+        BigDecimal rentalFee = new BigDecimal("50000");
+        
+        // Tiền cọc = 75% giá sách (price)
+        BigDecimal bookPrice = book.getPrice() != null ? book.getPrice() : BigDecimal.ZERO;
+        BigDecimal depositAmount = bookPrice.multiply(new BigDecimal("0.75"));
+
+        // Gán vào loan
+        loan.setRentalFee(rentalFee);
+        loan.setDepositAmount(depositAmount);
+        // Mặc định tiền đã đóng (depositPaid) sẽ bằng depositAmount khi ra quầy hoàn tất
+        loan.setDepositPaid(depositAmount); 
+
+        // 3. Trừ bớt 1 quyển sách khả dụng và ép đồng bộ xuống DB ngay
         book.setAvailableCopies(book.getAvailableCopies() - 1);
         bookRepository.save(book);
 
@@ -189,20 +208,17 @@ public class LoanService {
         systemLibrarian.setId(1L); 
         loan.setLibrarian(systemLibrarian);
 
-        // ─── THÊM VÀO: TỰ ĐỘNG THIẾT LẬP TRẠNG THÁI CỌC BAN ĐẦU KHI TẠO ĐƠN ONLINE ───
-        // Nếu sách có yêu cầu tiền cọc lớn hơn 0, gắn trạng thái UNPAID (Chờ ra quầy đóng tiền)
-        // Nếu sách không yêu cầu cọc (hoặc = 0), đặt trạng thái là NONE
-        if (book.getDepositAmount() != null && book.getDepositAmount().compareTo(java.math.BigDecimal.ZERO) > 0) {
+        // 4. Thiết lập trạng thái cọc ban đầu
+        if (depositAmount.compareTo(BigDecimal.ZERO) > 0) {
             loan.setDepositStatus(DepositStatus.UNPAID);
         } else {
             loan.setDepositStatus(DepositStatus.NONE);
         }
-        // ──────────────────────────────────────────────────────────────────────────
 
-        // 3. Lưu thông tin gốc của Phiếu mượn
+        // 5. Lưu thông tin gốc của Phiếu mượn
         Loan savedLoan = loanRepository.save(loan);
 
-        // 4. Khởi tạo một bản sao vật lý ảo (BookCopy) để vượt qua ràng buộc dữ liệu
+        // 6. Khởi tạo một bản sao vật lý ảo (BookCopy) để vượt qua ràng buộc dữ liệu
         BookCopy tempCopy = new BookCopy();
         tempCopy.setBook(book); 
         tempCopy.setStatus(BookCopy.Status.AVAILABLE); 
@@ -212,7 +228,7 @@ public class LoanService {
         tempCopy.setBarcode(autoBarcode);
         BookCopy savedCopy = bookCopyRepository.save(tempCopy);
 
-        // 5. Liên kết chi tiết phiếu mượn (LoanItem) giữa Phiếu và Bản sao sách vừa tạo
+        // 7. Liên kết chi tiết phiếu mượn (LoanItem) giữa Phiếu và Bản sao sách vừa tạo
         LoanItem item = new LoanItem();
         item.setLoan(savedLoan);        
         item.setBookCopy(savedCopy);    
@@ -222,7 +238,6 @@ public class LoanService {
         savedLoan.setItems(List.of(item));
         return savedLoan;
     }
-
     // ─── THÊM VÀO THÊM HÀM DUYỆT PHIẾU/XÁC NHẬN ĐÓNG TIỀN TẠI QUẦY (Dành cho Admin) ───
     /**
      * Xác nhận độc giả đã đóng tiền cọc tại quầy, chuyển trạng thái mượn và trạng thái cọc
