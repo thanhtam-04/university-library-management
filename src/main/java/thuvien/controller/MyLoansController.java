@@ -68,15 +68,17 @@ public class MyLoansController {
         Map<Long, String> loanStatusMap = new HashMap<>();
         if (allLoans != null) {
             java.time.LocalDate today = java.time.LocalDate.now();
+         // Sửa lại đoạn tính toán loanStatusMap
             for (Loan l : allLoans) {
                 String status;
                 if (l.getStatus() == Loan.Status.RETURNED) {
                     status = "RETURNED";
                 } else if (l.getStatus() == Loan.Status.PENDING) {
                     status = "PENDING"; 
-                } else if (l.getDueDate() != null && l.getDueDate().isBefore(today)) {
-                    status = "OVERDUE";
-                } else if (l.getStatus() == Loan.Status.OVERDUE) {
+                } else if (l.getStatus() == Loan.Status.CANCELLED) { // THÊM TRẠNG THÁI NÀY
+                    status = "CANCELLED";
+                } else if (l.getStatus() == Loan.Status.OVERDUE || 
+                          (l.getDueDate() != null && l.getDueDate().isBefore(today))) {
                     status = "OVERDUE";
                 } else {
                     status = "ACTIVE";

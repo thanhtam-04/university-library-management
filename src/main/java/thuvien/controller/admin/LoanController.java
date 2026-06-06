@@ -15,7 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-
+import java.util.Comparator;
 @Controller("realAdminLoanController")
 @RequestMapping("/admin/loan") 
 @RequiredArgsConstructor
@@ -32,6 +32,10 @@ public class LoanController {
     @GetMapping("/list") 
     public String listLoans(Model model) {
         List<Loan> list = loanRepository.findAll();
+        
+        // Sắp xếp ngay tại đây
+        list.sort(Comparator.comparing(Loan::getLoanDate, Comparator.nullsLast(Comparator.reverseOrder())));
+        
         model.addAttribute("loans", list);
         return "views/admin/loan/list"; 
     }
@@ -202,4 +206,12 @@ public class LoanController {
         }
         return "redirect:/admin/loan/list";
     }
+    @GetMapping("/pending")
+    public String listPendingLoans(Model model) {
+        // Lấy danh sách phiếu PENDING
+        model.addAttribute("loans", loanRepository.findByStatus(Loan.Status.PENDING));
+        model.addAttribute("activePage", "loan"); // Để sidebar highlight đúng mục
+        return "admin/loan/list-pending"; 
+    }
+    
 }

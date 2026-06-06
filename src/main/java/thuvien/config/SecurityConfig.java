@@ -66,7 +66,7 @@ public class SecurityConfig {
                     .requestMatchers("/admin/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_LIBRARIAN")
                     .requestMatchers("/admin/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_LIBRARIAN")
                     
-                    .requestMatchers("/profile/**", "/my-loans", "/my-loans/**", "/contact/history", "/contact/send").authenticated()
+                    .requestMatchers("/profile/**", "/my-loans", "/my-loans/**", "/my-notifications", "/contact/history", "/contact/send").authenticated()
                     
                     // Độc giả được phép truy cập /reservation/list (đã có xác thực)
                     .requestMatchers("/reservation/**").authenticated()

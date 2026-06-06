@@ -218,38 +218,38 @@
 	            </div>
 	        </div>
 
-	        <!-- Body - Nội dung chat -->
-	        <div class="thread-body px-5 pb-5" th:id="'body-' + ${msg.id}">
-	            <div class="bubble-wrap space-y-4">
+			<div class="thread-body px-5 pb-5 bg-white" th:id="'body-' + ${msg.id}">
+			    <div class="bubble-wrap space-y-5">
+			        
+			        <div class="bubble-user">
+			            <div class="bubble-label">Bạn (Tin nhắn gốc)</div>
+			            <div class="bubble-text" th:text="${msg.message}"></div>
+			            <div class="bubble-time" th:text="${#temporals.format(msg.createdAt, 'HH:mm – dd/MM/yyyy')}"></div>
+			        </div>
 
-	                <!-- Tin nhắn của bạn -->
-	                <div class="bubble-user max-w-[85%]">
-	                    <div class="bubble-label">Bạn</div>
-	                    <div class="bubble-text" th:text="${msg.message}"></div>
-	                    <div class="bubble-time" 
-	                         th:text="${#temporals.format(msg.createdAt, 'HH:mm – dd/MM/yyyy')}"></div>
-	                </div>
+			        <th:block th:each="reply : ${chatReplies}" th:if="${reply.contactMessage.id == msg.id}">
+			            <div th:class="${reply.senderRole == 'USER'} ? 'bubble-user' : 'bubble-admin'">
+			                <div class="bubble-label" th:text="${reply.senderRole == 'USER' ? 'Bạn' : 'Thư viện'}"></div>
+			                <div class="bubble-text" th:text="${reply.content}"></div>
+			                <div class="bubble-time" th:text="${#temporals.format(reply.createdAt, 'HH:mm – dd/MM/yyyy')}"></div>
+			            </div>
+			        </th:block>
 
-	                <!-- Phản hồi từ Thư viện -->
-	                <div th:if="${msg.replyContent != null and !msg.replyContent.isEmpty()}" 
-	                     class="bubble-admin max-w-[85%]">
-	                    <div class="bubble-label" style="color:#1e40af;">
-	                        <i class="fas fa-shield-halved mr-1"></i> Thư viện
-	                    </div>
-	                    <div class="bubble-text" th:text="${msg.replyContent}"></div>
-	                    <div class="bubble-time"
-	                         th:text="${msg.repliedAt != null ? #temporals.format(msg.repliedAt, 'HH:mm – dd/MM/yyyy') : 'Vừa xong'}"></div>
-	                </div>
-
-	                <!-- Chưa có phản hồi -->
-	                <div th:if="${msg.replyContent == null or msg.replyContent.isEmpty()}" 
-	                     class="bg-amber-50 border border-amber-100 text-amber-700 px-5 py-4 rounded-2xl text-sm flex items-center gap-3">
-	                    <i class="fas fa-clock"></i>
-	                    <span>Đang chờ phản hồi từ thư viện...</span>
-	                </div>
-
-	            </div>
-	        </div>
+			        <form th:action="@{/contact/reply}" method="POST" class="mt-2 pt-4 border-t border-slate-100 flex items-end gap-3">
+			            <input type="hidden" name="id" th:value="${msg.id}">
+			            <input type="hidden" name="role" value="USER">
+			            
+			            <div class="flex-1">
+			                <input type="text" name="content" required placeholder="Viết phản hồi của bạn..." 
+			                       class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm">
+			            </div>
+			            
+			            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-semibold text-sm transition-all shadow-md shadow-blue-500/20">
+			                <i class="fas fa-paper-plane"></i>
+			            </button>
+			        </form>
+			    </div>
+			</div>
 	    </div>
 	</div>
 </div><!-- end max-w-4xl -->

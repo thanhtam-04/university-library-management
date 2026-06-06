@@ -136,12 +136,12 @@ CREATE TABLE IF NOT EXISTS `book_copies` (
   UNIQUE KEY `barcode` (`barcode`),
   KEY `book_id` (`book_id`),
   CONSTRAINT `1` FOREIGN KEY (`book_id`) REFERENCES `books` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table library_db.book_copies: ~13 rows (approximately)
+-- Dumping data for table library_db.book_copies: ~20 rows (approximately)
 INSERT INTO `book_copies` (`id`, `book_id`, `barcode`, `status`, `condition_note`, `acquired_date`) VALUES
 	(1, 5, 'BC-5-B6A095', 'AVAILABLE', NULL, '2026-05-23'),
-	(2, 39, 'BC-39-D8623E', 'BORROWED', NULL, '2026-05-23'),
+	(2, 39, 'BC-39-D8623E', 'AVAILABLE', NULL, '2026-05-23'),
 	(3, 1, 'BC-1-773A2E', 'AVAILABLE', NULL, '2026-05-23'),
 	(4, 1, 'BC-1-60438D', 'AVAILABLE', NULL, '2026-05-24'),
 	(5, 11, 'BC-11-6DB7DD', 'AVAILABLE', NULL, '2026-05-24'),
@@ -156,7 +156,11 @@ INSERT INTO `book_copies` (`id`, `book_id`, `barcode`, `status`, `condition_note
 	(14, 12, 'BC-12-7BA56A', 'BORROWED', NULL, '2026-06-03'),
 	(15, 12, 'BC-12-F3C0FE', 'BORROWED', NULL, '2026-06-03'),
 	(16, 24, 'BC-24-60819F', 'BORROWED', NULL, '2026-06-04'),
-	(17, 28, 'BC-28-5693EA', 'BORROWED', NULL, '2026-06-04');
+	(17, 28, 'BC-28-5693EA', 'BORROWED', NULL, '2026-06-04'),
+	(18, 27, 'BC-27-329B2B', 'AVAILABLE', NULL, '2026-06-05'),
+	(19, 13, 'BC-13-9BE1B1', 'AVAILABLE', NULL, '2026-06-05'),
+	(20, 23, 'BC-23-278206', 'AVAILABLE', NULL, '2026-06-05'),
+	(21, 28, 'BC-28-C05181', 'AVAILABLE', NULL, '2026-06-05');
 
 -- Dumping structure for table library_db.books
 CREATE TABLE IF NOT EXISTS `books` (
@@ -186,23 +190,23 @@ CREATE TABLE IF NOT EXISTS `books` (
   CONSTRAINT `1` FOREIGN KEY (`publisher_id`) REFERENCES `publishers` (`id`),
   CONSTRAINT `2` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`),
   CONSTRAINT `chk_book_copies_logic` CHECK (`available_copies` <= `total_copies` and `available_copies` >= 0)
-) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Dumping data for table library_db.books: ~40 rows (approximately)
 INSERT INTO `books` (`id`, `isbn`, `title`, `publisher_id`, `category_id`, `publication_year`, `edition`, `language`, `total_copies`, `available_copies`, `shelf_location`, `cover_image`, `description`, `price`, `deposit_fee`, `created_at`, `updated_at`, `summary`, `deposit_amount`) VALUES
-	(1, '978604118', 'Cho Tôi Xin Một Vé Đi Tuổi Thơ', 1, 3, NULL, NULL, 'Tiếng Việt', 11, 5, 'Kệ A1-01', '/uploads/books/1778857096378_cho-toi-mot-ve-di-tuoi-tho-1_600x943.jpg', NULL, 84000.00, 0.00, '2026-05-23 18:52:22', '2026-05-28 03:14:03', NULL, 58800.00),
+	(1, '978604118', 'Cho Tôi Xin Một Vé Đi Tuổi Thơ', 1, 3, NULL, NULL, 'Tiếng Việt', 11, 6, 'Kệ A1-01', '/uploads/books/1778857096378_cho-toi-mot-ve-di-tuoi-tho-1_600x943.jpg', NULL, 84000.00, 0.00, '2026-05-23 18:52:22', '2026-06-05 11:05:03', NULL, 58800.00),
 	(2, '978604222', 'Dế Mèn Phiêu Lưu Ký', 3, 3, NULL, NULL, 'Tiếng Việt', 10, 0, 'Kệ A2-03', '/uploads/books/1778858260472_demenphieuluuky.jpg', NULL, 55000.00, 0.00, '2026-05-24 16:41:10', '2026-05-28 03:14:03', NULL, 38500.00),
 	(3, '9786041234586', 'Nhà Giả Kim', 9, 3, NULL, NULL, 'Tiếng Việt', 12, 9, 'Kệ VH-04', '/uploads/books/1779192399331_nhagiakim.jpg', NULL, 65000.00, 0.00, '2026-05-19 12:06:39', '2026-05-28 04:09:59', 'Cuốn tiểu thuyết huyền thoại của văn hào Paulo Coelho là một trong những cuốn sách bán chạy nhất lịch sử nhân loại, mang tính chất của một câu chuyện ngụ ngôn đầy tính triết lý và tâm linh. Truyện theo chân Santiago, một chàng chăn cừu nghèo người Tây Ban Nha, người đã dũng cảm từ bỏ cuộc sống an phận để lên đường thực hiện giấc mơ lặp đi lặp lại của mình: đi tìm kho báu tại các kim tự tháp Ai Cập. Hành trình xuyên qua sa mạc mênh mông đầy rẫy hiểm nguy không chỉ là một cuộc tìm kiếm vật chất, mà dần trở thành một cuộc viễn chinh khám phá thế giới nội tâm của chính mình. Trên đường đi, chàng đã gặp gỡ nhiều nhân vật kỳ lạ như một vị vua già thông thái, một nhà giả kim bí ẩn và một tình yêu đích thực nơi ốc đảo. Họ đã dạy cho chàng cách lắng nghe tiếng gọi của con tim, cách đọc và thấu hiểu "Ngôn ngữ của Vũ trụ", nhận biết các dấu hiệu định mệnh mà Thượng đế sắp đặt. Tác phẩm truyền cảm hứng mãnh liệt về việc theo đuổi Vận mệnh cá nhân, nhắc nhở chúng ta rằng: Khi bạn khao khát một điều gì đó đủ lớn, toàn vũ trụ sẽ hợp lực giúp bạn đạt được điều đó, và đôi khi kho báu thực sự không nằm ở đích đến mà nằm ngay trong quá trình ta hoàn thiện bản thân.', 45500.00),
-	(4, '9786041234589', 'Harry Potter và Phòng Chứa Bí Mật', 6, 3, 2023, NULL, 'Tiếng Việt', 10, 7, 'Kệ VH-05', '/uploads/books/1778858976638_HarryPotter.jpg', 'Phần 2 của series Harry Potter', 120000.00, 0.00, '2026-05-17 03:28:50', '2026-05-28 03:14:03', 'Phần thứ hai trong loạt truyện phù thủy toàn cầu của nữ văn sĩ J.K. Rowling tiếp tục mở ra cánh cửa dẫn vào thế giới phép thuật kỳ ảo nhưng cũng không kém phần đen tối tại trường Hogwarts. Năm học này của cậu bé Harry Potter bắt đầu bằng những lời cảnh báo đầy kinh hãi từ gia tinh Dobby về một mối nguy hiểm chết người đang chờ đợi cậu tại trường. Bất chấp tất cả, Harry cùng hai người bạn thân Ron và Hermione vẫn quay lại trường và đối mặt với hàng loạt hiện tượng rùng rợn: những thông điệp bằng máu xuất hiện trên tường, những con mèo và học sinh gốc Muggle liên tục bị hóa đá một cách bí ẩn. Phòng chứa bí mật – nơi ẩn náu của một quái vật cổ xưa do vị tổ sáng lập Salazar Slytherin để lại – được cho là đã bị mở ra bởi một "Kẻ kế vị" giấu mặt. Để cứu lấy ngôi trường và minh oan cho người bạn Hagrid, Harry phải vận dụng lòng dũng cảm, sự thông minh và khả năng nói tiếng Xà ngữ của mình để đi sâu vào lòng đất, đối đầu trực diện với ký ức đen tối của Tom Riddle và con mãng xà Tử xà Basilisk khổng lồ, khẳng định một chân lý sâu sắc rằng: Lựa chọn của chúng ta mới thể hiện bản chất thực sự, chứ không phải là năng lực bẩm sinh.', 84000.00),
+	(4, '9786041234589', 'Harry Potter và Phòng Chứa Bí Mật', 6, 3, 2023, NULL, 'Tiếng Việt', 10, 8, 'Kệ VH-05', '/uploads/books/1778858976638_HarryPotter.jpg', 'Phần 2 của series Harry Potter', 120000.00, 0.00, '2026-05-17 03:28:50', '2026-06-05 11:05:03', 'Phần thứ hai trong loạt truyện phù thủy toàn cầu của nữ văn sĩ J.K. Rowling tiếp tục mở ra cánh cửa dẫn vào thế giới phép thuật kỳ ảo nhưng cũng không kém phần đen tối tại trường Hogwarts. Năm học này của cậu bé Harry Potter bắt đầu bằng những lời cảnh báo đầy kinh hãi từ gia tinh Dobby về một mối nguy hiểm chết người đang chờ đợi cậu tại trường. Bất chấp tất cả, Harry cùng hai người bạn thân Ron và Hermione vẫn quay lại trường và đối mặt với hàng loạt hiện tượng rùng rợn: những thông điệp bằng máu xuất hiện trên tường, những con mèo và học sinh gốc Muggle liên tục bị hóa đá một cách bí ẩn. Phòng chứa bí mật – nơi ẩn náu của một quái vật cổ xưa do vị tổ sáng lập Salazar Slytherin để lại – được cho là đã bị mở ra bởi một "Kẻ kế vị" giấu mặt. Để cứu lấy ngôi trường và minh oan cho người bạn Hagrid, Harry phải vận dụng lòng dũng cảm, sự thông minh và khả năng nói tiếng Xà ngữ của mình để đi sâu vào lòng đất, đối đầu trực diện với ký ức đen tối của Tom Riddle và con mãng xà Tử xà Basilisk khổng lồ, khẳng định một chân lý sâu sắc rằng: Lựa chọn của chúng ta mới thể hiện bản chất thực sự, chứ không phải là năng lực bẩm sinh.', 84000.00),
 	(5, '9786041234592', 'Truyện Kiều', 9, 3, NULL, NULL, 'Tiếng Việt', 6, 4, 'Kệ VH-06', '/uploads/books/1779192413873_truyenkieu.jpg', NULL, 45000.00, 0.00, '2026-05-19 12:06:53', '2026-05-28 03:14:03', 'Kiệt tác văn học trung đại bất hủ của Đại thi hào Nguyễn Du, tác phẩm đại diện cho đỉnh cao chói lọi của thể thơ lục bát và ngôn ngữ chữ Nôm dân tộc. Cuốn truyện thơ dài 3254 câu kể về cuộc đời đầy bão táp, truân chuyên suốt 15 năm lưu lạc của Vương Thúy Kiều – một người con gái tài sắc vẹn toàn, hiếu nghĩa đủ đường. Vì tai họa gia đình ập xuống, nàng buộc phải lỗi hẹn tình thâm với Kim Trọng để bán mình chuộc cha và em trai. Từ đó, Kiều bị đẩy vào vòng xoáy bi kịch vô tận của xã hội phong kiến thối nát: hai lần sa vào lầu xanh, bị đày đọa bởi những kẻ độc ác như Mã Giám Sinh, Tú Bà, Sở Khanh, Hoạn Thư, rồi tìm được hạnh phúc ngắn ngủi bên người anh hùng Từ Hải trước khi bị lừa gạt dẫn đến cái chết của chồng và phải trầm mình xuống sông Tiền Đường. Tác phẩm là một bức tranh hiện thực tàn khốc lên án xã hội coi trọng đồng tiền, chà đạp lên quyền sống của con người, đồng thời là một tiếng khóc nhân đạo bao la, ngợi ca vẻ đẹp tâm hồn, sự thủy chung, lòng hiếu thảo và khát vọng tự do, công lý của con người trước định mệnh bất công.', 31500.00),
 	(6, '9786041234595', '1984', 9, 3, NULL, NULL, 'Tiếng Việt', 5, 4, 'Kệ VH-07', '/uploads/books/1779192429598_1984.jpg', NULL, 95000.00, 0.00, '2026-05-19 12:07:09', '2026-05-28 03:14:03', 'Tiểu thuyết viễn tưởng phản địa đàng (dystopia) gai góc và kiệt xuất của George Orwell, được xem là một trong những cuốn sách có tầm ảnh hưởng chính trị sâu rộng nhất thế kỷ 20. Câu chuyện diễn ra tại một thế giới giả tưởng đen tối, nơi xã hội bị chia cắt thành các siêu quốc gia và quyền lực tối cao nằm trong tay một bộ máy độc tài toàn trị do "Anh Cả" (Big Brother) đứng đầu. Nhân vật chính Winston Smith, một nhân viên tại Bộ Sự Thật, có nhiệm vụ hàng ngày là bóp méo, sửa đổi lịch sử theo ý muốn của Đảng. Sống dưới sự giám sát nghẹt thở của các màn hình kiểm soát (telescreen), nơi ngay cả một suy nghĩ lệch lạc cũng bị coi là "Tội phạm tư tưởng", Winston bắt đầu nhen nhóm ngọn lửa nổi loạn trong lòng. Cậu bí mật ghi nhật ký, tìm kiếm tình yêu đích thực với cô gái Julia và cố gắng liên lạc với tổ chức phản kháng ngầm. Cuốn sách phác họa một cách rùng rợn về việc chính quyền kiểm soát tư duy con người bằng cách bóp méo sự thật, thao túng ngôn ngữ (Newspeak) và triệt tiêu mọi cảm xúc cá nhân, để lại lời cảnh báo sâu sắc về giá trị vô giá của tự do và sự thật độc lập.', 66500.00),
 	(7, '9786041234599', 'Nóng Trong Lòng', 3, 3, NULL, NULL, 'Tiếng Việt', 8, 7, 'Kệ VH-08', '/uploads/books/1779207526539_nongtronglong.jpg', NULL, 55000.00, 0.00, '2026-05-19 16:18:46', '2026-05-28 03:14:03', 'Một tập truyện ngắn vô cùng tinh tế và giàu cảm xúc của nhà văn Nguyễn Nhật Ánh, tiếp tục khẳng định thương hiệu "người giữ ký ức cho tuổi học trò". Khác với những tác phẩm mang màu sắc hoài niệm tuổi thơ, cuốn sách này đi sâu khai thác những chuyển biến tâm lý tinh tế, những trăn trở, suy tư và cả những rung động đầu đời có phần ngơ ngác, vụng dại của lứa tuổi mới lớn khi đứng trước ngưỡng cửa trưởng thành. Qua những câu chuyện dung dị, quen thuộc về tình bạn, tình yêu, những mâu thuẫn gia đình và áp lực học đường, tác giả đã vẽ nên một bức tranh tâm lý vô cùng chân thực. Văn phong của Nguyễn Nhật Ánh vẫn mộc mạc, dí dỏm nhưng ở tác phẩm này lại lắng đọng thêm nhiều nốt trầm chiêm nghiệm. Cuốn sách như một làn gió mát làm dịu đi những "cơn nóng" bồng bột, những tổn thương vô hình trong lòng người trẻ, giúp họ tìm thấy sự đồng cảm, học cách bao dung, trân trọng gia đình và biết cách đối diện với những thay đổi của bản thân một cách trưởng thành và điềm tĩnh hơn.', 38500.00),
 	(8, '978013235', 'Clean Code', 4, 1, NULL, NULL, 'Tiếng Việt', 3, 0, 'Kệ CNTT-05', '/uploads/books/1778858079273_Clean Code.jpg', NULL, 320000.00, 0.00, '2026-05-24 11:29:33', '2026-05-28 03:14:03', NULL, 224000.00),
-	(9, '9786041234593', 'Python Programming', 2, 1, NULL, NULL, 'Tiếng Việt', 10, 6, 'Kệ CNTT-06', '/uploads/books/1779207587155_python.jpg', NULL, 175000.00, 0.00, '2026-05-19 16:19:47', '2026-05-28 03:14:03', 'Giáo trình nhập môn khoa học máy tính chuẩn mực được biên soạn bởi Giáo sư John Zelle, được áp dụng giảng dạy rộng rãi tại hàng trăm trường đại học danh tiếng trên toàn cầu. Cuốn sách sử dụng ngôn ngữ lập trình Python – một ngôn ngữ có cú pháp trong sáng, gần gũi với ngôn ngữ tự nhiên – làm công cụ chính để truyền tải các tư duy cốt lõi của khoa học máy tính. Thay vì chỉ tập trung vào việc giải thích cú pháp khô khan, tác giả khéo léo dẫn dắt người học qua các bài toán tư duy logic, cấu trúc dữ liệu, thuật toán cơ bản, lập trình hướng đối tượng (OOP) và thiết kế giao diện đồ họa (GUI). Mỗi chương đều đi kèm các ví dụ thực tế trực quan và hệ thống bài tập thực hành từ dễ đến khó. Đây là cuốn sách hoàn hảo cho người mới bắt đầu, giúp xây dựng một nền tảng tư duy lập trình vững chắc, làm bệ phóng để người học tiến xa hơn trong các lĩnh vực công nghệ cao như phát triển phần mềm, phân tích dữ liệu hay trí tuệ nhân tạo.', 122500.00),
+	(9, '9786041234593', 'Python Programming', 2, 1, NULL, NULL, 'Tiếng Việt', 10, 8, 'Kệ CNTT-06', '/uploads/books/1779207587155_python.jpg', NULL, 175000.00, 0.00, '2026-05-19 16:19:47', '2026-06-05 11:05:03', 'Giáo trình nhập môn khoa học máy tính chuẩn mực được biên soạn bởi Giáo sư John Zelle, được áp dụng giảng dạy rộng rãi tại hàng trăm trường đại học danh tiếng trên toàn cầu. Cuốn sách sử dụng ngôn ngữ lập trình Python – một ngôn ngữ có cú pháp trong sáng, gần gũi với ngôn ngữ tự nhiên – làm công cụ chính để truyền tải các tư duy cốt lõi của khoa học máy tính. Thay vì chỉ tập trung vào việc giải thích cú pháp khô khan, tác giả khéo léo dẫn dắt người học qua các bài toán tư duy logic, cấu trúc dữ liệu, thuật toán cơ bản, lập trình hướng đối tượng (OOP) và thiết kế giao diện đồ họa (GUI). Mỗi chương đều đi kèm các ví dụ thực tế trực quan và hệ thống bài tập thực hành từ dễ đến khó. Đây là cuốn sách hoàn hảo cho người mới bắt đầu, giúp xây dựng một nền tảng tư duy lập trình vững chắc, làm bệ phóng để người học tiến xa hơn trong các lĩnh vực công nghệ cao như phát triển phần mềm, phân tích dữ liệu hay trí tuệ nhân tạo.', 122500.00),
 	(10, '9786041234598', 'Clean Architecture', 4, 1, NULL, NULL, 'Tiếng Việt', 6, 4, 'Kệ CNTT-07', '/uploads/books/1779207605503_CleanArchitecture.jpg', NULL, 450000.00, 0.00, '2026-05-19 16:20:05', '2026-05-28 03:14:03', 'Tiếp nối thành công của Clean Code, cuốn sách này của Robert C. Martin nâng tầm tư duy của người lập trình lên mức vĩ mô – tầng kiến trúc hệ thống phần mềm. Cuốn sách giải quyết câu hỏi cốt lõi: Làm thế nào để xây dựng một hệ thống phần mềm có thể trường tồn với thời gian, dễ dàng thay đổi và mở rộng mà không bị sụp đổ dưới sức nặng của chính nó? Tác giả giới thiệu các nguyên lý thiết kế kinh điển như SOLID ở cấp độ component, sự phân chia ranh giới rõ ràng giữa các phân vùng chức năng (Business Rules, UI, Database, Frameworks). Kiến trúc sạch (Clean Architecture) hướng tới một hệ thống độc lập hoàn toàn với các thư viện hay công nghệ bên ngoài, giúp bạn có thể đổi từ cơ sở dữ liệu này sang cơ sở dữ liệu khác, hoặc thay đổi giao diện web thành mobile mà không cần sửa đổi logic cốt lõi của doanh nghiệp. Cuốn sách là tài liệu gối đầu giường không thể thiếu cho các Senior Developer và Software Architect muốn làm chủ nghệ thuật thiết kế hệ thống lớn.', 315000.00),
-	(11, '9786041234600', 'Machine Learning Yearning', 2, 1, NULL, NULL, 'Tiếng Việt', 7, 3, 'Kệ CNTT-09', '/uploads/books/1779207634283_MachineLearningYearning.jpg', NULL, 220000.00, 0.00, '2026-05-19 16:20:34', '2026-05-28 03:14:03', 'Cuốn sách chuyên sâu và mang tính thực chiến cực kỳ cao của giáo sư Andrew Ng – một trong những bộ óc vĩ đại nhất của cuộc cách mạng Trí tuệ nhân tạo. Cuốn sách không đi sâu vào việc chứng minh các công thức toán học hay cú pháp code Machine Learning, mà tập trung hoàn toàn vào việc dạy người đọc "chiến lược" để xây dựng và tối ưu hóa một dự án Học máy trong thực tế doanh nghiệp. Tác giả chia sẻ những kinh nghiệm vô giá về cách phân chia tập dữ liệu (Train/Dev/Test), cách chẩn đoán lỗi của mô hình thông qua phân tích phương sai (Variance) và độ chệch (Bias), cách định hướng ưu tiên khi mô hình chạy sai, và cách tích hợp các kỹ thuật Học sâu (Deep Learning) vào hệ thống phức tạp. Đây là cẩm nang hành nghề bắt buộc cho các kỹ sư dữ liệu và nhà quản trị dự án AI, giúp tiết kiệm hàng tháng trời thử sai vô ích và định hình tư duy phát triển sản phẩm công nghệ một cách khoa học.', 154000.00),
+	(11, '9786041234600', 'Machine Learning Yearning', 2, 1, NULL, NULL, 'Tiếng Việt', 7, 5, 'Kệ CNTT-09', '/uploads/books/1779207634283_MachineLearningYearning.jpg', NULL, 220000.00, 0.00, '2026-05-19 16:20:34', '2026-06-05 11:05:03', 'Cuốn sách chuyên sâu và mang tính thực chiến cực kỳ cao của giáo sư Andrew Ng – một trong những bộ óc vĩ đại nhất của cuộc cách mạng Trí tuệ nhân tạo. Cuốn sách không đi sâu vào việc chứng minh các công thức toán học hay cú pháp code Machine Learning, mà tập trung hoàn toàn vào việc dạy người đọc "chiến lược" để xây dựng và tối ưu hóa một dự án Học máy trong thực tế doanh nghiệp. Tác giả chia sẻ những kinh nghiệm vô giá về cách phân chia tập dữ liệu (Train/Dev/Test), cách chẩn đoán lỗi của mô hình thông qua phân tích phương sai (Variance) và độ chệch (Bias), cách định hướng ưu tiên khi mô hình chạy sai, và cách tích hợp các kỹ thuật Học sâu (Deep Learning) vào hệ thống phức tạp. Đây là cẩm nang hành nghề bắt buộc cho các kỹ sư dữ liệu và nhà quản trị dự án AI, giúp tiết kiệm hàng tháng trời thử sai vô ích và định hình tư duy phát triển sản phẩm công nghệ một cách khoa học.', 154000.00),
 	(12, '9786041234587', 'Sapiens - Lược Sử Loài Người', 5, 2, 2023, NULL, 'Tiếng Việt', 8, 1, 'Kệ XH-01', '/uploads/books/1778858891552_Sapiens.jpg', 'Lịch sử phát triển nhân loại', 195000.00, 0.00, '2026-05-17 03:28:50', '2026-06-04 17:04:54', 'Kiệt tác biên khảo mang tính đột phá toàn cầu của giáo sư triết học kiêm lịch sử Yuval Noah Harari, định hình lại cách chúng ta nhìn nhận về quá khứ và tương lai của chính giống loài mình. Cuốn sách đưa người đọc vào một hành trình vĩ mô kéo dài 70.000 năm lịch sử, giải thích cách một loài vượn người không có gì nổi bật ở Đông Phi lại có thể vươn lên trở thành kẻ thống trị tối cao của hành tinh xanh. Harari chỉ ra ba cuộc cách mạng lớn quyết định vận mệnh của Homo Sapiens: Cách mạng Nhận thức (khi con người biết tưởng tượng và tin vào các "huyền thoại chung" như tôn giáo, quốc gia, tiền tệ); Cách mạng Nông nghiệp (khi con người thuần hóa cây trồng nhưng cũng tự trói buộc mình); và Cách mạng Khoa học (kỷ nguyên giúp con người làm chủ công nghệ nhưng cũng đối mặt với nguy cơ tự diệt vong). Bằng lối viết sắc bén, kết hợp nhân chủng học, sinh học và triết học, tác phẩm mở ra những góc nhìn chấn động, kích thích tư duy phê phán sâu sắc về ý nghĩa của hạnh phúc và tương lai của nhân loại.', 136500.00),
-	(13, '9786041234588', 'Đắc Nhân Tâm', 8, 2, 2021, NULL, 'Tiếng Việt', 15, 12, 'Kệ KNS-02', '/uploads/books/1778858450856_dacnhantam.jpg', 'Kinh điển nghệ thuật thu phục lòng người', 85000.00, 0.00, '2026-05-17 03:28:50', '2026-05-28 03:14:03', 'Được xem là cuốn sách tự lực (self-help) nổi tiếng và có doanh số bán chạy nhất mọi thời đại, tác phẩm của Dale Carnegie không chỉ là một cuốn sách hướng dẫn giao tiếp, mà là một triết lý sống nghệ thuật thu phục lòng người sâu sắc. Cuốn sách đưa ra các nguyên tắc cốt lõi, những bài học ứng xử tinh tế được đúc kết từ cuộc đời của các vĩ nhân lịch sử và trải nghiệm thực tế của chính tác giả. Bản chất của "Đắc nhân tâm" không phải là những thủ thuật thao túng tâm lý giả tạo, mà xuất phát từ lòng chân thành, sự thấu hiểu, biết lắng nghe và tôn trọng cái tôi của người khác. Cuốn sách hướng dẫn cách tạo thiện cảm trong lần đầu gặp gỡ, cách dẫn dắt người khác suy nghĩ theo mình mà không gây thù chuốc oán, và nghệ thuật khơi dậy tiềm năng, lòng tự trọng ở nhân viên hay người thân. Qua nhiều thập kỷ, những lời khuyên của Carnegie vẫn giữ nguyên giá trị thời đại, là cẩm nang sống gối đầu giường giúp hàng triệu người xây dựng mối quan hệ bền vững và gặt hái thành công.', 59500.00),
+	(13, '9786041234588', 'Đắc Nhân Tâm', 8, 2, 2021, NULL, 'Tiếng Việt', 15, 12, 'Kệ KNS-02', '/uploads/books/1778858450856_dacnhantam.jpg', 'Kinh điển nghệ thuật thu phục lòng người', 85000.00, 0.00, '2026-05-17 03:28:50', '2026-06-05 11:12:06', 'Được xem là cuốn sách tự lực (self-help) nổi tiếng và có doanh số bán chạy nhất mọi thời đại, tác phẩm của Dale Carnegie không chỉ là một cuốn sách hướng dẫn giao tiếp, mà là một triết lý sống nghệ thuật thu phục lòng người sâu sắc. Cuốn sách đưa ra các nguyên tắc cốt lõi, những bài học ứng xử tinh tế được đúc kết từ cuộc đời của các vĩ nhân lịch sử và trải nghiệm thực tế của chính tác giả. Bản chất của "Đắc nhân tâm" không phải là những thủ thuật thao túng tâm lý giả tạo, mà xuất phát từ lòng chân thành, sự thấu hiểu, biết lắng nghe và tôn trọng cái tôi của người khác. Cuốn sách hướng dẫn cách tạo thiện cảm trong lần đầu gặp gỡ, cách dẫn dắt người khác suy nghĩ theo mình mà không gây thù chuốc oán, và nghệ thuật khơi dậy tiềm năng, lòng tự trọng ở nhân viên hay người thân. Qua nhiều thập kỷ, những lời khuyên của Carnegie vẫn giữ nguyên giá trị thời đại, là cẩm nang sống gối đầu giường giúp hàng triệu người xây dựng mối quan hệ bền vững và gặt hái thành công.', 59500.00),
 	(14, '9786041234590', 'Deep Work', 2, 2, 2024, NULL, 'Tiếng Việt', 7, 5, 'Kệ KNS-03', '/uploads/books/1778858497071_DeepWork.jpg', 'Kỹ năng làm việc tập trung sâu', 135000.00, 0.00, '2026-05-17 03:28:50', '2026-05-28 03:14:03', 'Trong kỷ nguyên số đầy rẫy những xao nhãng từ thông báo mạng xã hội, tin nhắn và email, tác phẩm của giáo sư khoa học máy tính Cal Newport xuất hiện như một cứu cánh, định hình lại phong cách làm việc hiệu suất cao. Tác giả đưa ra khái niệm "Deep Work" (Làm việc sâu) – khả năng tập trung cao độ không xao lãng vào một nhiệm vụ phức tạp về mặt nhận thức. Đây là kỹ năng siêu đẳng giúp bạn tiếp thu nhanh chóng các kiến thức khó và tạo ra những kết quả vượt trội trong thời gian ngắn. Đối lập với nó là "Shallow Work" (Làm việc nông) – những việc hành chính vặt vãnh tiêu tốn thời gian nhưng không tạo ra nhiều giá trị. Cuốn sách không chỉ chứng minh tầm quan trọng của Deep Work dựa trên khoa học thần kinh mà còn cung cấp 4 nguyên tắc thực kỷ luật nghiêm ngặt: làm việc chuyên sâu, biến sự buồn chán thành thói quen, từ bỏ mạng xã hội một cách thông minh và cắt giảm các công việc nông, giúp người đọc giành lại sự chủ động cho bộ não và sự nghiệp.', 94500.00),
 	(15, '9786041234591', 'Grit - Sức Mạnh Của Đam Mê', 5, 2, 2023, NULL, 'Tiếng Việt', 9, 7, 'Kệ KNS-04', '/uploads/books/1778859082984_Grit.jpg', 'Bí mật của sự thành công bền bỉ', 145000.00, 0.00, '2026-05-17 03:28:50', '2026-05-28 03:14:03', 'Cuốn sách tâm lý học hành vi chấn động của Giáo sư Angela Duckworth đã phá tan huyền thoại về "tài năng bẩm sinh" để khẳng định một chân lý mới: Bí mật của sự thành công vượt trội nằm ở GRIT – sự kết hợp bền bỉ giữa niềm đam mê dài hạn và lòng kiên trì vượt qua nghịch cảnh. Dựa trên các công trình nghiên cứu khoa học thực địa quy mô lớn tại học viện quân sự West Point, các cuộc thi đánh vần quốc gia và các tập đoàn hàng đầu, tác giả chứng minh rằng chỉ số thông minh IQ hay tài năng thiên bẩm chỉ là điều kiện cần, còn nỗ lực và sự bền bỉ mới nhân đôi tài năng đó thành thành quả thực tế. Cuốn sách hướng dẫn chi tiết cách nuôi dưỡng lòng kiên trì từ bên trong (thông qua đam mê, luyện tập có chủ đích, tìm kiếm mục đích sống và tư duy tiến bộ) cũng như cách thúc đẩy lòng kiên trì từ bên ngoài (cách cha mẹ, thầy cô hay người lãnh đạo rèn luyện cho con trẻ), truyền cảm hứng mạnh mẽ cho bất kỳ ai muốn kiên định đi đến tận cùng ước mơ.', 101500.00),
 	(16, '9786041234594', 'Kinh Tế Học Hành Vi', 1, 2, NULL, NULL, 'Tiếng Việt', 8, 6, 'Kệ KT-06', '/uploads/books/1779207658133_kinhte.jpg', NULL, 155000.00, 0.00, '2026-05-19 16:20:58', '2026-05-28 03:14:03', 'Tác phẩm xuất sắc của giáo sư đoạt giải Nobel Kinh tế Richard H. Thaler, đưa người đọc đi sâu khám phá một lĩnh vực khoa học đầy thú vị: sự giao thoa giữa kinh tế học và tâm lý học con người. Khác với nền kinh tế học truyền thống luôn giả định con người là những "sinh vật lý trí" (Econs) luôn tính toán chuẩn xác lợi ích, Thaler chứng minh rằng thế giới thực được vận hành bởi những con người bằng xương bằng thịt đầy rẫy những định kiến, sai lầm và hành vi phi lý trí mang tính hệ thống. Qua những ví dụ hài hước, sinh động về cách chúng ta chi tiêu tiền bạc, chọn mua nhà, hay sa bẫy trong các chương trình khuyến mãi, tác giả giải thích các khái niệm như "tâm lý học kế toán", "hiệu ứng sở hữu" và đặc biệt là lý thuyết "Hích" (Nudge) – cách thiết kế môi trường lựa chọn để định hướng hành vi con người theo hướng tốt đẹp hơn mà không cần ép buộc. Cuốn sách mở ra một tầm nhìn mới cho các nhà làm chính sách, các doanh nhân và người tiêu dùng thông thái.', 108500.00),
@@ -212,12 +216,12 @@ INSERT INTO `books` (`id`, `isbn`, `title`, `publisher_id`, `category_id`, `publ
 	(20, '9786041234603', 'Lược Sử Thời Gian', 5, 5, NULL, NULL, 'Tiếng Việt', 6, 6, 'Kệ VLY-01', '/uploads/books/1779207933002_Luocsuthoigian.jpg', NULL, 115000.00, 0.00, '2026-05-19 16:25:32', '2026-05-28 03:14:03', 'Một trong những cuốn sách phổ biến khoa học vĩ đại và bán chạy nhất mọi thời đại của nhà vật lý lý thuyết thiên tài Stephen Hawking. Cuốn sách là nỗ lực phi thường của Hawking nhằm giải thích những bí ẩn sâu thẳm và phức tạp nhất của vũ trụ bao la bằng một ngôn ngữ giản dị, trong sáng dành cho đại chúng, hoàn toàn không chứa các công thức toán học phức tạp (ngoại trừ phương trình E=mc² của Einstein). Tác giả dẫn dắt người đọc qua các lý thuyết nền tảng của vật lý hiện đại: từ Thuyết tương đối tổng quát của Einstein giải thích thế giới vĩ mô, đến Cơ học lượng tử giải thích thế giới vi mô của các hạt dưới nguyên tử. Từ đó, Hawking mở ra những cuộc thảo luận chấn động về nguồn gốc của vũ trụ (Thuyết Vụ Nổ Lớn - Big Bang), bản chất bí ẩn của Hố đen, sự giãn nở của không-thời gian và hướng tới một "Thuyết vạn vật" thống nhất, kích thích trí tưởng tượng và khát khao khám phá tri thức của nhân loại.', 80500.00),
 	(21, '9786041234604', 'Hóa Học Hữu Cơ Căn Bản', 3, 6, NULL, NULL, 'Tiếng Việt', 8, 7, 'Kệ HOA-01', '/uploads/books/1779207961953_Hoahochuuco.jpg', NULL, 85000.00, 0.00, '2026-05-19 16:26:01', '2026-05-28 03:14:03', 'Bộ giáo trình hàn lâm uy tín cấp quốc gia được chủ biên bởi Giáo sư Ngô Thị Thuận, là tài liệu giảng dạy cốt lõi dành cho sinh viên chuyên ngành Hóa học, Sinh học, Dược học và Công nghệ thực phẩm tại các trường đại học lớn. Cuốn sách cung cấp một hệ thống kiến thức toàn diện và sâu sắc về cấu trúc, danh pháp, tính chất vật lý và hóa học của các hợp chất hữu cơ từ hydrocacbon no, không no, thơm đến các dẫn xuất chứa oxy, nitơ và các hợp chất thiên nhiên phức tạp như cacbohydrat, amino axit. Tác giả đặc biệt chú trọng việc giải thích bản chất của các cơ chế phản ứng hữu cơ (thế, cộng, tách) thông qua lý thuyết orbital phân tử và hiệu ứng cấu trúc, giúp người học không chỉ học vẹt các phương trình phản ứng mà hình thành tư duy phân tích, dự đoán sản xuất và ứng dụng vào các ngành công nghiệp tổng hợp dược phẩm, hóa dầu thực tế.', 59500.00),
 	(22, '9786041234605', 'Giáo Trình Luật Dân Sự Việt Nam', 7, 7, NULL, NULL, 'Tiếng Việt', 12, 11, 'Kệ LUAT-01', '/uploads/books/1779207998100_luatdansu.jpg', NULL, 110000.00, 0.00, '2026-05-19 16:26:38', '2026-05-28 03:14:03', 'Tác phẩm được biên soạn bởi hội đồng học thuật đầu ngành trực thuộc Trường Đại học Luật Hà Nội, là tài liệu giảng dạy và nghiên cứu pháp lý có tính chuẩn mực, chính thống bậc nhất tại Việt Nam. Cuốn sách bám sát các quy định, tinh thần của Bộ luật Dân sự hiện hành, cung cấp hệ thống kiến thức nền tảng về phần chung của luật dân sự (chủ thể, hộ tịch, tài sản, giao dịch dân sự, đại diện, thời hiệu) và các chế định chuyên sâu cốt lõi như Quyền sở hữu và các quyền khác đối với tài sản, Lý thuyết về Nghĩa vụ và Hợp đồng dân sự, cũng như Pháp luật về Thừa kế. Bằng phương pháp phân tích khoa học kết hợp giữa lý luận và thực tiễn xét xử, cuốn sách giải thích rõ ràng các nguyên lý pháp lý, quyền và nghĩa vụ hợp pháp của các bên, là cẩm nang bắt buộc cho sinh viên luật, luật sư, thẩm phán và các nhà quản lý.', 77000.00),
-	(23, '9786041234606', 'Khi Hơi Thở Hóa Thinh Không', 9, 8, NULL, NULL, 'Tiếng Việt', 7, 6, 'Kệ YHOC-01', '/uploads/books/1779208026459_Khihoitho.jpg', NULL, 120000.00, 0.00, '2026-05-19 16:27:06', '2026-05-28 03:14:03', 'Cuốn tự truyện vô cùng xúc động và thấm đẫm triết lý nhân sinh của Paul Kalanithi – một bác sĩ phẫu thuật thần kinh tài hoa đầy triển vọng bỗng chốc trở thành một bệnh nhân ung thư phổi giai đoạn cuối ở tuổi 36. Cuốn sách được viết trong những tháng ngày cuối cùng của cuộc đời, khi Paul đang đứng ở ranh giới mong manh giữa sự sống và cái chết. Với ngòi bút tinh tế của một người từng học thạc sĩ văn học Anh tại Stanford kết hợp với trải nghiệm sâu sắc của một bác sĩ y khoa tại Yale, tác giả đã tái hiện lại hành trình đầy kiêu hãnh của mình: từ một cậu sinh viên tò mò về ý nghĩa cuộc sống, một bác sĩ thức trắng đêm trong phòng mổ để giành giật mạng sống cho bệnh nhân, cho đến khi chính mình phải đối diện với án tử hình của căn bệnh quái ác. Tác phẩm không phải là một tiếng khóc than bi lụy, mà là một lời tự tình, một bài ca ca ngợi nghị lực sống, tình yêu gia đình và câu trả lời sâu sắc cho câu hỏi: Điều gì khiến cuộc sống đáng sống khi tương lai không còn nữa?', 84000.00),
+	(23, '9786041234606', 'Khi Hơi Thở Hóa Thinh Không', 9, 8, NULL, NULL, 'Tiếng Việt', 7, 6, 'Kệ YHOC-01', '/uploads/books/1779208026459_Khihoitho.jpg', NULL, 120000.00, 0.00, '2026-05-19 16:27:06', '2026-06-05 11:29:43', 'Cuốn tự truyện vô cùng xúc động và thấm đẫm triết lý nhân sinh của Paul Kalanithi – một bác sĩ phẫu thuật thần kinh tài hoa đầy triển vọng bỗng chốc trở thành một bệnh nhân ung thư phổi giai đoạn cuối ở tuổi 36. Cuốn sách được viết trong những tháng ngày cuối cùng của cuộc đời, khi Paul đang đứng ở ranh giới mong manh giữa sự sống và cái chết. Với ngòi bút tinh tế của một người từng học thạc sĩ văn học Anh tại Stanford kết hợp với trải nghiệm sâu sắc của một bác sĩ y khoa tại Yale, tác giả đã tái hiện lại hành trình đầy kiêu hãnh của mình: từ một cậu sinh viên tò mò về ý nghĩa cuộc sống, một bác sĩ thức trắng đêm trong phòng mổ để giành giật mạng sống cho bệnh nhân, cho đến khi chính mình phải đối diện với án tử hình của căn bệnh quái ác. Tác phẩm không phải là một tiếng khóc than bi lụy, mà là một lời tự tình, một bài ca ca ngợi nghị lực sống, tình yêu gia đình và câu trả lời sâu sắc cho câu hỏi: Điều gì khiến cuộc sống đáng sống khi tương lai không còn nữa?', 84000.00),
 	(24, '9786041234597', 'Lịch Sử Việt Nam', 7, 9, NULL, NULL, 'Tiếng Việt', 10, 6, 'Kệ LS-01', '/uploads/books/1779208071200_lichsuvietnam.jpg', NULL, 120000.00, 0.00, '2026-05-19 16:27:51', '2026-06-04 17:05:36', 'Một công trình biên khảo lịch sử đồ sộ và nghiêm túc, phác họa lại toàn bộ tiến trình lịch sử thăng trầm nhưng đầy oanh liệt của dân tộc Việt Nam từ thuở bình minh dựng nước đến kỷ nguyên hiện đại. Cuốn sách được chia làm nhiều phần mạch lạc, dẫn dắt người đọc đi qua thời kỳ tiền sử, giai đoạn huyền sử Hùng Vương, một ngàn năm bắc thuộc kiên cường đấu tranh giành độc lập, cho đến thời kỳ tự chủ hoàng kim của các triều đại Lý, Trần, Lê, Nguyễn. Tác phẩm không chỉ đơn thuần liệt kê các mốc thời gian hay các trận đánh khô khan, mà đi sâu phân tích bối cảnh chính trị, sự phát triển văn hóa, bang giao quốc tế, tư duy quân sự và các thiết chế kinh tế - xã hội qua từng thời kỳ. Đây là tư liệu lịch sử vô giá giúp người đọc hiểu rõ cội nguồn, bồi đắp lòng tự hào dân tộc và rút ra những bài học quý báu từ quá khứ để hướng tới tương lai.', 84000.00),
 	(25, '9786041234607', 'Việt Nam Sử Lược', 9, 9, NULL, NULL, 'Tiếng Việt', 5, 5, 'Kệ LS-02', '/uploads/books/1779208116251_vnsuluoc.jpg', NULL, 145000.00, 0.00, '2026-05-19 16:28:36', '2026-05-28 03:14:03', NULL, 101500.00),
 	(26, '9786041234608', 'Thế Giới Của Sophie', 6, 10, NULL, NULL, 'Tiếng Việt', 6, 4, 'Kệ TRIET-01', '/uploads/books/1779208159326_thegioisophe.jpg', NULL, 175000.00, 0.00, '2026-05-19 16:29:19', '2026-05-28 03:14:03', NULL, 122500.00),
-	(27, '9786041234609', 'Tâm Lý Học Đám Đông', 5, 11, NULL, NULL, 'Tiếng Việt', 14, 12, 'Kệ TLY-01', '/uploads/books/1779208191452_tamlyhocdamdong.jpg', NULL, 95000.00, 0.00, '2026-05-19 16:29:51', '2026-05-28 03:14:03', NULL, 66500.00),
-	(28, '9786041234610', 'Cambridge IELTS 18', 4, 12, NULL, NULL, 'Tiếng Việt', 20, 16, 'Kệ NNGU-01', '/uploads/books/1779208215263_18.jpg', NULL, 240000.00, 0.00, '2026-05-19 16:30:15', '2026-06-04 15:55:07', NULL, 168000.00),
+	(27, '9786041234609', 'Tâm Lý Học Đám Đông', 5, 11, NULL, NULL, 'Tiếng Việt', 14, 12, 'Kệ TLY-01', '/uploads/books/1779208191452_tamlyhocdamdong.jpg', NULL, 95000.00, 0.00, '2026-05-19 16:29:51', '2026-06-05 11:05:03', NULL, 66500.00),
+	(28, '9786041234610', 'Cambridge IELTS 18', 4, 12, NULL, NULL, 'Tiếng Việt', 20, 15, 'Kệ NNGU-01', '/uploads/books/1779208215263_18.jpg', NULL, 240000.00, 0.00, '2026-05-19 16:30:15', '2026-06-05 16:02:47', NULL, 168000.00),
 	(29, '9786041234611', 'Câu Chuyện Nghệ Thuật', 8, 13, NULL, NULL, 'Tiếng Việt', 4, 4, 'Kệ MNET-01', '/uploads/books/1779208248114_cauchuyennghethuat.jpg', NULL, 450000.00, 0.00, '2026-05-19 16:30:48', '2026-05-28 03:14:03', NULL, 315000.00),
 	(30, '9786041234612', 'Y Học Dinh Dưỡng', 1, 14, NULL, NULL, 'Tiếng Việt', 9, 9, 'Kệ TTSK-01', '/uploads/books/1779208284667_yhocdinhduong.jpg', NULL, 130000.00, 0.00, '2026-05-19 16:31:24', '2026-05-28 03:14:03', NULL, 91000.00),
 	(31, '9786041234613', 'Cách Mạng Một Cọng Rơm', 5, 15, NULL, NULL, 'Tiếng Việt', 8, 8, 'Kệ NN-01', '/uploads/books/1779208660563_cachmangmotcongrom.jpg', NULL, 88000.00, 0.00, '2026-05-19 16:37:40', '2026-05-28 03:14:03', NULL, 61600.00),
@@ -228,7 +232,7 @@ INSERT INTO `books` (`id`, `isbn`, `title`, `publisher_id`, `category_id`, `publ
 	(36, '9786041234618', 'Nghề Báo Gian Khổ Quyến Rũ', 7, 20, NULL, NULL, 'Tiếng Việt', 4, 4, 'Kệ BCTT-01', '/uploads/books/1779208811543_nghenhabao.jpg', NULL, 110000.00, 0.00, '2026-05-19 16:40:11', '2026-05-28 03:14:03', NULL, 77000.00),
 	(37, '9786041234619', 'Kỹ Thuật Mạch Điện Tử', 2, 21, NULL, NULL, 'Tiếng Việt', 12, 11, 'Kệ DTVT-01', '/uploads/books/1779208646645_kythuatmachdientu.jpg', NULL, 115000.00, 0.00, '2026-05-19 16:37:26', '2026-05-28 03:14:03', NULL, 80500.00),
 	(38, '9786041234620', 'Kiến Trúc Việt Nam', 4, 22, NULL, NULL, 'Tiếng Việt', 5, 5, 'Kệ XDKT-01', '/uploads/books/1779208508741_kientruc.jpg', NULL, 240000.00, 0.00, '2026-05-19 16:35:08', '2026-05-28 03:14:03', NULL, 168000.00),
-	(39, '9786041234621', 'Trà Kinh', 3, 23, NULL, NULL, 'Tiếng Việt', 6, 5, 'Kệ TPDU-01', '/uploads/books/1779208553730_traking.jpg', NULL, 180000.00, 0.00, '2026-05-19 16:35:53', '2026-05-28 03:14:03', NULL, 126000.00),
+	(39, '9786041234621', 'Trà Kinh', 3, 23, NULL, NULL, 'Tiếng Việt', 6, 6, 'Kệ TPDU-01', '/uploads/books/1779208553730_traking.jpg', NULL, 180000.00, 0.00, '2026-05-19 16:35:53', '2026-06-05 11:05:03', NULL, 126000.00),
 	(40, '9786041234622', 'Những quý cô thời trang', 8, 24, NULL, NULL, 'Tiếng Việt', 5, 4, 'Kệ TTR-01', '/uploads/books/1779208627159_nhungquyco.jpg', NULL, 260000.00, 0.00, '2026-05-19 16:37:07', '2026-05-28 03:14:03', NULL, 182000.00);
 
 -- Dumping structure for table library_db.categories
@@ -241,7 +245,7 @@ CREATE TABLE IF NOT EXISTS `categories` (
   UNIQUE KEY `name` (`name`),
   KEY `parent_id` (`parent_id`),
   CONSTRAINT `1` FOREIGN KEY (`parent_id`) REFERENCES `categories` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Dumping data for table library_db.categories: ~24 rows (approximately)
 INSERT INTO `categories` (`id`, `name`, `description`, `parent_id`) VALUES
@@ -271,6 +275,26 @@ INSERT INTO `categories` (`id`, `name`, `description`, `parent_id`) VALUES
 	(24, 'Thời trang - May mặc', 'Lịch sử thiết kế, xu hướng và kỹ thuật may mặc', NULL),
 	(25, 'Thanh Taam', '', 1);
 
+-- Dumping structure for table library_db.chat_replies
+CREATE TABLE IF NOT EXISTS `chat_replies` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `content` text DEFAULT NULL,
+  `created_at` datetime(6) DEFAULT NULL,
+  `sender_name` varchar(255) DEFAULT NULL,
+  `sender_role` varchar(255) DEFAULT NULL,
+  `contact_message_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKr8fdrsc9v9ooqn26tvk5ra874` (`contact_message_id`),
+  CONSTRAINT `FKr8fdrsc9v9ooqn26tvk5ra874` FOREIGN KEY (`contact_message_id`) REFERENCES `contact_messages` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Dumping data for table library_db.chat_replies: ~4 rows (approximately)
+INSERT INTO `chat_replies` (`id`, `content`, `created_at`, `sender_name`, `sender_role`, `contact_message_id`) VALUES
+	(1, 'hi', '2026-06-05 23:58:48.078603', NULL, 'ADMIN', 6),
+	(2, 'hi', '2026-06-06 00:34:35.029375', NULL, 'USER', 6),
+	(3, 'hi', '2026-06-06 00:35:27.925592', NULL, 'USER', 6),
+	(4, 'chào nhi bạn cần giúp gì', '2026-06-06 00:36:25.912801', NULL, 'ADMIN', 6);
+
 -- Dumping structure for table library_db.contact_messages
 CREATE TABLE IF NOT EXISTS `contact_messages` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -289,9 +313,9 @@ CREATE TABLE IF NOT EXISTS `contact_messages` (
 
 -- Dumping data for table library_db.contact_messages: ~3 rows (approximately)
 INSERT INTO `contact_messages` (`id`, `created_at`, `email`, `full_name`, `message`, `phone`, `status`, `student_code`, `subject`, `replied_at`, `reply_content`) VALUES
-	(4, '2026-05-27 11:24:29.203731', 'Nhi123@gmail.com', 'lenhi', 'dffa', '0348155189', 'UNREAD', 'SV-2026-5', 'borrow', NULL, NULL),
+	(4, '2026-05-27 11:24:29.203731', 'Nhi123@gmail.com', 'lenhi', 'dffa', '0348155189', 'READ', 'SV-2026-5', 'borrow', NULL, NULL),
 	(5, '2026-05-27 11:58:54.456533', 'Nhi123@gmail.com', 'lenhi', 'styj', '0348155189', 'REPLIED', 'SV-2026-5', 'card', '2026-05-27 11:59:13.343863', 'helo'),
-	(6, '2026-05-27 12:25:02.068329', 'Nhi123@gmail.com', 'Lê Thị Yến Nhi', 'gigi', '0434874433', 'UNREAD', NULL, 'borrow', NULL, NULL);
+	(6, '2026-05-27 12:25:02.068329', 'Nhi123@gmail.com', 'Lê Thị Yến Nhi', 'gigi', '0434874433', 'REPLIED', NULL, 'borrow', NULL, NULL);
 
 -- Dumping structure for table library_db.digital_documents
 CREATE TABLE IF NOT EXISTS `digital_documents` (
@@ -360,6 +384,7 @@ CREATE TABLE IF NOT EXISTS `fines` (
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   `paid_at` datetime DEFAULT NULL,
   `paid_by` bigint(20) DEFAULT NULL,
+  `is_account_locked` bit(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `loan_id` (`loan_id`),
   KEY `member_id` (`member_id`),
@@ -367,13 +392,14 @@ CREATE TABLE IF NOT EXISTS `fines` (
   CONSTRAINT `1` FOREIGN KEY (`loan_id`) REFERENCES `loans` (`id`),
   CONSTRAINT `2` FOREIGN KEY (`member_id`) REFERENCES `members` (`id`),
   CONSTRAINT `3` FOREIGN KEY (`paid_by`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table library_db.fines: ~3 rows (approximately)
-INSERT INTO `fines` (`id`, `loan_id`, `member_id`, `fine_amount`, `days_overdue`, `fine_per_day`, `reason`, `status`, `created_at`, `paid_at`, `paid_by`) VALUES
-	(1, 1, 1, 20000.00, 10, 2000.00, 'Trả sách quá hạn 10 ngày', 'PAID', '2026-05-28 03:38:28', '2026-05-31 23:39:12', 8),
-	(2, 10, 7, 26000.00, 13, 2000.00, NULL, 'UNPAID', '2026-05-31 16:38:07', NULL, NULL),
-	(3, 21, 8, 2000.00, 1, 2000.00, NULL, 'UNPAID', '2026-06-04 17:05:49', NULL, NULL);
+-- Dumping data for table library_db.fines: ~4 rows (approximately)
+INSERT INTO `fines` (`id`, `loan_id`, `member_id`, `fine_amount`, `days_overdue`, `fine_per_day`, `reason`, `status`, `created_at`, `paid_at`, `paid_by`, `is_account_locked`) VALUES
+	(1, 1, 1, 20000.00, 10, 2000.00, 'Trả sách quá hạn 10 ngày', 'PAID', '2026-05-28 03:38:28', '2026-05-31 23:39:12', 8, NULL),
+	(2, 10, 7, 26000.00, 13, 2000.00, NULL, 'PAID', '2026-05-31 16:38:07', '2026-06-05 22:37:53', 1, NULL),
+	(3, 21, 8, 2000.00, 1, 2000.00, NULL, 'UNPAID', '2026-06-04 17:05:49', NULL, NULL, NULL),
+	(6, 1, 11, 24000.00, 12, 2000.00, NULL, 'UNPAID', '2026-06-05 15:49:10', NULL, NULL, NULL);
 
 -- Dumping structure for table library_db.loan_items
 CREATE TABLE IF NOT EXISTS `loan_items` (
@@ -387,29 +413,21 @@ CREATE TABLE IF NOT EXISTS `loan_items` (
   KEY `book_copy_id` (`book_copy_id`),
   CONSTRAINT `1` FOREIGN KEY (`loan_id`) REFERENCES `loans` (`id`),
   CONSTRAINT `2` FOREIGN KEY (`book_copy_id`) REFERENCES `book_copies` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table library_db.loan_items: ~14 rows (approximately)
+-- Dumping data for table library_db.loan_items: ~11 rows (approximately)
 INSERT INTO `loan_items` (`id`, `loan_id`, `book_copy_id`, `returned`, `return_date`) VALUES
 	(1, 1, 1, 1, '2026-05-23 16:16:58'),
-	(2, 2, 2, 0, NULL),
-	(3, 4, 3, 1, '2026-05-24 01:47:17'),
 	(4, 5, 4, 1, '2026-05-24 00:52:03'),
-	(5, 6, 5, 0, NULL),
-	(6, 7, 6, 0, NULL),
-	(7, 8, 7, 0, NULL),
-	(8, 9, 8, 1, '2026-05-24 01:53:04'),
 	(9, 10, 9, 0, NULL),
-	(10, 11, 10, 0, NULL),
-	(11, 13, 11, 0, NULL),
-	(12, 15, 12, 0, NULL),
 	(13, 16, 13, 1, '2026-05-28 11:09:59'),
 	(15, 18, 2, 0, NULL),
 	(16, 19, 13, 0, NULL),
 	(17, 20, 14, 0, NULL),
 	(18, 21, 15, 0, NULL),
 	(19, 22, 16, 0, NULL),
-	(20, 23, 17, 0, NULL);
+	(20, 23, 17, 0, NULL),
+	(24, 27, 21, 0, NULL);
 
 -- Dumping structure for table library_db.loans
 CREATE TABLE IF NOT EXISTS `loans` (
@@ -420,7 +438,7 @@ CREATE TABLE IF NOT EXISTS `loans` (
   `loan_date` datetime DEFAULT current_timestamp(),
   `due_date` date NOT NULL,
   `return_date` datetime DEFAULT NULL,
-  `status` enum('PENDING','ACTIVE','RETURNED','OVERDUE','LOST') DEFAULT 'PENDING',
+  `status` enum('PENDING','ACTIVE','RETURNED','OVERDUE','LOST','CANCELLED') DEFAULT NULL,
   `deposit_paid` decimal(12,2) DEFAULT 0.00,
   `deposit_refunded` decimal(12,2) DEFAULT 0.00,
   `note` text DEFAULT NULL,
@@ -433,29 +451,21 @@ CREATE TABLE IF NOT EXISTS `loans` (
   KEY `librarian_id` (`librarian_id`),
   CONSTRAINT `1` FOREIGN KEY (`member_id`) REFERENCES `members` (`id`),
   CONSTRAINT `2` FOREIGN KEY (`librarian_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table library_db.loans: ~15 rows (approximately)
+-- Dumping data for table library_db.loans: ~11 rows (approximately)
 INSERT INTO `loans` (`id`, `loan_code`, `member_id`, `librarian_id`, `loan_date`, `due_date`, `return_date`, `status`, `deposit_paid`, `deposit_refunded`, `note`, `deposit_status`, `deposit_amount`, `rental_fee`) VALUES
 	(1, 'PM-197A', 7, 1, '2026-05-23 13:53:31', '2026-06-06', '2026-05-23 16:16:58', 'RETURNED', 0.00, 0.00, '', 'NONE', NULL, NULL),
-	(2, 'PM-6254', 7, 1, '2026-05-23 14:03:45', '2026-06-06', NULL, 'PENDING', 0.00, 0.00, '', 'NONE', NULL, NULL),
-	(4, 'PM-7259', 7, 1, '2026-05-23 15:55:03', '2026-06-06', '2026-05-24 01:47:17', 'RETURNED', 0.00, 0.00, '', 'NONE', NULL, NULL),
 	(5, 'PM-F3F8', 7, 1, '2026-05-24 00:51:19', '2026-06-07', '2026-05-24 00:52:03', 'RETURNED', 0.00, 0.00, '', 'NONE', NULL, NULL),
-	(6, 'PM-275D', 7, 1, '2026-05-24 00:56:12', '2026-06-07', NULL, 'PENDING', 0.00, 0.00, '', 'NONE', NULL, NULL),
-	(7, 'PM-5EE9', 7, 1, '2026-05-24 01:35:45', '2026-06-07', NULL, 'PENDING', 0.00, 0.00, '', 'NONE', NULL, NULL),
-	(8, 'PM-861A', 7, 1, '2026-05-24 01:36:45', '2026-06-07', NULL, 'PENDING', 0.00, 0.00, '', 'NONE', NULL, NULL),
-	(9, 'PM-0EC0', 7, 1, '2026-05-24 01:52:33', '2026-06-07', '2026-05-24 01:53:04', 'RETURNED', 0.00, 0.00, '', 'NONE', NULL, NULL),
 	(10, 'PM-517B', 7, 1, '2026-05-24 23:42:02', '2026-05-23', '2026-05-21 23:51:00', 'OVERDUE', 0.00, 0.00, '', 'NONE', NULL, NULL),
-	(11, 'PM-D779', 8, 1, '2026-05-26 09:53:22', '2026-06-09', NULL, 'PENDING', 0.00, 0.00, '', 'NONE', NULL, NULL),
-	(13, 'PM-29E1', 8, 1, '2026-05-28 00:09:53', '2026-06-11', NULL, 'PENDING', 0.00, 0.00, '', 'NONE', NULL, NULL),
-	(15, 'PM-49F0', 8, 1, '2026-05-28 00:16:49', '2026-05-29', NULL, 'PENDING', 0.00, 0.00, '', 'NONE', NULL, NULL),
 	(16, 'PM-DDDE', 7, 1, '2026-05-28 10:56:44', '2026-06-11', '2026-05-28 11:09:59', 'RETURNED', 45500.00, 0.00, '', 'REFUNDED', NULL, NULL),
 	(18, 'PM-2026-01', 8, 1, '2026-05-31 16:45:08', '2026-06-05', NULL, 'ACTIVE', 49998.00, 0.00, '', 'PAID', NULL, NULL),
 	(19, 'PM-2026-02', 8, 8, '2026-05-31 17:03:22', '2026-06-05', NULL, 'ACTIVE', 29999.00, 0.00, '', 'PAID', NULL, NULL),
 	(20, 'PM-D3C4', 8, 1, '2026-06-05 00:04:54', '2026-06-06', NULL, 'ACTIVE', 146250.00, 0.00, '', 'PAID', 146250.00, 50000.00),
 	(21, 'PM-383D', 8, 1, '2026-06-03 01:23:24', '2026-06-04', NULL, 'OVERDUE', 146250.00, 0.00, '', 'PAID', 146250.00, 50000.00),
 	(22, 'PM-C33A', 11, 1, '2026-06-05 00:05:36', '2026-06-06', NULL, 'ACTIVE', 90000.00, 0.00, '', 'PAID', 90000.00, 50000.00),
-	(23, 'PM-811C', 11, 1, '2026-06-04 22:50:54', '2026-06-05', NULL, 'ACTIVE', 180000.00, 0.00, '', 'PAID', 180000.00, 50000.00);
+	(23, 'PM-811C', 11, 1, '2026-06-04 22:50:54', '2026-06-05', NULL, 'ACTIVE', 180000.00, 0.00, '', 'PAID', 180000.00, 50000.00),
+	(27, 'PM-D17F', 11, 1, '2026-06-05 23:02:47', '2026-06-06', NULL, 'PENDING', 180000.00, 0.00, '', 'UNPAID', 180000.00, 50000.00);
 
 -- Dumping structure for table library_db.members
 CREATE TABLE IF NOT EXISTS `members` (
@@ -468,9 +478,10 @@ CREATE TABLE IF NOT EXISTS `members` (
   `card_issued_date` date NOT NULL,
   `card_expiry_date` date NOT NULL,
   `max_borrow_limit` int(11) DEFAULT 5,
-  `status` enum('ACTIVE','SUSPENDED','EXPIRED') DEFAULT 'ACTIVE',
+  `status` enum('ACTIVE','SUSPENDED','EXPIRED','LOCKED') DEFAULT NULL,
   `total_borrowed` int(11) DEFAULT 0,
   `current_debt` decimal(12,2) DEFAULT 0.00,
+  `is_account_locked` bit(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`),
   UNIQUE KEY `card_number` (`card_number`),
@@ -478,15 +489,29 @@ CREATE TABLE IF NOT EXISTS `members` (
   CONSTRAINT `1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table library_db.members: ~6 rows (approximately)
-INSERT INTO `members` (`id`, `user_id`, `card_number`, `student_code`, `department`, `course`, `card_issued_date`, `card_expiry_date`, `max_borrow_limit`, `status`, `total_borrowed`, `current_debt`) VALUES
-	(1, 1, 'LIB-2026-001', 'SV2101001', 'Công nghệ thông tin', 'K64', '2024-10-01', '2028-10-01', 5, 'ACTIVE', 3, 0.00),
-	(2, 3, 'CARD-1778110194051', NULL, NULL, NULL, '2026-05-07', '2030-05-07', 5, 'ACTIVE', 0, 0.00),
-	(3, 4, 'CARD-1778110619381', NULL, NULL, NULL, '2026-05-07', '2030-05-07', 5, 'ACTIVE', 0, 0.00),
-	(7, 5, 'SV-2026-5', 'lenhi', NULL, NULL, '2026-05-07', '2030-05-07', 5, 'ACTIVE', 0, 0.00),
-	(8, 7, 'SV-2026-7', 'thanhtam12', NULL, NULL, '2026-05-24', '2030-05-24', 5, 'ACTIVE', 0, 0.00),
-	(9, 8, 'SV-2026-8', 'thuthu1', NULL, NULL, '2026-05-31', '2030-05-31', 5, 'ACTIVE', 0, 0.00),
-	(11, 9, 'SV-2026-9', 'Trungkien', NULL, NULL, '2026-06-04', '2030-06-04', 5, 'ACTIVE', 0, 0.00);
+-- Dumping data for table library_db.members: ~7 rows (approximately)
+INSERT INTO `members` (`id`, `user_id`, `card_number`, `student_code`, `department`, `course`, `card_issued_date`, `card_expiry_date`, `max_borrow_limit`, `status`, `total_borrowed`, `current_debt`, `is_account_locked`) VALUES
+	(1, 1, 'LIB-2026-001', 'SV2101001', 'Công nghệ thông tin', 'K64', '2024-10-01', '2028-10-01', 5, 'ACTIVE', 3, 0.00, b'0'),
+	(2, 3, 'CARD-1778110194051', NULL, NULL, NULL, '2026-05-07', '2030-05-07', 5, 'ACTIVE', 0, 0.00, b'0'),
+	(3, 4, 'CARD-1778110619381', NULL, NULL, NULL, '2026-05-07', '2030-05-07', 5, 'ACTIVE', 0, 0.00, b'0'),
+	(7, 5, 'SV-2026-5', 'lenhi', NULL, NULL, '2026-05-07', '2030-05-07', 5, 'ACTIVE', 0, 0.00, b'0'),
+	(8, 7, 'SV-2026-7', 'thanhtam12', NULL, NULL, '2026-05-24', '2030-05-24', 5, 'ACTIVE', 0, 0.00, b'0'),
+	(9, 8, 'SV-2026-8', 'thuthu1', NULL, NULL, '2026-05-31', '2030-05-31', 5, 'ACTIVE', 0, 0.00, b'0'),
+	(11, 9, 'SV-2026-9', 'Trungkien', NULL, NULL, '2026-06-04', '2030-06-04', 5, 'LOCKED', 0, 0.00, b'1');
+
+-- Dumping structure for table library_db.notification
+CREATE TABLE IF NOT EXISTS `notification` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) DEFAULT NULL,
+  `is_read` bit(1) NOT NULL,
+  `message` varchar(255) DEFAULT NULL,
+  `member_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKsx211v1rhgkexuj5drj2kpu0t` (`member_id`),
+  CONSTRAINT `FKsx211v1rhgkexuj5drj2kpu0t` FOREIGN KEY (`member_id`) REFERENCES `members` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Dumping data for table library_db.notification: ~0 rows (approximately)
 
 -- Dumping structure for table library_db.payments
 CREATE TABLE IF NOT EXISTS `payments` (
@@ -506,11 +531,12 @@ CREATE TABLE IF NOT EXISTS `payments` (
   CONSTRAINT `1` FOREIGN KEY (`member_id`) REFERENCES `members` (`id`),
   CONSTRAINT `2` FOREIGN KEY (`fine_id`) REFERENCES `fines` (`id`),
   CONSTRAINT `3` FOREIGN KEY (`processed_by`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Dumping data for table library_db.payments: ~0 rows (approximately)
 INSERT INTO `payments` (`id`, `member_id`, `fine_id`, `amount`, `payment_type`, `payment_method`, `note`, `processed_by`, `created_at`) VALUES
-	(1, 1, 1, 20000.00, 'FINE', 'CASH', 'Thu phí phạt vi phạm phiếu mượn mã: PM-197A', 8, '2026-05-31 16:39:12');
+	(1, 1, 1, 20000.00, 'FINE', 'CASH', 'Thu phí phạt vi phạm phiếu mượn mã: PM-197A', 8, '2026-05-31 16:39:12'),
+	(2, 7, 2, 26000.00, 'FINE', 'CASH', 'Thu phí phạt vi phạm phiếu mượn mã: PM-517B', 1, '2026-06-05 15:37:53');
 
 -- Dumping structure for table library_db.publishers
 CREATE TABLE IF NOT EXISTS `publishers` (
@@ -613,7 +639,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 
 -- Dumping data for table library_db.users: ~9 rows (approximately)
 INSERT INTO `users` (`id`, `username`, `password`, `full_name`, `email`, `phone`, `avatar`, `is_active`, `created_at`, `is_approved`) VALUES
-	(1, 'admin', '$2a$10$pARj6HVYveSMWy4Nll5fF.t5cKzN//RFxGyQG/b7aF22vTggonvkq', 'Quản trị viên Nhi', 'nhi@university.edu.vn', '0912345678', NULL, 1, '2026-05-04 02:17:19', b'1'),
+	(1, 'admin', '$2a$10$uWv5O9Q4QG6rfmLL9QedVOEanSDX.KWXlk8DVb4xAyGiOZTDMVjtO', 'Quản trị viên Nhi', 'nhi@university.edu.vn', '0912345678', NULL, 1, '2026-05-04 02:17:19', b'1'),
 	(2, 'thuthu01', '123456', 'Nguyễn Văn A', 'vana@university.edu.vn', '0987654321', NULL, 1, '2026-05-04 02:17:19', b'1'),
 	(3, 'thanhtam', '$2a$10$K7sxrw4GxquraxsAceHtCuaED.wsAY.LE/nXt6jmHI4A.bQWhPHO2', 'Lưu Thị Thanh Tâm', 'tammaibong16042004@gmail.com', '0348155189', NULL, 1, '2026-05-06 23:29:53', b'1'),
 	(4, 'thanhtam1', '$2a$10$cV5FJKhr5PdXhsOm1ra2m.AxH79zfLqs.pSogtHv8T3bo6tGOyb3u', 'Lưu Thị Thanh Tâm', 'tammaibong160420045@gmail.com', '0348155188', NULL, 1, '2026-05-06 23:36:59', b'1'),

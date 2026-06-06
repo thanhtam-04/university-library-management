@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.LocalDate; // Đã thêm
 import java.time.temporal.ChronoUnit; // Đã thêm
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -103,6 +104,26 @@ public class FineService {
         }
     
 }
+    @Transactional
+    public void processOverdueLocks() {
+        List<Fine> unpaidFines = fineRepository.findAll();
+        
+        for (Fine fine : unpaidFines) {
+            // Log ra để kiểm tra xem nó có quét thấy dữ liệu không
+            System.out.println("DEBUG: Đang kiểm tra fine ID: " + fine.getId() + " - Ngày trễ: " + fine.getDaysOverdue());
+            
+            // Kiểm tra điều kiện: Phải là UNPAID và trễ > 10 ngày
+            if (fine.getStatus() == Fine.Status.UNPAID && fine.getDaysOverdue() > 10) {
+                Member member = fine.getMember();
+                if (member != null) {
+                    System.out.println("DEBUG: Khóa thành viên ID: " + member.getId());
+                    member.setAccountLocked(true); 
+                    member.setStatus(Member.Status.LOCKED);
+                    memberRepository.save(member);
+                }
+            }
+        }
+    }
     /**
      * Xử lý thanh toán phí phạt:
      * 1. Cập nhật trạng thái phiếu phạt thành PAID

@@ -304,7 +304,7 @@
 					<th>Cọc</th>
                     <th>Kho</th>
                     <th>Vị trí</th>
-                    <th>Ngôn ngữ</th>
+                   
                     <th class="text-end" style="padding-right:22px">Thao tác</th>
                 </tr>
             </thead>
@@ -369,12 +369,7 @@
                         <span th:unless="${b.shelfLocation != null and !b.shelfLocation.isEmpty()}" style="color:var(--t3);font-size:12px">—</span>
                     </td>
 
-                    <td>
-                        <span class="lang-tag">
-                            <i class="bi bi-translate"></i>
-                            <span th:text="${b.language ?: 'Tiếng Việt'}"></span>
-                        </span>
-                    </td>
+                    
 
                     <td style="padding-right:22px">
                         <div class="act-g">

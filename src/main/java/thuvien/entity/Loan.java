@@ -13,7 +13,8 @@ import java.util.List;
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class Loan {
 
-    public enum Status { PENDING, ACTIVE, RETURNED, OVERDUE, LOST }
+    // ĐÃ THÊM: CANCELLED vào Enum Status
+    public enum Status { PENDING, ACTIVE, RETURNED, OVERDUE, LOST, CANCELLED }
     public enum DepositStatus { NONE, UNPAID, PAID, REFUNDED }
 
     @Id
@@ -32,7 +33,6 @@ public class Loan {
     @JoinColumn(name = "librarian_id", nullable = true)
     private User librarian;
 
-    // ĐÃ SỬA: Bỏ = LocalDateTime.now() để tránh ghi đè ngày tạo phiếu
     @Column(name = "loan_date")
     private LocalDateTime loanDate;
 
@@ -49,7 +49,7 @@ public class Loan {
     private LocalDateTime returnDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 15) 
+    @Column(length = 50) 
     private Status status = Status.PENDING; 
 
     @Column(name = "deposit_paid", precision = 12, scale = 2)
@@ -67,6 +67,14 @@ public class Loan {
     @Enumerated(EnumType.STRING)
     @Column(name = "deposit_status", length = 20)
     private DepositStatus depositStatus = DepositStatus.NONE;
+
+    // Tự động gán thời gian khi tạo mới phiếu
+    @PrePersist
+    protected void onCreate() {
+        if (this.loanDate == null) {
+            this.loanDate = LocalDateTime.now();
+        }
+    }
 
     public BigDecimal getTotalAmount() {
         BigDecimal rental = (rentalFee != null) ? rentalFee : BigDecimal.ZERO;

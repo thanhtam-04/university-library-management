@@ -265,4 +265,20 @@ public class LoanService {
     public void deleteById(Long id) { 
         loanRepository.deleteById(id); 
     }
+    @Transactional
+    public void cancelLoan(Long loanId) {
+        Loan loan = findById(loanId);
+        // Chỉ cho phép hủy nếu phiếu đang ở trạng thái PENDING
+        if (loan.getStatus() == Status.PENDING) {
+            loan.setStatus(Status.CANCELLED);
+            
+            // Hoàn trả lại số lượng sách vào kho
+            for (LoanItem item : loan.getItems()) {
+                Book book = item.getBookCopy().getBook();
+                book.setAvailableCopies(book.getAvailableCopies() + 1);
+                bookRepository.save(book);
+            }
+            loanRepository.save(loan);
+        }
+    }
 }

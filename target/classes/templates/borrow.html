@@ -15,10 +15,15 @@
             <p class="text-blue-100 text-sm mt-1">Vui lòng kiểm tra và điền đầy đủ thông tin trước khi xác nhận</p>
         </div>
 
-        <div th:if="${error}" class="m-6 p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl flex items-center gap-2">
-            <i class="fas fa-exclamation-triangle"></i>
-            <span class="font-medium" th:text="${error}"></span>
-        </div>
+		<div th:if="${error}" class="m-6 p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl flex items-center gap-2">
+		    <i class="fas fa-exclamation-triangle"></i>
+		    <span class="font-medium" th:text="${error}"></span>
+		</div>
+
+		<div th:if="${member != null and member.isAccountLocked()}" class="m-6 p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl flex items-center gap-2">
+		    <i class="fas fa-lock"></i>
+		    <span class="font-medium">Tài khoản của bạn đang bị khóa do vi phạm phí phạt. Vui lòng thanh toán để mượn sách.</span>
+		</div>
 
        <form th:action="@{'/books/' + ${book.id} + '/borrow-submit'}" method="POST" class="p-8 space-y-6">
             
@@ -111,10 +116,13 @@
                    class="flex-1 py-3 text-center bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-xl transition duration-150">
                     Hủy bỏ
                 </a>
-                <button type="submit" th:disabled="${error != null}"
-                        class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold rounded-xl transition duration-150 shadow-md shadow-blue-200">
-                    Xác nhận gửi phiếu mượn
-                </button>
+				<button type="submit" 
+				        th:disabled="${(error != null) or (member != null and member.isAccountLocked())}"
+				        class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold rounded-xl transition duration-150 shadow-md shadow-blue-200">
+				    <span th:text="${(member != null and member.isAccountLocked()) ? 'Tài khoản đã bị khóa' : 'Xác nhận gửi phiếu mượn'}">
+				        Xác nhận gửi phiếu mượn
+				    </span>
+				</button>
             </div>
         </form>
     </div>

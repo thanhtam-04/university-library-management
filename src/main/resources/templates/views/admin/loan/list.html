@@ -251,15 +251,16 @@
             </td>
             <td>
                 <span th:class="'status-badge ' + ${displayStatus}">
-                    <i th:class="${displayStatus == 'PENDING'  ? 'bi bi-clock-history' :
-                                   displayStatus == 'ACTIVE'   ? 'bi bi-hourglass-split' :
-                                   displayStatus == 'RETURNED' ? 'bi bi-check-circle-fill' :
-                                   displayStatus == 'OVERDUE'  ? 'bi bi-exclamation-circle-fill' : 'bi bi-x-circle-fill'}"></i>
-                    <span th:text="${displayStatus == 'PENDING'  ? 'Chờ duyệt' :
-                                   displayStatus == 'ACTIVE'   ? 'Đang mượn' :
-                                   displayStatus == 'RETURNED' ? 'Đã trả' :
-                                   displayStatus == 'OVERDUE'  ? 'Quá hạn' : 'Mất sách'}"></span>
-                </span>
+					<i th:class="${displayStatus == 'PENDING'  ? 'bi bi-clock-history' :
+					               displayStatus == 'ACTIVE'   ? 'bi bi-hourglass-split' :
+					               displayStatus == 'RETURNED' ? 'bi bi-check-circle-fill' :
+					               displayStatus == 'OVERDUE'  ? 'bi bi-exclamation-circle-fill' : 
+					               displayStatus == 'CANCELLED'? 'bi bi-x-circle' : 'bi bi-x-circle-fill'}"></i>
+								   <span th:text="${displayStatus == 'PENDING'  ? 'Chờ duyệt' :
+								                  displayStatus == 'ACTIVE'   ? 'Đang mượn' :
+								                  displayStatus == 'RETURNED' ? 'Đã trả' :
+								                  displayStatus == 'OVERDUE'  ? 'Quá hạn' : 
+								                  displayStatus == 'CANCELLED'? 'Đã hủy' : 'Mất sách'}"></span>
             </td>
 
             <td style="padding-right:22px">

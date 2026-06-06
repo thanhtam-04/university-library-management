@@ -195,23 +195,23 @@
                         <td><span class="id-tag" th:text="${'#' + f.id}"></span></td>
 
                         <!-- Bạn đọc -->
-                        <td>
-                            <div class="member-cell">
-                                <div class="m-av"
-                                     th:text="${f.member?.user?.fullName != null
-                                                ? f.member.user.fullName.substring(0,1).toUpperCase()
-                                                : '?'}">
-                                </div>
-                                <div>
-                                    <div class="m-name row-name"
-                                         th:text="${f.member?.user?.fullName ?: 'N/A'}">
-                                    </div>
-                                    <div class="m-card"
-                                         th:text="${f.member?.cardNumber ?: ''}">
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
+						<td>
+						    <div class="member-cell">
+						        <div class="m-av"
+						             th:text="${f.member?.user?.fullName != null ? f.member.user.fullName.substring(0,1).toUpperCase() : '?'}">
+						        </div>
+						        <div>
+						            <div class="m-name row-name" th:text="${f.member?.user?.fullName ?: 'N/A'}"></div>
+						            <div class="m-card" th:text="${f.member?.cardNumber ?: ''}"></div>
+						            
+						            <div th:if="${f.member?.isAccountLocked}" style="margin-top:2px">
+						                <span class="badge" style="background:var(--cr); color:#fff; font-size:10px; padding:2px 6px; border-radius:4px;">
+						                    <i class="bi bi-lock-fill"></i> Đã khóa thẻ
+						                </span>
+						            </div>
+						            </div>
+						    </div>
+						</td>
 
                         <!-- Mã phiếu mượn -->
                         <td>
@@ -223,12 +223,14 @@
                         </td>
 
                         <!-- Số ngày trễ -->
-                        <td>
-                            <span class="overdue-pill">
-                                <i class="bi bi-clock"></i>
-                                <span th:text="${f.daysOverdue + ' ngày'}"></span>
-                            </span>
-                        </td>
+						<td>
+						    <span th:classappend="${f.daysOverdue > 10} ? 'bg-danger text-white' : ''" 
+						          class="overdue-pill"
+						          th:style="${f.daysOverdue > 10} ? 'background:var(--cr)!important; color:#fff!important;' : ''">
+						        <i class="bi bi-clock"></i>
+						        <span th:text="${f.daysOverdue + ' ngày'}"></span>
+						    </span>
+						</td>
 
                         <!-- Phí mỗi ngày -->
                         <td>

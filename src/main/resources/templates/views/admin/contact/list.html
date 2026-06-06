@@ -552,16 +552,12 @@
                     </td>
 
                     <!-- Phản hồi -->
-                    <td>
-                        <button th:if="${msg.status.name() != 'REPLIED'}"
-                                class="btn-ct btn-reply"
-                                th:attr="onclick='openModal(' + ${msg.id} + ', \'' + ${#strings.escapeJavaScript(msg.fullName)} + '\')'">
-                            <i class="bi bi-reply-fill"></i> Phản hồi
-                        </button>
-                        <span th:if="${msg.status.name() == 'REPLIED'}" class="replied-badge">
-                            <i class="bi bi-check-circle-fill"></i> Đã trả lời
-                        </span>
-                    </td>
+					<td>
+					    <a th:href="@{/admin/contact/detail/{id}(id=${msg.id})}" class="btn-ct btn-reply">
+					        <i class="bi bi-chat-dots-fill"></i> Hội thoại
+					    </a>
+					   
+					</td>
 
                     <!-- Thao tác -->
                     <td>

@@ -42,7 +42,7 @@ public class Member {
     private Integer maxBorrowLimit = 5;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 10)
+    @Column(name = "status", length = 20) // Thay vì để EnumType mặc định
     private Status status = Status.ACTIVE;
 
     @Column(name = "total_borrowed")
@@ -60,6 +60,8 @@ public class Member {
 		// TODO Auto-generated method stub
 		
 	}
+	@Column(name = "is_account_locked")
+	private Boolean isAccountLocked = false;
 
 	// Xóa các hàm TODO rỗng cũ và thay bằng đoạn này:
 
@@ -69,5 +71,13 @@ public class Member {
 
 	public void setIsActive(boolean active) {
 	    this.status = active ? Status.ACTIVE : Status.LOCKED;
+	}
+
+	public boolean isAccountLocked() {
+	    return this.isAccountLocked != null && this.isAccountLocked;
+	}
+
+	public void setAccountLocked(Boolean isLocked) {
+	    this.isAccountLocked = (isLocked != null) ? isLocked : false;
 	}
 }

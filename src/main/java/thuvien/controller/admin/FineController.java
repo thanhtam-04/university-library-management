@@ -40,6 +40,12 @@ public class FineController {
             list = fineService.findAll();
         }
 
+        // --- ĐOẠN MỚI: Sắp xếp theo ID giảm dần (Mới nhất lên đầu) ---
+        if (list != null && !list.isEmpty()) {
+            list.sort((f1, f2) -> f2.getId().compareTo(f1.getId()));
+        }
+        // -------------------------------------------------------------
+
         // Thống kê nhanh
         long totalUnpaid  = list.stream().filter(f -> f.getStatus() == Status.UNPAID).count();
         long totalPaid    = list.stream().filter(f -> f.getStatus() == Status.PAID).count();

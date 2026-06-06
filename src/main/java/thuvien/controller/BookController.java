@@ -127,6 +127,17 @@ public class BookController {
             return "borrow";
         }
 
+        // --- BỔ SUNG: KIỂM TRA KHÓA THẺ ---
+        if (member.isAccountLocked()) {
+            model.addAttribute("error", "Tài khoản của bạn đang bị KHÓA do vi phạm phí phạt quá hạn. Vui lòng liên hệ thủ thư để được mở khóa!");
+            model.addAttribute("book", bookService.getBookById(bookId));
+            model.addAttribute("loanDate", LocalDateTime.now());
+            model.addAttribute("dueDate", LocalDate.now().plusDays(1));
+            model.addAttribute("calculatedDeposit", BigDecimal.ZERO);
+            return "borrow";
+        }
+        // ----------------------------------
+
         Book bookEntity = bookService.findById(bookId); 
         if (bookEntity == null || bookEntity.getAvailableCopies() <= 0) {
             model.addAttribute("error", "Rất tiếc, đầu sách này hiện tại không khả dụng hoặc đã hết sách!");
@@ -159,7 +170,6 @@ public class BookController {
             // ── LOGIC XỬ LÝ ĐỒNG BỘ TRẠNG THÁI CỌC XUỐNG CƠ SỞ DỮ LIỆU ──
             if (finalDeposit.compareTo(BigDecimal.ZERO) <= 0) {
                 // Nếu tiền cọc bằng 0 thì gán trạng thái MIỄN CỌC
-                // Nhi hãy đổi 'NONE' thành tên Enum chính xác trong thuộc tính depositStatus của Entity Loan (ví dụ: Loan.DepositStatus.NONE)
                 loan.setDepositStatus(Loan.DepositStatus.NONE); 
             } else {
                 // Nếu tiền cọc > 0, kiểm tra xem nút tích chọn ở giao diện có được bật hay không
@@ -181,7 +191,7 @@ public class BookController {
             model.addAttribute("dueDate", loan.getDueDate());
             model.addAttribute("calculatedDeposit", loan.getDepositPaid());
             model.addAttribute("currentUser", user);
-            
+            model.addAttribute("member", memberRepository.findByUserId(user.getId()).orElse(null));
             return "borrow"; 
 
         } catch (Exception e) {
